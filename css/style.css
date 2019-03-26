@@ -1,0 +1,64 @@
+/**
+ * Drop cap styles
+ * Loads on front end and back end
+ */
+article.node .ab-block-drop-cap {
+    /* Font size styles */
+}
+article.node .ab-block-drop-cap .ab-drop-cap-text p:first-letter {
+    float: left;
+    font-size: 75px;
+    line-height: 0.7em;
+    margin-top: 0.15em;
+    margin-right: 25px;
+    margin-bottom: 25px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+article.node .ab-block-drop-cap.ab-drop-cap-square .ab-drop-cap-text p:first-letter {
+    background: #32373c;
+    color: #fff;
+    padding: 0.2em;
+}
+article.node .ab-block-drop-cap.ab-drop-cap-border .ab-drop-cap-text p:first-letter {
+    color: #32373c;
+    padding: 0.2em;
+    border: solid 4px;
+}
+@media only screen and (min-width: 600px) {
+    article.node .ab-block-drop-cap.ab-font-size-1 .ab-drop-cap-text:first-letter {
+        font-size: 75px;
+    }
+    article.node .ab-block-drop-cap.ab-font-size-2 .ab-drop-cap-text:first-letter {
+        font-size: 85px;
+    }
+    article.node .ab-block-drop-cap.ab-font-size-3 .ab-drop-cap-text:first-letter {
+        font-size: 95px;
+    }
+    article.node .ab-block-drop-cap.ab-font-size-4 .ab-drop-cap-text:first-letter {
+        font-size: 105px;
+    }
+    article.node .ab-block-drop-cap.ab-font-size-5 .ab-drop-cap-text:first-letter {
+        font-size: 115px;
+    }
+    article.node .ab-block-drop-cap.ab-font-size-6 .ab-drop-cap-text p:first-letter {
+        font-size: 125px;
+    }
+}
+
+.ab-block-drop-cap:before, .ab-block-drop-cap:after {
+    content: "";
+    display: table;
+}
+.ab-block-drop-cap:after {
+    clear: both;
+}
+.ab-block-drop-cap a {
+    color: inherit;
+    box-shadow: 0 -1px 0 inset;
+    text-decoration: none;
+}
+.ab-block-drop-cap a:hover {
+    color: inherit;
+    box-shadow: 0 -2px 0 inset;
+}

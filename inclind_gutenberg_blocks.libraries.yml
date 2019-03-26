@@ -1,0 +1,16 @@
+block-edit:
+  version: VERSION
+  js:
+    dist/index-browserify.js: { }
+  css:
+    theme:
+      css/style.css: { }
+      css/edit.css: { }
+  dependencies:
+    - gutenberg/editor
+    - drupal
+block-view:
+  version: VERSION
+  css:
+    theme:
+      css/style.css: { }

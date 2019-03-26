@@ -1,0 +1,33 @@
+{
+  "name": "inclind-gutenberg-blocks",
+  "description": "Custom Gutenberg blocks for Drupal 8.",
+  "private": true,
+  "engines": {
+    "yarn": ">= 1.6",
+    "node": ">= 8.11"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0-beta.31",
+    "@babel/plugin-proposal-function-bind": "^7.2.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.4.0",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.0-beta.0",
+    "babelify": "^10.0.0",
+    "browserify": "^16.2.3"
+  },
+  "dependencies": {
+    "@frontkom/g-media-attributes": "^1.0.1",
+    "@frontkom/gutenberg-js": "^4.0.0",
+    "classnames": "^2.2.6",
+    "moment": "^2.22.2",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
+    "regenerator": "^0.13.3"
+  },
+  "scripts": {
+    "babel": "babel js/src/ --out-dir dist",
+    "browser": "browserify dist/index.js -t babelify --outfile dist/index-browserify.js",
+    "gutenberg-compile": "babel js/src/ --out-dir dist; browserify dist/index.js -t babelify --outfile dist/index-browserify.js;"
+  }
+}
