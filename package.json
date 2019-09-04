@@ -1,10 +1,11 @@
 {
   "name": "inclind-gutenberg-blocks",
+  "version": "1.0.0",
   "description": "Custom Gutenberg blocks for Drupal 8.",
+  "main": "js/src/index.js",
   "private": true,
-  "engines": {
-    "yarn": ">= 1.6",
-    "node": ">= 8.11"
+  "dependencies": {
+    "classnames": "^2.2.6"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0",
@@ -15,15 +16,6 @@
     "babel-loader": "^8.0.0-beta.0",
     "babelify": "^10.0.0",
     "browserify": "^16.2.3"
-  },
-  "dependencies": {
-    "@frontkom/g-media-attributes": "^1.0.1",
-    "@frontkom/gutenberg-js": "^4.0.0",
-    "classnames": "^2.2.6",
-    "moment": "^2.22.2",
-    "react": "^16.6.3",
-    "react-dom": "^16.6.3",
-    "regenerator": "^0.13.3"
   },
   "scripts": {
     "babel": "babel js/src/ --out-dir dist",

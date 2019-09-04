@@ -1,0 +1,38 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+// Setup the block.
+const {
+  Component
+} = wp.element; // Import Inspector components.
+
+const {
+  InspectorControls
+} = wp.editor; // Import block components.
+
+const {
+  PanelBody
+} = wp.components;
+/**
+ * Create an Inspector Controls wrapper Component.
+ */
+
+class Inspector extends Component {
+  constructor(props) {
+    super(...arguments);
+  }
+
+  render() {
+    // Setup the attributes
+    const {} = this.props.attributes;
+    return React.createElement(InspectorControls, {
+      key: "inspector"
+    }, React.createElement(PanelBody, null));
+  }
+
+}
+
+exports.default = Inspector;
