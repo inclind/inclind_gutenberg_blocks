@@ -1,0 +1,15 @@
+{
+    "name": "inclind/inclind_gutenberg_blocks",
+    "description": "Custom gutenberg blocks",
+    "type": "drupal-module",
+    "authors": [
+        {
+            "name": "Inclind",
+            "email": "hosting@inclindinc.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+         "drupal/gutenberg": "1.x-dev#db2952e3",
+    }
+}
