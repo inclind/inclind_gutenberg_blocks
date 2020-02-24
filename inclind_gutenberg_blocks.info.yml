@@ -1,10 +1,7 @@
-name: Inclind Gutenberg Blocks
+name: Inclind - Gutenberg Blocks
 type: module
 description: This module provides custom gutenberg blocks.
-package: Gutenberg
+package: inclind
 dependencies:
-  - gutenberg
-
-version: '8.x-0.1'
+  - gutenberg:gutenberg
 core: '8.x'
-project: 'inclind_gutenberg_blocks'

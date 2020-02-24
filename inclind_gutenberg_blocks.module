@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * @file
+ * Provides integration with the Gutenberg editor.
+ */
+
+use Drupal\block_content\BlockContentInterface;
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function inclind_gutenberg_blocks_block_content_insert(BlockContentInterface $entity) {
+  $changed = FALSE;
+  $bundle = $entity->bundle();
+  if (in_array($bundle, [
+    'hero_banner',
+    'call_to_action',
+    'guten_form',
+    'basic',
+  ])) {
+    $gutenberg_config = \Drupal::service('config.factory')
+      ->getEditable('gutenberg.settings');
+    $sett = $gutenberg_config->getRawData();
+    $uuid = 'block_content:' . $entity->uuid();
+
+    foreach ($sett as $n => $v) {
+      if (is_array($v) && strpos($n, '_allowed_drupal_blocks') !== FALSE
+        && empty($v[$uuid])) {
+        $sett[$n][$uuid] = $uuid;
+
+        $changed = TRUE;
+        $gutenberg_config->set($n, $sett[$n]);
+      }
+    }
+
+    if ($changed) {
+      $gutenberg_config->save();
+    }
+  }
+}
