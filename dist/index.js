@@ -4,9 +4,13 @@ require("./blocks/accordion/index.js");
 
 require("./blocks/accordion-item/index.js");
 
+require("./blocks/advanced-btn/index.js");
+
 require("./blocks/card/index.js");
 
 require("./blocks/infobox/index.js");
+
+require("./blocks/section-wrap/index.js");
 
 require("./blocks/call-to-action/index.js");
 
