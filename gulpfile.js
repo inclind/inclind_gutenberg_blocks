@@ -58,10 +58,6 @@ function watch() {
 exports.styles = styles;
 exports.watch = watch;
 
-gulp.task("css-build", gulp.series(
-    styles
-));
-
 gulp.task("build", gulp.series(
     gulp.parallel(styles)
 ));

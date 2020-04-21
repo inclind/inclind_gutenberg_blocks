@@ -3,6 +3,7 @@
 ## Install
 
 ### Pre-Requisites
+- `Gutenberg` module patch from: https://www.drupal.org/project/gutenberg/issues/3104108#comment-13564671
 
 ### Drupal Pre-Requisites
 - [Drupal 8](https://www.drupal.org/8)
@@ -11,6 +12,17 @@
 #### Local Development Pre-Requisites
 - [Node](https://nodejs.org/en/)
 - [Browserify](http://browserify.org/#install)
+- Gulp ^4.0
+
+### Drupal UI Configuration:
+- Add base CSS override within default site theme: `/admin/config/inclind-gutenberg/settings`.
+Set the path to point to CSS file which will contain BASE colors/fonts overrides 
+of the values within Inclind Gutenberg module. You can copy `inclind_gutenberg_blocks/scss/edit.scss`
+file into your current theme (and compile it) to override default colors/fonts 
+and some other presets within Inclind Gutenberg widgets.This setting applies if 
+destination file is of CSS type file only.
+- All `Inclind Gutenberg` widgets are available to be enabled/disabled on each 
+Gutenberg enabled content type edit form (similar to Core blocks)
 
 ### Local Development Setup
 

@@ -13,7 +13,6 @@ module.exports = {
       dest: root + "/css",
       // Pass options to node-sass.
       sassOptions: {
-        // Include paths to resolve automatically.
         outputStyle: "compressed"
       }
     }
