@@ -6,6 +6,7 @@
  */
 
 use Drupal\block_content\BlockContentInterface;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Implements hook_ENTITY_TYPE_insert().
@@ -36,6 +37,89 @@ function inclind_gutenberg_blocks_block_content_insert(BlockContentInterface $en
 
     if ($changed) {
       $gutenberg_config->save();
+    }
+  }
+}
+
+/**
+ * Implements hook_library_info_alter().
+ */
+function inclind_gutenberg_blocks_library_info_alter(&$libraries, $extension) {
+  if ($extension === 'inclind_gutenberg_blocks') {
+    $config = \Drupal::configFactory()
+      ->getEditable('inclind_gutenberg_blocks.settings');
+
+    $moduleHandler = \Drupal::moduleHandler();
+    $js_files_edit = [];
+    $css_files_edit = [];
+    $css_files_view = [];
+
+    if (!empty($config) && !empty($config->get('css_default_path'))) {
+      $theme_name = \Drupal::config('system.theme')->get('default');
+      $theme_path = drupal_get_path('theme', $theme_name);
+
+      $css_path = $config->get('css_default_path');
+      $file_path = /*DRUPAL_ROOT . */ '/' . $theme_path . '/' . ltrim($css_path, '/');
+
+      if (stripos($css_path, '.css', -4) !== FALSE
+        && file_exists(DRUPAL_ROOT . $file_path)) {
+        $libraries['blocks-edit']['css']['base'] = [$file_path => []];
+        $libraries['blocks-view']['css']['base'] = [$file_path => []];
+      }
+    }
+
+    $moduleHandler->alter('inclind_gutenberg_blocks', $js_files_edit, $css_files_edit, $css_files_view);
+
+    foreach ($js_files_edit as $file) {
+      $libraries['blocks-edit']['js'][$file] = [];
+    }
+
+    foreach ($css_files_edit as $file) {
+      $libraries['blocks-edit']['css']['theme'][$file] = [];
+    }
+
+    foreach ($css_files_view as $file) {
+      $libraries['blocks-edit']['css']['theme'][$file] = [];
+      $libraries['blocks-view']['css']['theme'][$file] = [];
+    }
+  }
+}
+
+/**
+ * Implements hook_allowed_gutenberg_blocks_default_list_alter().
+ */
+function inclind_gutenberg_blocks_allowed_gutenberg_blocks_default_list_alter(&$settings) {
+
+  $blocks_settings = &drupal_static(__FUNCTION__);
+
+  if (!isset($blocks_settings)) {
+    $module_handler = \Drupal::service('module_handler');
+    $path = $module_handler->getModule('inclind_gutenberg_blocks')->getPath();
+
+    $file_path = DRUPAL_ROOT . '/' . $path . '/' . 'gutenberg.blocks.yml';
+    if (file_exists($file_path)) {
+      $file_contents = file_get_contents($file_path);
+      $blocks_settings = Yaml::parse($file_contents);
+    }
+  }
+
+  if (!empty($blocks_settings) && $settings) {
+    foreach ($blocks_settings['categories'] as $cat) {
+      $cat_exists = FALSE;
+
+      foreach ($settings['categories'] as $i => $cat_def) {
+        if ($cat_def['reference'] === $cat['reference']) {
+          $cat_exists = TRUE;
+          break;
+        }
+      }
+
+      if (!$cat_exists) {
+        $settings['categories'][] = $cat;
+      }
+      else {
+        $settings['categories'][$i]['blocks'] = array_merge($settings['categories'][$i]['blocks'], $cat['blocks']);
+      }
     }
   }
 }

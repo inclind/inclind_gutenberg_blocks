@@ -354,197 +354,203 @@ const category = {
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-jumbotron', {
-  title: __('Hero (Jumbotron)', 'inclind-jumbotron'),
-  description: __('Add jumbotron with background image/overlay.', 'inclind-jumbotron'),
-  category: 'inclind-blocks',
-  keywords: [__('Hero', 'inclind-jumbotron'), __('Info', 'inclind-jumbotron'), __('inclind', 'inclind-jumbotron'), __('custom', 'inclind-jumbotron')],
-  attributes: {
-    blockAlignment: {
-      type: 'string',
-      default: 'none'
-    },
-    backgroundColor: {
-      type: 'string',
-      default: '#2e358f'
-    },
-    backgroundImage: {
-      type: 'string',
-      default: 'https://placeimg.com/1200/600/nature/grayscale'
-    },
-    backgroundImageUUID: {
-      type: 'string',
-      default: ''
-    },
-    uniqueID: {
-      type: 'string',
-      default: ''
-    },
-    link: {
-      type: 'string',
-      source: 'attribute',
-      attribute: 'href',
-      selector: 'a'
-    },
-    target: {
-      type: 'string',
-      source: 'attribute',
-      attribute: 'target',
-      selector: 'a',
-      default: '_self'
-    },
-    hAlign: {
-      type: 'string',
-      default: 'left'
-    },
-    displayTitle: {
-      type: 'bool',
-      default: true
-    },
-    displayScriptTitle: {
-      type: 'bool',
-      default: true
-    },
-    titleScript: {
-      type: 'array',
-      source: 'children',
-      selector: 'span.jtr-script',
-      default: __('Title Script will be in cursive font.')
-    },
-    title: {
-      type: 'array',
-      source: 'children',
-      selector: 'span.jtr-title',
-      default: __('Title')
-    },
-    displayText: {
-      type: 'bool',
-      default: true
-    },
-    contentText: {
-      type: 'array',
-      source: 'children',
-      selector: 'p.jtr-text',
-      default: __('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean diam dolor, accumsan sed rutrum vel, dapibus et leo.')
-    },
-    displayLearnMore: {
-      type: 'bool',
-      default: true
-    },
-    learnMore: {
-      type: 'array',
-      source: 'children',
-      selector: '.jtr-learnmore',
-      default: __('Link this button in settings..')
-    }
-  },
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-  // Render the block components.
-  getEditWrapperProps({
-    blockAlignment
-  }) {
-    if ('left' === blockAlignment || 'right' === blockAlignment || 'center' === blockAlignment) {
-      return {
-        'data-align': blockAlignment
-      };
-    }
-  },
-
-  edit: InclindJumbotron,
-  save: props => {
-    const {
+  if (blocks.hasOwnProperty(category.slug + '/inclind-jumbotron') && blocks[category.slug + '/inclind-jumbotron']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-jumbotron', {
+      title: __('Hero (Jumbotron)', 'inclind-jumbotron'),
+      description: __('Add jumbotron with background image/overlay.', 'inclind-jumbotron'),
+      category: 'inclind-blocks',
+      keywords: [__('Hero', 'inclind-jumbotron'), __('Info', 'inclind-jumbotron'), __('inclind', 'inclind-jumbotron'), __('custom', 'inclind-jumbotron')],
       attributes: {
-        blockAlignment,
-        backgroundImage,
-        backgroundImageUUID,
-        uniqueID,
-        link,
-        target,
-        hAlign,
-        displayTitle,
-        displayScriptTitle,
-        title,
-        titleScript,
-        displayText,
-        contentText,
-        displayLearnMore,
-        learnMore
+        blockAlignment: {
+          type: 'string',
+          default: 'none'
+        },
+        backgroundColor: {
+          type: 'string',
+          default: '#2e358f'
+        },
+        backgroundImage: {
+          type: 'string',
+          default: 'https://placeimg.com/1200/600/nature/grayscale'
+        },
+        backgroundImageUUID: {
+          type: 'string',
+          default: ''
+        },
+        uniqueID: {
+          type: 'string',
+          default: ''
+        },
+        link: {
+          type: 'string',
+          source: 'attribute',
+          attribute: 'href',
+          selector: 'a'
+        },
+        target: {
+          type: 'string',
+          source: 'attribute',
+          attribute: 'target',
+          selector: 'a',
+          default: '_self'
+        },
+        hAlign: {
+          type: 'string',
+          default: 'left'
+        },
+        displayTitle: {
+          type: 'bool',
+          default: true
+        },
+        displayScriptTitle: {
+          type: 'bool',
+          default: true
+        },
+        titleScript: {
+          type: 'array',
+          source: 'children',
+          selector: 'span.jtr-script',
+          default: __('Title Script will be in cursive font.')
+        },
+        title: {
+          type: 'array',
+          source: 'children',
+          selector: 'span.jtr-title',
+          default: __('Title')
+        },
+        displayText: {
+          type: 'bool',
+          default: true
+        },
+        contentText: {
+          type: 'array',
+          source: 'children',
+          selector: 'p.jtr-text',
+          default: __('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean diam dolor, accumsan sed rutrum vel, dapibus et leo.')
+        },
+        displayLearnMore: {
+          type: 'bool',
+          default: true
+        },
+        learnMore: {
+          type: 'array',
+          source: 'children',
+          selector: '.jtr-learnmore',
+          default: __('Link this button in settings..')
+        }
+      },
+
+      // Render the block components.
+      getEditWrapperProps({
+        blockAlignment
+      }) {
+        if ('left' === blockAlignment || 'right' === blockAlignment || 'center' === blockAlignment) {
+          return {
+            'data-align': blockAlignment
+          };
+        }
+      },
+
+      edit: InclindJumbotron,
+      save: props => {
+        const {
+          attributes: {
+            blockAlignment,
+            backgroundImage,
+            backgroundImageUUID,
+            uniqueID,
+            link,
+            target,
+            hAlign,
+            displayTitle,
+            displayScriptTitle,
+            title,
+            titleScript,
+            displayText,
+            contentText,
+            displayLearnMore,
+            learnMore
+          }
+        } = props;
+        const align_class = ['jtr-content', 'col-xs-12'];
+
+        if (hAlign == 'right') {
+          align_class.push('float-right', 'col-lg-7', 'text-right');
+        } else if (hAlign == 'center') {
+          align_class.push('col-lg-8', 'offset-lg-2', 'text-center');
+        } else {
+          align_class.push('col-lg-7');
+        }
+
+        const classes = [// className,
+        (0, _classnames.default)(`align${blockAlignment ? blockAlignment : 'none'}`), 'jumbotron jumbotron-fluid']; // const learnMoreOutput = (
+        //     <RichText.Content
+        //         className="jtr-learnmore btn btn-secondary btn-sm"
+        //         tagName={'button'}
+        //         value={learnMore}
+        //         type={'button'}
+        //     />
+        // );
+
+        const learnMoreLinkOutput = React.createElement("p", {
+          className: "lead mt-5 d-none d-sm-block"
+        }, React.createElement("a", {
+          href: link,
+          target: '_blank' === target ? target : undefined,
+          rel: '_blank' === target ? 'noopener noreferrer' : undefined
+        }, React.createElement("button", {
+          className: "btn btn-arrow btn-lg btn-secondary"
+        }, React.createElement(RichText.Content, {
+          className: "jtr-learnmore",
+          tagName: 'span',
+          placeholder: __('Link this button in settings..'),
+          value: learnMore
+        }), React.createElement("div", {
+          className: "color-fill--secondary svg svg--icon js-svg-exists"
+        }, React.createElement("svg", null, React.createElement("use", {
+          "xlink:href": "/themes/custom/particle/dist/app-drupal/assets/spritemap.svg#sprite-chevron-right"
+        }))))));
+        const textOutput = React.createElement("div", {
+          className: align_class.join(' ')
+        }, displayScriptTitle && React.createElement(RichText.Content, {
+          className: "jtr-script script h1 text-primary",
+          tagName: 'span',
+          value: titleScript
+        }), React.createElement("br", null), displayTitle && React.createElement(RichText.Content, {
+          className: "jtr-title lead h2 caps text-primary",
+          tagName: 'span',
+          value: title
+        }), displayText && React.createElement(RichText.Content, {
+          className: "jtr-text jumbotron-text text-black",
+          tagName: 'p',
+          value: contentText
+        }), displayLearnMore && link !== undefined && learnMoreLinkOutput); // Render the Jumbotron on Front-end:
+
+        return React.createElement("div", {
+          id: `kt-jtr-box${uniqueID}`,
+          className: classes.join(' ')
+        }, React.createElement("div", {
+          className: "jumbotron-image"
+        }, React.createElement("div", {
+          className: "overlay-wrapper"
+        }, React.createElement("div", {
+          className: "overlay gradient"
+        }), React.createElement("img", {
+          "data-image-style": "1200x400",
+          "data-entity-type": "file",
+          "data-entity-uuid": `${backgroundImageUUID}`,
+          src: `${backgroundImage}`,
+          alt: "",
+          className: "image image--jumbotron image--overlay img-fluid js-image-exists"
+        }))), React.createElement("div", {
+          className: "container jumbotron-text-container"
+        }, textOutput));
       }
-    } = props;
-    const align_class = ['jtr-content', 'col-xs-12'];
-
-    if (hAlign == 'right') {
-      align_class.push('float-right', 'col-lg-7', 'text-right');
-    } else if (hAlign == 'center') {
-      align_class.push('col-lg-8', 'offset-lg-2', 'text-center');
-    } else {
-      align_class.push('col-lg-7');
-    }
-
-    const classes = [// className,
-    (0, _classnames.default)(`align${blockAlignment ? blockAlignment : 'none'}`), 'jumbotron jumbotron-fluid']; // const learnMoreOutput = (
-    //     <RichText.Content
-    //         className="jtr-learnmore btn btn-secondary btn-sm"
-    //         tagName={'button'}
-    //         value={learnMore}
-    //         type={'button'}
-    //     />
-    // );
-
-    const learnMoreLinkOutput = React.createElement("p", {
-      className: "lead mt-5 d-none d-sm-block"
-    }, React.createElement("a", {
-      href: link,
-      target: '_blank' === target ? target : undefined,
-      rel: '_blank' === target ? 'noopener noreferrer' : undefined
-    }, React.createElement("button", {
-      className: "btn btn-arrow btn-lg btn-secondary"
-    }, React.createElement(RichText.Content, {
-      className: "jtr-learnmore",
-      tagName: 'span',
-      placeholder: __('Link this button in settings..'),
-      value: learnMore
-    }), React.createElement("div", {
-      className: "color-fill--secondary svg svg--icon js-svg-exists"
-    }, React.createElement("svg", null, React.createElement("use", {
-      "xlink:href": "/themes/custom/particle/dist/app-drupal/assets/spritemap.svg#sprite-chevron-right"
-    }))))));
-    const textOutput = React.createElement("div", {
-      className: align_class.join(' ')
-    }, displayScriptTitle && React.createElement(RichText.Content, {
-      className: "jtr-script script h1 text-primary",
-      tagName: 'span',
-      value: titleScript
-    }), React.createElement("br", null), displayTitle && React.createElement(RichText.Content, {
-      className: "jtr-title lead h2 caps text-primary",
-      tagName: 'span',
-      value: title
-    }), displayText && React.createElement(RichText.Content, {
-      className: "jtr-text jumbotron-text text-black",
-      tagName: 'p',
-      value: contentText
-    }), displayLearnMore && link !== undefined && learnMoreLinkOutput); // Render the Jumbotron on Front-end:
-
-    return React.createElement("div", {
-      id: `kt-jtr-box${uniqueID}`,
-      className: classes.join(' ')
-    }, React.createElement("div", {
-      className: "jumbotron-image"
-    }, React.createElement("div", {
-      className: "overlay-wrapper"
-    }, React.createElement("div", {
-      className: "overlay gradient"
-    }), React.createElement("img", {
-      "data-image-style": "1200x400",
-      "data-entity-type": "file",
-      "data-entity-uuid": `${backgroundImageUUID}`,
-      src: `${backgroundImage}`,
-      alt: "",
-      className: "image image--jumbotron image--overlay img-fluid js-image-exists"
-    }))), React.createElement("div", {
-      className: "container jumbotron-text-container"
-    }, textOutput));
+    });
   }
-});
+}

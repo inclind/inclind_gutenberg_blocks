@@ -10,6 +10,886 @@ const {
   Component
 } = wp.element;
 /**
+ * Create a AccordionBootstrap wrapper Component.
+ */
+
+class AccordionBootstrap extends Component {
+  constructor(props) {
+    super(...arguments);
+  }
+
+  render() {
+    let className = '';
+
+    if (this.props.className !== 'wp-block-inclind-blocks-accordion-bootstrap') {
+      className = className + ' ' + this.props.className;
+    }
+
+    return React.createElement("div", {
+      className: className
+    }, this.props.children);
+  }
+
+}
+
+exports.default = AccordionBootstrap;
+
+},{}],2:[function(require,module,exports){
+"use strict";
+
+var _accordionBootstrap = _interopRequireDefault(require("./components/accordion-bootstrap"));
+
+var _times = _interopRequireDefault(require("lodash/times"));
+
+var _classnames = _interopRequireDefault(require("classnames"));
+
+var _memize = _interopRequireDefault(require("memize"));
+
+var _map = _interopRequireDefault(require("lodash/map"));
+
+var _reactFonticonpicker = _interopRequireDefault(require("@fonticonpicker/react-fonticonpicker"));
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    default: obj
+  };
+} // Import block dependencies and components
+// import WebfontLoader from '../../fontloader';
+// import TypographyControls from '../../typography-control';
+// import MeasurementControls from '../../measurement-control';
+// import BorderColorControls from '../../border-color-control';
+// Internationalization
+
+
+const __ = Drupal.t; // Extend component
+
+const {
+  Component,
+  Fragment
+} = wp.element; // Register block
+
+const {
+  registerBlockType,
+  createBlock
+} = wp.blocks; // Register editor components
+
+const {
+  InnerBlocks,
+  InspectorControls,
+  BlockControls,
+  AlignmentToolbar,
+  ColorPalette,
+  BlockAlignmentToolbar
+} = wp.blockEditor; // Register components
+
+const {
+  TabPanel,
+  Button,
+  ButtonGroup,
+  PanelBody,
+  Dashicon,
+  RangeControl,
+  ToggleControl,
+  SelectControl,
+  IconButton
+} = wp.components;
+const {
+  dispatch,
+  select
+} = wp.data;
+/**
+ * This allows for checking to see if the block needs to generate a new ID.
+ */
+
+const ktaccordUniqueIDs = [];
+const ALLOWED_BLOCKS = ['inclind-blocks/inclind-pane'];
+/**
+ * Returns the layouts configuration for a given number of panes.
+ *
+ * @param {number} panes Number of panes.
+ *
+ * @return {Object[]} Panes layout configuration.
+ */
+
+const getPanesTemplate = (0, _memize.default)((panes, collapse, parent) => {
+  return (0, _times.default)(panes, n => ['inclind-blocks/inclind-pane', {
+    id: n + 1,
+    parentID: parent,
+    startCollapsed: collapse
+  }]);
+});
+
+class InclindAccordionBootstrap extends Component {
+  constructor() {
+    super(...arguments);
+    this.showSettings = this.showSettings.bind(this);
+    this.state = {
+      contentPaddingControl: 'linked',
+      contentBorderRadiusControl: 'linked',
+      contentBorderControl: 'linked',
+      titleBorderControl: 'linked',
+      titlePaddingControl: 'individual',
+      titleBorderRadiusControl: 'linked',
+      titleBorderColorControl: 'linked',
+      titleBorderHoverColorControl: 'linked',
+      titleBorderActiveColorControl: 'linked',
+      titleTag: 'div',
+      showPreset: false,
+      user: 'admin',
+      settings: {}
+    };
+  }
+
+  componentDidMount() {
+    if (!this.props.attributes.uniqueID) {
+      if (this.props.attributes.showPresets) {
+        this.setState({
+          showPreset: true
+        });
+      }
+
+      this.props.setAttributes({
+        uniqueID: '_' + this.props.clientId.substr(2, 9)
+      });
+      ktaccordUniqueIDs.push('_' + this.props.clientId.substr(2, 9));
+    } else if (ktaccordUniqueIDs.includes(this.props.attributes.uniqueID)) {
+      this.props.setAttributes({
+        uniqueID: '_' + this.props.clientId.substr(2, 9)
+      });
+      ktaccordUniqueIDs.push('_' + this.props.clientId.substr(2, 9));
+    } else {
+      ktaccordUniqueIDs.push(this.props.attributes.uniqueID);
+    }
+
+    if (this.props.attributes.titleStyles[0].padding[0] === this.props.attributes.titleStyles[0].padding[1] && this.props.attributes.titleStyles[0].padding[0] === this.props.attributes.titleStyles[0].padding[2] && this.props.attributes.titleStyles[0].padding[0] === this.props.attributes.titleStyles[0].padding[3]) {
+      this.setState({
+        titlePaddingControl: 'linked'
+      });
+    } else {
+      this.setState({
+        titlePaddingControl: 'individual'
+      });
+    }
+
+    if (this.props.attributes.titleStyles[0].borderWidth[0] === this.props.attributes.titleStyles[0].borderWidth[1] && this.props.attributes.titleStyles[0].borderWidth[0] === this.props.attributes.titleStyles[0].borderWidth[2] && this.props.attributes.titleStyles[0].borderWidth[0] === this.props.attributes.titleStyles[0].borderWidth[3]) {
+      this.setState({
+        titleBorderControl: 'linked'
+      });
+    } else {
+      this.setState({
+        titleBorderControl: 'individual'
+      });
+    }
+
+    if (this.props.attributes.titleStyles[0].borderRadius[0] === this.props.attributes.titleStyles[0].borderRadius[1] && this.props.attributes.titleStyles[0].borderRadius[0] === this.props.attributes.titleStyles[0].borderRadius[2] && this.props.attributes.titleStyles[0].borderRadius[0] === this.props.attributes.titleStyles[0].borderRadius[3]) {
+      this.setState({
+        titleBorderRadiusControl: 'linked'
+      });
+    } else {
+      this.setState({
+        titleBorderRadiusControl: 'individual'
+      });
+    }
+
+    if (this.props.attributes.contentBorder[0] === this.props.attributes.contentBorder[1] && this.props.attributes.contentBorder[0] === this.props.attributes.contentBorder[2] && this.props.attributes.contentBorder[0] === this.props.attributes.contentBorder[3]) {
+      this.setState({
+        contentBorderControl: 'linked'
+      });
+    } else {
+      this.setState({
+        contentBorderControl: 'individual'
+      });
+    }
+
+    if (this.props.attributes.contentBorderRadius[0] === this.props.attributes.contentBorderRadius[1] && this.props.attributes.contentBorderRadius[0] === this.props.attributes.contentBorderRadius[2] && this.props.attributes.contentBorderRadius[0] === this.props.attributes.contentBorderRadius[3]) {
+      this.setState({
+        contentBorderRadiusControl: 'linked'
+      });
+    } else {
+      this.setState({
+        contentBorderRadiusControl: 'individual'
+      });
+    }
+
+    if (this.props.attributes.contentPadding[0] === this.props.attributes.contentPadding[1] && this.props.attributes.contentPadding[0] === this.props.attributes.contentPadding[2] && this.props.attributes.contentPadding[0] === this.props.attributes.contentPadding[3]) {
+      this.setState({
+        contentPaddingControl: 'linked'
+      });
+    } else {
+      this.setState({
+        contentPaddingControl: 'individual'
+      });
+    }
+
+    if (this.props.attributes.titleStyles[0].border[0] === this.props.attributes.titleStyles[0].border[1] && this.props.attributes.titleStyles[0].border[0] === this.props.attributes.titleStyles[0].border[2] && this.props.attributes.titleStyles[0].border[0] === this.props.attributes.titleStyles[0].border[3]) {
+      this.setState({
+        titleBorderColorControl: 'linked'
+      });
+    } else {
+      this.setState({
+        titleBorderColorControl: 'individual'
+      });
+    }
+
+    if (this.props.attributes.titleStyles[0].borderHover[0] === this.props.attributes.titleStyles[0].borderHover[1] && this.props.attributes.titleStyles[0].borderHover[0] === this.props.attributes.titleStyles[0].borderHover[2] && this.props.attributes.titleStyles[0].borderHover[0] === this.props.attributes.titleStyles[0].borderHover[3]) {
+      this.setState({
+        titleBorderHoverColorControl: 'linked'
+      });
+    } else {
+      this.setState({
+        titleBorderHoverColorControl: 'individual'
+      });
+    }
+
+    if (this.props.attributes.titleStyles[0].borderActive[0] === this.props.attributes.titleStyles[0].borderActive[1] && this.props.attributes.titleStyles[0].borderActive[0] === this.props.attributes.titleStyles[0].borderActive[2] && this.props.attributes.titleStyles[0].borderActive[0] === this.props.attributes.titleStyles[0].borderActive[3]) {
+      this.setState({
+        titleBorderActiveColorControl: 'linked'
+      });
+    } else {
+      this.setState({
+        titleBorderActiveColorControl: 'individual'
+      });
+    }
+
+    const accordionBlock = wp.data.select('core/block-editor').getBlocksByClientId(this.props.clientId);
+
+    if (accordionBlock && accordionBlock[0] && accordionBlock[0].innerBlocks[0] && accordionBlock[0].innerBlocks[0].attributes && accordionBlock[0].innerBlocks[0].attributes.titleTag) {
+      this.setState({
+        titleTag: accordionBlock[0].innerBlocks[0].attributes.titleTag
+      });
+    }
+
+    const blockSettings = {};
+
+    if (blockSettings['inclind-blocks/accordion-bootstrap'] !== undefined && typeof blockSettings['inclind-blocks/accordion-bootstrap'] === 'object') {
+      this.setState({
+        settings: blockSettings['inclind-blocks/accordion-bootstrap']
+      });
+    }
+  }
+
+  showSettings(key) {
+    let donot_allow = ['backgroundSettings'];
+
+    if (donot_allow.includes(key)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  render() {
+    const {
+      attributes: {
+        uniqueID,
+        paneCount,
+        blockAlignment,
+        openPane,
+        titleStyles,
+        contentPadding,
+        minHeight,
+        maxWidth,
+        contentBorder,
+        contentBorderColor,
+        contentBorderRadius,
+        contentBgColor,
+        titleAlignment,
+        startCollapsed,
+        linkPaneCollapse,
+        showIcon,
+        iconStyle,
+        iconSide
+      },
+      className,
+      setAttributes,
+      clientId
+    } = this.props;
+    const {
+      titleBorderRadiusControl,
+      titleBorderControl,
+      titlePaddingControl,
+      contentBorderControl,
+      contentBorderRadiusControl,
+      contentPaddingControl,
+      titleBorderColorControl,
+      titleBorderHoverColorControl,
+      titleBorderActiveColorControl,
+      titleTag
+    } = this.state;
+    const accordionBlock = wp.data.select('core/block-editor').getBlocksByClientId(clientId);
+    const realPaneCount = accordionBlock && accordionBlock[0] ? accordionBlock[0].innerBlocks.length : 0;
+
+    const saveTitleStyles = value => {
+      const newUpdate = titleStyles.map((item, index) => {
+        if (0 === index) {
+          item = { ...item,
+            ...value
+          };
+        }
+
+        return item;
+      });
+      setAttributes({
+        titleStyles: newUpdate
+      });
+    };
+
+    const lgconfig = {
+      google: {
+        families: [titleStyles[0].family + (titleStyles[0].variant ? ':' + titleStyles[0].variant : '')]
+      }
+    };
+    const config = titleStyles[0].google ? lgconfig : '';
+    const classes = (0, _classnames.default)(className, `kt-accordion-wrap kt-accordion-id${uniqueID} kt-accordion-has-${paneCount}-panes kt-accordion-block kt-pane-header-alignment-${titleAlignment}`);
+    const normalSettings = React.createElement(Fragment, null, React.createElement("p", {
+      className: "kt-setting-label"
+    }, __('Title Color')), React.createElement(ColorPalette, {
+      value: titleStyles[0].color,
+      onChange: value => saveTitleStyles({
+        color: value
+      })
+    }), React.createElement("p", {
+      className: "kt-setting-label"
+    }, __('Title Background')), React.createElement(ColorPalette, {
+      value: titleStyles[0].background,
+      onChange: value => saveTitleStyles({
+        background: value
+      })
+    }));
+    const hoverSettings = React.createElement(Fragment, null, React.createElement("p", {
+      className: "kt-setting-label"
+    }, __('Hover Color')), React.createElement(ColorPalette, {
+      value: titleStyles[0].colorHover,
+      onChange: value => saveTitleStyles({
+        colorHover: value
+      })
+    }), React.createElement("p", {
+      className: "kt-setting-label"
+    }, __('Hover Background')), React.createElement(ColorPalette, {
+      value: titleStyles[0].backgroundHover,
+      onChange: value => saveTitleStyles({
+        backgroundHover: value
+      })
+    }));
+    const activeSettings = React.createElement(Fragment, null, React.createElement("p", {
+      className: "kt-setting-label"
+    }, __('Active Color')), React.createElement(ColorPalette, {
+      value: titleStyles[0].colorActive,
+      onChange: value => saveTitleStyles({
+        colorActive: value
+      })
+    }), React.createElement("p", {
+      className: "kt-setting-label"
+    }, __('Active Background')), React.createElement(ColorPalette, {
+      value: titleStyles[0].backgroundActive,
+      onChange: value => saveTitleStyles({
+        backgroundActive: value
+      })
+    }));
+    const accordionIconSet = [];
+    accordionIconSet.basic = React.createElement(Fragment, null, React.createElement("rect", {
+      x: "77.002",
+      y: "12.507",
+      width: "13.982",
+      height: "74.986",
+      fill: "#444"
+    }), React.createElement("path", {
+      d: "M359.538,56.991l0,-13.982l-74.986,0l0,13.982l74.986,0Z",
+      fill: "#444"
+    }), React.createElement("path", {
+      d: "M121.486,56.991l0,-13.982l-74.986,0l0,13.982l74.986,0Z",
+      fill: "#444"
+    }), React.createElement("path", {
+      d: "M359.538,56.991l0,-13.982l-74.986,0l0,13.982l74.986,0Z",
+      fill: "#444"
+    }));
+    accordionIconSet.basiccircle = React.createElement(Fragment, null, React.createElement("circle", {
+      cx: "83.723",
+      cy: "50",
+      r: "50",
+      fill: "#444"
+    }), React.createElement("circle", {
+      cx: "322.768",
+      cy: "50",
+      r: "50",
+      fill: "#444"
+    }), React.createElement("rect", {
+      x: "77.002",
+      y: "12.507",
+      width: "13.982",
+      height: "74.986",
+      fill: "#fff"
+    }), React.createElement("path", {
+      d: "M359.538,56.991l0,-13.982l-74.986,0l0,13.982l74.986,0Z",
+      fill: "#fff"
+    }), React.createElement("path", {
+      d: "M121.486,56.991l0,-13.982l-74.986,0l0,13.982l74.986,0Z",
+      fill: "#fff"
+    }), React.createElement("path", {
+      d: "M359.538,56.991l0,-13.982l-74.986,0l0,13.982l74.986,0Z",
+      fill: "#fff"
+    }));
+    accordionIconSet.xclose = React.createElement(Fragment, null, React.createElement("rect", {
+      x: "77.002",
+      y: "12.507",
+      width: "13.982",
+      height: "74.986",
+      fill: "#444"
+    }), React.createElement("path", {
+      d: "M353.5,28.432l-9.887,-9.887l-53.023,53.023l9.887,9.887l53.023,-53.023Z",
+      fill: "#444"
+    }), React.createElement("path", {
+      d: "M121.486,56.991l0,-13.982l-74.986,0l0,13.982l74.986,0Z",
+      fill: "#444"
+    }), React.createElement("path", {
+      d: "M343.613,81.455l9.887,-9.887l-53.023,-53.023l-9.887,9.887l53.023,53.023Z",
+      fill: "#444"
+    }));
+    accordionIconSet.xclosecircle = React.createElement(Fragment, null, React.createElement("circle", {
+      cx: "83.723",
+      cy: "50",
+      r: "50",
+      fill: "#444"
+    }), React.createElement("circle", {
+      cx: "322.768",
+      cy: "50",
+      r: "50",
+      fill: "#444"
+    }), React.createElement("rect", {
+      x: "77.002",
+      y: "12.507",
+      width: "13.982",
+      height: "74.986",
+      fill: "#fff"
+    }), React.createElement("path", {
+      d: "M343.613,81.455l9.887,-9.887l-53.023,-53.023l-9.887,9.887l53.023,53.023Z",
+      fill: "#fff"
+    }), React.createElement("path", {
+      d: "M121.486,56.991l0,-13.982l-74.986,0l0,13.982l74.986,0Z",
+      fill: "#fff"
+    }), React.createElement("path", {
+      d: "M290.59,71.568l9.887,9.887l53.023,-53.023l-9.887,-9.887l-53.023,53.023Z",
+      fill: "#fff"
+    }));
+    accordionIconSet.arrow = React.createElement(Fragment, null, React.createElement("g", {
+      fill: "#444"
+    }, React.createElement("path", {
+      d: "M122.2,37.371l-9.887,-9.886l-38.887,38.887l9.887,9.887l38.887,-38.888Z"
+    }), React.createElement("path", {
+      d: "M83.18,76.515l9.887,-9.886l-38.92,-38.921l-9.887,9.887l38.92,38.92Z"
+    })), React.createElement("g", {
+      fill: "#444"
+    }, React.createElement("path", {
+      d: "M283.65,63.629l9.887,9.886l38.887,-38.887l-9.887,-9.887l-38.887,38.888Z"
+    }), React.createElement("path", {
+      d: "M322.67,24.485l-9.887,9.886l38.92,38.921l9.887,-9.887l-38.92,-38.92Z"
+    })));
+    accordionIconSet.arrowcircle = React.createElement(Fragment, null, React.createElement("circle", {
+      cx: "83.723",
+      cy: "50",
+      r: "50",
+      fill: "#444"
+    }), React.createElement("circle", {
+      cx: "322.768",
+      cy: "50",
+      r: "50",
+      fill: "#444"
+    }), React.createElement("g", {
+      fill: "#fff"
+    }, React.createElement("path", {
+      d: "M122.2,37.371l-9.887,-9.886l-38.887,38.887l9.887,9.887l38.887,-38.888Z"
+    }), React.createElement("path", {
+      d: "M83.18,76.515l9.887,-9.886l-38.92,-38.921l-9.887,9.887l38.92,38.92Z"
+    })), React.createElement("g", {
+      fill: "#fff"
+    }, React.createElement("path", {
+      d: "M283.65,63.629l9.887,9.886l38.887,-38.887l-9.887,-9.887l-38.887,38.888Z"
+    }), React.createElement("path", {
+      d: "M322.67,24.485l-9.887,9.886l38.92,38.921l9.887,-9.887l-38.92,-38.92Z"
+    })));
+
+    const renderIconSet = svg => React.createElement("svg", {
+      className: "accord-icon",
+      viewBox: "0 0 400 100",
+      xmlns: "http://www.w3.org/2000/svg",
+      preserveAspectRatio: "none",
+      fillRule: "evenodd",
+      clipRule: "evenodd",
+      strokeLinejoin: "round",
+      strokeMiterlimit: "1.414",
+      style: {
+        fill: '#000000'
+      }
+    }, accordionIconSet[svg]);
+
+    const renderCSS = React.createElement("style", null, `
+				.kt-accordion-${uniqueID} .kt-blocks-accordion-header {
+					color: ${titleStyles[0].color};
+					border-color: ${titleStyles[0].border[0]} ${titleStyles[0].border[1]} ${titleStyles[0].border[2]} ${titleStyles[0].border[3]};
+					background-color: ${titleStyles[0].background};
+					padding:${titleStyles[0].padding[0]}px ${titleStyles[0].padding[1]}px ${titleStyles[0].padding[2]}px ${titleStyles[0].padding[3]}px;
+					margin-top:${titleStyles[0].marginTop > 32 ? titleStyles[0].marginTop : 0}px;
+					border-width:${titleStyles[0].borderWidth[0]}px ${titleStyles[0].borderWidth[1]}px ${titleStyles[0].borderWidth[2]}px ${titleStyles[0].borderWidth[3]}px;
+					border-radius:${titleStyles[0].borderRadius[0]}px ${titleStyles[0].borderRadius[1]}px ${titleStyles[0].borderRadius[2]}px ${titleStyles[0].borderRadius[3]}px;
+					font-size:${titleStyles[0].size[0]}${titleStyles[0].sizeType};
+					line-height:${titleStyles[0].lineHeight[0]}${titleStyles[0].lineType};
+					letter-spacing:${titleStyles[0].letterSpacing}px;
+					text-transform:${titleStyles[0].textTransform};
+					font-family:${titleStyles[0].family};
+					font-style:${titleStyles[0].style};
+					font-weight:${titleStyles[0].weight};
+				}
+				.kt-accordion-${uniqueID} .kt-blocks-accordion-header .kt-blocks-accordion-title {
+					line-height:${titleStyles[0].lineHeight[0]}${titleStyles[0].lineType};
+				}
+				.kt-accordion-${uniqueID} .kt-blocks-accordion-header .kt-btn-svg-icon svg {
+					width:${titleStyles[0].size[0]}${titleStyles[0].sizeType};
+					height:${titleStyles[0].size[0]}${titleStyles[0].sizeType};
+				}
+				.kt-accordion-${uniqueID} .kt-accordion-panel-inner {
+					padding:${contentPadding[0]}px ${contentPadding[1]}px ${contentPadding[2]}px ${contentPadding[3]}px;
+					background-color: ${contentBgColor};
+					border-color: ${contentBorderColor};
+					border-width:${contentBorder[0]}px ${contentBorder[1]}px ${contentBorder[2]}px ${contentBorder[3]}px;
+					border-radius:${contentBorderRadius[0]}px ${contentBorderRadius[1]}px ${contentBorderRadius[2]}px ${contentBorderRadius[3]}px;
+					min-height:${minHeight ? minHeight + 'px' : '0'};
+				}
+				.kt-accordion-${uniqueID}:not( .kt-accodion-icon-style-basiccircle ):not( .kt-accodion-icon-style-xclosecircle ):not( .kt-accodion-icon-style-arrowcircle ) .kt-blocks-accordion-header .kt-blocks-accordion-icon-trigger:before, .kt-accordion-${uniqueID}:not( .kt-accodion-icon-style-basiccircle ):not( .kt-accodion-icon-style-xclosecircle ):not( .kt-accodion-icon-style-arrowcircle ) .kt-blocks-accordion-header .kt-blocks-accordion-icon-trigger:after {
+					background-color: ${titleStyles[0].color};
+				}
+				.kt-accordion-${uniqueID}:not( .kt-accodion-icon-style-basic ):not( .kt-accodion-icon-style-xclose ):not( .kt-accodion-icon-style-arrow ) .kt-blocks-accordion-header .kt-blocks-accordion-icon-trigger:before, .kt-accordion-${uniqueID}:not( .kt-accodion-icon-style-basic ):not( .kt-accodion-icon-style-xclose ):not( .kt-accodion-icon-style-arrow ) .kt-blocks-accordion-header .kt-blocks-accordion-icon-trigger:after {
+					background-color: ${titleStyles[0].background};
+				}
+				.kt-accordion-${uniqueID}:not( .kt-accodion-icon-style-basic ):not( .kt-accodion-icon-style-xclose ):not( .kt-accodion-icon-style-arrow ) .kt-blocks-accordion-header .kt-blocks-accordion-icon-trigger {
+					background-color: ${titleStyles[0].color};
+				}
+				.kt-accordion-${uniqueID} .kt-blocks-accordion-header:hover {
+					color: ${titleStyles[0].colorHover};
+					border-color: ${titleStyles[0].borderHover[0]} ${titleStyles[0].borderHover[1]} ${titleStyles[0].borderHover[2]} ${titleStyles[0].borderHover[3]};
+					background-color: ${titleStyles[0].backgroundHover};
+				}
+				.kt-accordion-${uniqueID}:not( .kt-accodion-icon-style-basiccircle ):not( .kt-accodion-icon-style-xclosecircle ):not( .kt-accodion-icon-style-arrowcircle ) .kt-blocks-accordion-header:hover .kt-blocks-accordion-icon-trigger:before, .kt-accordion-${uniqueID}:not( .kt-accodion-icon-style-basiccircle ):not( .kt-accodion-icon-style-xclosecircle ):not( .kt-accodion-icon-style-arrowcircle ) .kt-blocks-accordion-header:hover .kt-blocks-accordion-icon-trigger:after {
+					background-color: ${titleStyles[0].colorHover};
+				}
+				.kt-accordion-${uniqueID}:not( .kt-accodion-icon-style-basic ):not( .kt-accodion-icon-style-xclose ):not( .kt-accodion-icon-style-arrow ) .kt-blocks-accordion-header:hover .kt-blocks-accordion-icon-trigger:before, .kt-accordion-${uniqueID}:not( .kt-accodion-icon-style-basic ):not( .kt-accodion-icon-style-xclose ):not( .kt-accodion-icon-style-arrow ) .kt-blocks-accordion-header:hover .kt-blocks-accordion-icon-trigger:after {
+					background-color: ${titleStyles[0].backgroundHover};
+				}
+				.kt-accordion-${uniqueID}:not( .kt-accodion-icon-style-basic ):not( .kt-accodion-icon-style-xclose ):not( .kt-accodion-icon-style-arrow ) .kt-blocks-accordion-header:hover .kt-blocks-accordion-icon-trigger {
+					background-color: ${titleStyles[0].colorHover};
+                                }
+				.kt-accordion-${uniqueID}.kt-start-active-pane-${openPane + 1} .kt-accordion-pane-${openPane + 1} .kt-blocks-accordion-header {
+					color: ${titleStyles[0].colorActive};
+					border-color: ${titleStyles[0].borderActive[0]} ${titleStyles[0].borderActive[1]} ${titleStyles[0].borderActive[2]} ${titleStyles[0].borderActive[3]};
+					background-color: ${titleStyles[0].backgroundActive};
+				}
+				.kt-accordion-${uniqueID}.kt-start-active-pane-${openPane + 1}:not( .kt-accodion-icon-style-basiccircle ):not( .kt-accodion-icon-style-xclosecircle ):not( .kt-accodion-icon-style-arrowcircle ) .kt-accordion-pane-${openPane + 1} .kt-blocks-accordion-icon-trigger:before, .kt-accordion-${uniqueID}.kt-start-active-pane-${openPane + 1}:not( .kt-accodion-icon-style-basiccircle ):not( .kt-accodion-icon-style-xclosecircle ):not( .kt-accodion-icon-style-arrowcircle ) .kt-accordion-pane-${openPane + 1} .kt-blocks-accordion-icon-trigger:after {
+					background-color: ${titleStyles[0].colorActive};
+				}
+				.kt-accordion-${uniqueID}.kt-start-active-pane-${openPane + 1}:not( .kt-accodion-icon-style-basic ):not( .kt-accodion-icon-style-xclose ):not( .kt-accodion-icon-style-arrow ) .kt-accordion-pane-${openPane + 1} .kt-blocks-accordion-icon-trigger:before, .kt-accordion-${uniqueID}.kt-start-active-pane-${openPane + 1}:not( .kt-accodion-icon-style-basic ):not( .kt-accodion-icon-style-xclose ):not( .kt-accodion-icon-style-arrow ) .kt-accordion-pane-${openPane + 1} .kt-blocks-accordion-icon-trigger:after {
+					background-color: ${titleStyles[0].backgroundActive};
+				}
+				.kt-accordion-${uniqueID}.kt-start-active-pane-${openPane + 1}:not( .kt-accodion-icon-style-basic ):not( .kt-accodion-icon-style-xclose ):not( .kt-accodion-icon-style-arrow ) .kt-accordion-pane-${openPane + 1} .kt-blocks-accordion-icon-trigger {
+					background-color: ${titleStyles[0].colorActive};
+				}
+				`); // Unique HTML ID for accordion:
+
+    var startCollapseVar = this.props.startCollapsed;
+    const acc_unique_id = `${uniqueID}`.length ? `accord${uniqueID}` : `accord_${this.props.clientId.substr(2, 9)}`;
+
+    const onStartCollapsedChange = collapse => {
+      startCollapseVar = collapse;
+      setAttributes({
+        startCollapsed: collapse
+      });
+    };
+
+    return React.createElement(Fragment, null, renderCSS, React.createElement(BlockControls, null, React.createElement(BlockAlignmentToolbar, {
+      value: blockAlignment,
+      controls: ['center', 'wide', 'full'],
+      onChange: value => setAttributes({
+        blockAlignment: value
+      })
+    }), React.createElement(AlignmentToolbar, {
+      value: titleAlignment,
+      onChange: nextAlign => {
+        setAttributes({
+          titleAlignment: nextAlign
+        });
+      }
+    })), this.showSettings('allSettings') && React.createElement(InspectorControls, null, this.showSettings('titleTag') && React.createElement(PanelBody, {
+      title: __('Title Tag Settings', 'inclind-blocks'),
+      initialOpen: false
+    }, React.createElement(SelectControl, {
+      label: __('Title Tag', 'inclind-blocks'),
+      value: titleTag,
+      options: [{
+        value: 'div',
+        label: __('div')
+      }, {
+        value: 'h2',
+        label: __('h2')
+      }, {
+        value: 'h3',
+        label: __('h3')
+      }, {
+        value: 'h4',
+        label: __('h4')
+      }, {
+        value: 'h5',
+        label: __('h5')
+      }, {
+        value: 'h6',
+        label: __('h6')
+      }],
+      onChange: value => {
+        (0, _times.default)(realPaneCount, n => {
+          wp.data.dispatch('core/block-editor').updateBlockAttributes(accordionBlock[0].innerBlocks[n].clientId, {
+            titleTag: value
+          });
+        });
+        this.setState({
+          titleTag: value
+        });
+      }
+    }))), React.createElement("div", {
+      className: classes
+    }, !this.state.showPreset && React.createElement(Fragment, null, React.createElement("div", {
+      className: "kt-accordion-selecter"
+    }, __('Accordion', 'inclind-blocks')), React.createElement("div", {
+      className: "kt-accordion-wrap",
+      style: {
+        maxWidth: maxWidth + 'px'
+      }
+    }, React.createElement("div", {
+      id: `kt-accordion-${uniqueID}`,
+      className: `kt-accordion-inner-wrap kt-accordion-${uniqueID} kt-start-active-pane-${openPane + 1} kt-accodion-icon-style-${iconStyle && showIcon ? iconStyle : 'none'} kt-accodion-icon-side-${iconSide ? iconSide : 'right'}`
+    }, React.createElement(InnerBlocks, {
+      template: getPanesTemplate(0 === realPaneCount ? paneCount : realPaneCount, startCollapseVar, acc_unique_id),
+      templateLock: false,
+      allowedBlocks: ALLOWED_BLOCKS
+    }))), React.createElement("div", {
+      className: "kt-accordion-add-selecter"
+    }, React.createElement(Button, {
+      className: "kt-accordion-add",
+      isPrimary: true,
+      onClick: () => {
+        let newBlock = createBlock('inclind-blocks/inclind-pane', {
+          id: paneCount + 1,
+          titleTag: titleTag,
+          parentID: acc_unique_id,
+          startCollapsed: startCollapseVar
+        });
+        wp.data.dispatch('core/block-editor').insertBlock(newBlock, realPaneCount, clientId);
+        setAttributes({
+          paneCount: paneCount + 1
+        });
+      }
+    }, React.createElement(Dashicon, {
+      icon: "plus"
+    }), __('Add Accordion Item', 'inclind-blocks')), realPaneCount > 1 && React.createElement(IconButton, {
+      className: "kt-accordion-remove",
+      label: __('Remove Accordion Item', 'inclind-blocks'),
+      icon: "minus",
+      onClick: () => {
+        const removeClientId = accordionBlock[0].innerBlocks[realPaneCount - 1].clientId;
+        wp.data.dispatch('core/block-editor').removeBlocks(removeClientId);
+      }
+    })))));
+  }
+
+} //  Start Drupal Specific.
+
+
+const category = {
+  slug: 'inclind-blocks',
+  title: __('Custom Blocks')
+}; // Grab the current categories and merge in the new category if not present.
+
+const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
+dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
+
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
+
+  if (blocks.hasOwnProperty(category.slug + '/accordion-bootstrap') && blocks[category.slug + '/accordion-bootstrap']) {
+    // Register the block.
+    registerBlockType(category.slug + '/accordion-bootstrap', {
+      title: __('Accordion (Bootstrap)', 'accordion-bootstrap'),
+      description: __('Create an accordion layout.', 'accordion-bootstrap'),
+      category: 'inclind-blocks',
+      keywords: [__('Accordion', 'accordion-bootstrap'), __('Icon', 'accordion-bootstrap'), __('inclind', 'accordion-bootstrap'), __('custom', 'accordion-bootstrap')],
+      attributes: {
+        uniqueID: {
+          type: 'string',
+          default: ''
+        },
+        paneCount: {
+          type: 'number',
+          default: 2
+        },
+        showPresets: {
+          type: 'bool',
+          default: false
+        },
+        openPane: {
+          type: 'number',
+          default: 0
+        },
+        startCollapsed: {
+          type: 'bool',
+          default: false
+        },
+        linkPaneCollapse: {
+          type: 'bool',
+          default: true
+        },
+        minHeight: {
+          type: 'number',
+          default: ''
+        },
+        maxWidth: {
+          type: 'number',
+          default: ''
+        },
+        contentBgColor: {
+          type: 'string',
+          default: ''
+        },
+        contentBorderColor: {
+          type: 'string',
+          default: '#eeeeee'
+        },
+        contentBorder: {
+          type: 'array',
+          default: [0, 1, 1, 1]
+        },
+        contentBorderRadius: {
+          type: 'array',
+          default: [0, 0, 0, 0]
+        },
+        contentPadding: {
+          type: 'array',
+          default: [20, 20, 20, 20]
+        },
+        titleAlignment: {
+          type: 'string',
+          default: 'left'
+        },
+        blockAlignment: {
+          type: 'string',
+          default: 'none'
+        },
+        titleStyles: {
+          type: 'array',
+          default: [{
+            size: [18, '', ''],
+            sizeType: 'px',
+            lineHeight: [24, '', ''],
+            lineType: 'px',
+            letterSpacing: '',
+            family: '',
+            google: '',
+            style: '',
+            weight: '',
+            variant: '',
+            subset: '',
+            loadGoogle: true,
+            padding: [10, 14, 10, 14],
+            marginTop: 8,
+            color: '#555555',
+            background: '#f2f2f2',
+            border: ['#555555', '#555555', '#555555', '#555555'],
+            borderRadius: [0, 0, 0, 0],
+            borderWidth: [0, 0, 0, 0],
+            colorHover: '#444444',
+            backgroundHover: '#eeeeee',
+            borderHover: ['#eeeeee', '#eeeeee', '#eeeeee', '#eeeeee'],
+            colorActive: '#ffffff',
+            backgroundActive: '#444444',
+            borderActive: ['#444444', '#444444', '#444444', '#444444'],
+            textTransform: ''
+          }]
+        },
+        showIcon: {
+          type: 'bool',
+          default: true
+        },
+        iconStyle: {
+          type: 'string',
+          default: 'basic'
+        },
+        iconSide: {
+          type: 'string',
+          default: 'right'
+        }
+      },
+
+      // Render the block components.
+      getEditWrapperProps({
+        blockAlignment
+      }) {
+        if ('left' === blockAlignment || 'right' === blockAlignment || 'center' === blockAlignment) {
+          return {
+            'data-align': blockAlignment
+          };
+        }
+      },
+
+      edit: InclindAccordionBootstrap,
+      save: props => {
+        const {
+          attributes: {
+            uniqueID,
+            paneCount,
+            blockAlignment,
+            maxWidth,
+            titleAlignment,
+            startCollapsed,
+            linkPaneCollapse,
+            showIcon,
+            iconStyle,
+            iconSide,
+            openPane
+          }
+        } = props;
+        const classes = (0, _classnames.default)(`align${blockAlignment ? blockAlignment : 'none'}`);
+        const innerClasses = (0, _classnames.default)(`accordion-id${uniqueID} active-pane-${openPane}`);
+
+        const stripStringRender = string => {
+          return string.toLowerCase().replace(/[^0-9a-z-]/g, '');
+        }; // render() {
+
+
+        return React.createElement("div", {
+          className: classes
+        }, React.createElement("div", {
+          className: innerClasses,
+          style: {
+            maxWidth: maxWidth ? maxWidth + 'px' : 'none'
+          }
+        }, React.createElement("div", {
+          className: "accordion kt-accordion-inner-wrap",
+          id: `accord${uniqueID}`,
+          "data-allow-multiple-open": !linkPaneCollapse ? 'true' : 'false',
+          "data-start-open": !startCollapsed ? openPane : 'none'
+        }, React.createElement(InnerBlocks.Content, null)))); // }
+      }
+    });
+  }
+}
+
+},{"./components/accordion-bootstrap":1,"@fonticonpicker/react-fonticonpicker":59,"classnames":60,"lodash/map":182,"lodash/times":187,"memize":192}],3:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0; // Setup the block.
+
+const {
+  Component
+} = wp.element;
+/**
  * Create a Card wrapper Component.
  */
 
@@ -50,7 +930,7 @@ class AccordionItem extends Component {
 
 exports.default = AccordionItem;
 
-},{}],2:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -64,7 +944,7 @@ const icon = {
 var _default = icon;
 exports.default = _default;
 
-},{}],3:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -102,7 +982,7 @@ class Inspector extends Component {
 
 exports.default = Inspector;
 
-},{}],4:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 
 var _classnames = _interopRequireDefault(require("classnames"));
@@ -112,6 +992,8 @@ var _inspector = _interopRequireDefault(require("./components/inspector"));
 var _accordionItem = _interopRequireDefault(require("./components/accordion-item"));
 
 var _icon = _interopRequireDefault(require("./components/icon"));
+
+var _infobox = _interopRequireDefault(require("../infobox/components/infobox"));
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : {
@@ -187,79 +1069,85 @@ class InclindAccordionItem extends Component {
 
 const category = {
   slug: 'inclind-blocks',
-  title: __('Inclind Blocks')
+  title: __('Custom Blocks')
 }; // Grab the current categories and merge in the new category if not present.
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-accordion-item', {
-  title: __('Accordion Item', 'inclind-accordion-item'),
-  description: __('Description', 'inclind-blocks'),
-  category: 'inclind-blocks',
-  keywords: [__('accordion', 'inclind-accordion-item'), __('accordion item', 'inclind-accordion-item'), __('inclind', 'inclind-accordion-item')],
-  attributes: {
-    itemTitle: {
-      selector: '.accordion-item-title',
-      type: 'string'
-    },
-    itemContent: {
-      selector: '.accordion-item-content',
-      type: 'array',
-      source: 'children'
-    },
-    itemId: {
-      type: 'string',
-      default: ''
-    }
-  },
-  // Render the block components.
-  edit: InclindAccordionItem,
-  // Save the attributes and markup.
-  save: function (props) {
-    const {
-      itemTitle,
-      itemContent,
-      itemId
-    } = props.attributes;
-    const addIcon = '<svg viewBox="0 0 500 500"><path d="' + _icon.default['iconAdd'] + '"></path></svg>';
-    const removeIcon = '<svg viewBox="0 0 512 512"><path d="' + _icon.default['iconRemove'] + '"></path></svg>'; // Save the block markup for the front end.
-    // TODO: Unique ID on elements for JS functionality.
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-    return React.createElement(_accordionItem.default, props, React.createElement("div", {
-      className: "card-header",
-      id: "header-" + itemId
-    }, React.createElement("h5", {
-      className: "mb-0 accordion-item-title"
-    }, React.createElement("button", {
-      className: "btn btn-link",
-      "data-toggle": "collapse",
-      "data-target": "#collapse-" + itemId
-    }, itemTitle, React.createElement("span", {
-      className: "svgicon-default _ionicons_svg_ios-add",
-      dangerouslySetInnerHTML: {
-        __html: addIcon
+  if (blocks.hasOwnProperty(category.slug + '/inclind-accordion') && blocks[category.slug + '/inclind-accordion']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-accordion-item', {
+      title: __('Accordion Item', 'inclind-accordion-item'),
+      description: __('Description', 'inclind-blocks'),
+      category: 'inclind-blocks',
+      keywords: [__('accordion', 'inclind-accordion-item'), __('accordion item', 'inclind-accordion-item'), __('inclind', 'inclind-accordion-item')],
+      attributes: {
+        itemTitle: {
+          selector: '.accordion-item-title',
+          type: 'string'
+        },
+        itemContent: {
+          selector: '.accordion-item-content',
+          type: 'array',
+          source: 'children'
+        },
+        itemId: {
+          type: 'string',
+          default: ''
+        }
+      },
+      // Render the block components.
+      edit: InclindAccordionItem,
+      // Save the attributes and markup.
+      save: function (props) {
+        const {
+          itemTitle,
+          itemContent,
+          itemId
+        } = props.attributes;
+        const addIcon = '<svg viewBox="0 0 500 500"><path d="' + _icon.default['iconAdd'] + '"></path></svg>';
+        const removeIcon = '<svg viewBox="0 0 512 512"><path d="' + _icon.default['iconRemove'] + '"></path></svg>'; // Save the block markup for the front end.
+        // TODO: Unique ID on elements for JS functionality.
+
+        return React.createElement(_accordionItem.default, props, React.createElement("div", {
+          className: "card-header",
+          id: "header-" + itemId
+        }, React.createElement("h5", {
+          className: "mb-0 accordion-item-title"
+        }, React.createElement("button", {
+          className: "btn btn-link",
+          "data-toggle": "collapse",
+          "data-target": "#collapse-" + itemId
+        }, itemTitle, React.createElement("span", {
+          className: "svgicon-default _ionicons_svg_ios-add",
+          dangerouslySetInnerHTML: {
+            __html: addIcon
+          }
+        }), React.createElement("span", {
+          className: "svgicon-default _ionicons_svg_ios-remove",
+          dangerouslySetInnerHTML: {
+            __html: removeIcon
+          }
+        })))), React.createElement("div", {
+          id: "collapse-" + itemId,
+          className: "collapse"
+        }, React.createElement("div", {
+          class: "card-body"
+        }, itemContent && React.createElement(RichText.Content, {
+          tagName: "p",
+          className: "accordion-item-content",
+          value: itemContent
+        }), React.createElement(InnerBlocks.Content, null))));
       }
-    }), React.createElement("span", {
-      className: "svgicon-default _ionicons_svg_ios-remove",
-      dangerouslySetInnerHTML: {
-        __html: removeIcon
-      }
-    })))), React.createElement("div", {
-      id: "collapse-" + itemId,
-      className: "collapse"
-    }, React.createElement("div", {
-      class: "card-body"
-    }, itemContent && React.createElement(RichText.Content, {
-      tagName: "p",
-      className: "accordion-item-content",
-      value: itemContent
-    }), React.createElement(InnerBlocks.Content, null))));
+    });
   }
-});
+}
 
-},{"./components/accordion-item":1,"./components/icon":2,"./components/inspector":3,"classnames":44}],5:[function(require,module,exports){
+},{"../infobox/components/infobox":31,"./components/accordion-item":3,"./components/icon":4,"./components/inspector":5,"classnames":60}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -295,10 +1183,12 @@ class Accordion extends Component {
 
 exports.default = Accordion;
 
-},{}],6:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 
 var _accordion = _interopRequireDefault(require("./components/accordion"));
+
+var _classnames = _interopRequireDefault(require("classnames"));
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : {
@@ -345,30 +1235,36 @@ class InclindAccordion extends Component {
 
 const category = {
   slug: 'inclind-blocks',
-  title: __('Inclind Blocks')
+  title: __('Custom Blocks')
 }; // Grab the current categories and merge in the new category if not present.
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-accordion', {
-  title: __('Accordion', 'inclind-accordion'),
-  description: __('Description', 'inclind-blocks'),
-  category: 'inclind-blocks',
-  keywords: [__('accordion', 'inclind-accordion'), __('inclind', 'inclind-accordion')],
-  attributes: {},
-  // Render the block components.
-  edit: InclindAccordion,
-  // Save the attributes and markup.
-  save: function (props) {
-    const {} = props.attributes; // Save the block markup for the front end.
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-    return React.createElement(_accordion.default, props, React.createElement(InnerBlocks.Content, null));
+  if (blocks.hasOwnProperty(category.slug + '/inclind-accordion') && blocks[category.slug + '/inclind-accordion']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-accordion', {
+      title: __('Accordion', 'inclind-accordion'),
+      description: __('Description', 'inclind-blocks'),
+      category: 'inclind-blocks',
+      keywords: [__('accordion', 'inclind-accordion'), __('inclind', 'inclind-accordion')],
+      attributes: {},
+      // Render the block components.
+      edit: InclindAccordion,
+      // Save the attributes and markup.
+      save: function (props) {
+        const {} = props.attributes; // Save the block markup for the front end.
+
+        return React.createElement(_accordion.default, props, React.createElement(InnerBlocks.Content, null));
+      }
+    });
   }
-});
+}
 
-},{"./components/accordion":5}],7:[function(require,module,exports){
+},{"./components/accordion":7,"classnames":60}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -404,7 +1300,7 @@ class AdvancedBtn extends Component {
 
 exports.default = AdvancedBtn;
 
-},{}],8:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 
 var _advancedBtn = _interopRequireDefault(require("./components/advanced-btn"));
@@ -639,10 +1535,10 @@ class InclindAdvancedBtn extends Component {
     }];
     const bgType = [{
       key: 'solid',
-      name: __('Blue')
+      name: __('Primary')
     }, {
       key: 'yellow',
-      name: __('Yellow')
+      name: __('Secondary')
     }, {
       key: 'gradient',
       name: __('Transparent')
@@ -1267,178 +2163,184 @@ const category = {
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-advanced-btn', {
-  title: __('Button', 'inclind-advanced-btn'),
-  description: __('Create an advanced button or a row of buttons. Style each one, including hover controls!', 'inclind-advanced-btn'),
-  category: 'inclind-blocks',
-  keywords: [__('Button', 'inclind-advanced-btn'), __('Icon', 'inclind-advanced-btn'), __('inclind', 'inclind-advanced-btn'), __('custom', 'inclind-accoadvanced-btnrdion')],
-  attributes: {
-    hAlign: {
-      type: 'string',
-      default: 'center'
-    },
-    thAlign: {
-      type: 'string',
-      default: ''
-    },
-    mhAlign: {
-      type: 'string',
-      default: ''
-    },
-    btnCount: {
-      type: 'number',
-      default: 1
-    },
-    uniqueID: {
-      type: 'string',
-      default: ''
-    },
-    btns: {
-      type: 'array',
-      default: [{
-        text: 'Start Button...',
-        link: '',
-        target: '_self',
-        size: '',
-        paddingBT: '',
-        paddingLR: '',
-        color: '#555555',
-        background: '',
-        border: '#555555',
-        backgroundOpacity: 1,
-        borderOpacity: 1,
-        borderRadius: '',
-        borderWidth: '',
-        // colorHover: '#ffffff',
-        // backgroundHover: '#444444',
-        // borderHover: '#444444',
-        // backgroundHoverOpacity: 1,
-        // borderHoverOpacity: 1,
-        icon: '',
-        iconSide: 'left',
-        iconHover: false,
-        cssClass: '',
-        noFollow: false,
-        gap: 5,
-        responsiveSize: ['', ''],
-        gradient: ['#999999', 1, 0, 100, 'linear', 180, 'center center'],
-        gradientHover: ['#777777', 1, 0, 100, 'linear', 180, 'center center'],
-        btnStyle: 'basic',
-        btnSize: 'standard',
-        backgroundType: 'solid',
-        backgroundHoverType: 'solid',
-        width: ['', '', ''],
-        responsivePaddingBT: ['', ''],
-        responsivePaddingLR: ['', ''],
-        boxShadow: [false, '#000000', 0.2, 1, 1, 2, 0, false],
-        boxShadowHover: [false, '#000000', 0.4, 2, 2, 3, 0, false]
-      }]
-    },
-    letterSpacing: {
-      type: 'number'
-    },
-    widthType: {
-      type: 'string',
-      default: 'auto'
-    },
-    forceFullwidth: {
-      type: 'bool',
-      default: false
-    }
-  },
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-  // Render the block components.
-  getEditWrapperProps({
-    blockAlignment
-  }) {
-    if ('left' === blockAlignment || 'right' === blockAlignment || 'center' === blockAlignment) {
-      return {
-        'data-align': blockAlignment
-      };
-    }
-  },
-
-  edit: InclindAdvancedBtn,
-  save: props => {
-    const {
+  if (blocks.hasOwnProperty(category.slug + '/inclind-advanced-btn') && blocks[category.slug + '/inclind-advanced-btn']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-advanced-btn', {
+      title: __('Button (Bootstrap)', 'inclind-advanced-btn'),
+      description: __('Create an advanced button or a row of buttons. Style each one, including hover controls!', 'inclind-advanced-btn'),
+      category: 'inclind-blocks',
+      keywords: [__('Button', 'inclind-advanced-btn'), __('Icon', 'inclind-advanced-btn'), __('inclind', 'inclind-advanced-btn'), __('custom', 'inclind-accoadvanced-btnrdion')],
       attributes: {
-        btnCount,
-        btns,
-        hAlign,
-        uniqueID,
-        letterSpacing,
-        forceFullwidth,
-        thAlign,
-        mhAlign
-      }
-    } = props;
+        hAlign: {
+          type: 'string',
+          default: 'center'
+        },
+        thAlign: {
+          type: 'string',
+          default: ''
+        },
+        mhAlign: {
+          type: 'string',
+          default: ''
+        },
+        btnCount: {
+          type: 'number',
+          default: 1
+        },
+        uniqueID: {
+          type: 'string',
+          default: ''
+        },
+        btns: {
+          type: 'array',
+          default: [{
+            text: 'Start Button...',
+            link: '',
+            target: '_self',
+            size: '',
+            paddingBT: '',
+            paddingLR: '',
+            color: '#555555',
+            background: '',
+            border: '#555555',
+            backgroundOpacity: 1,
+            borderOpacity: 1,
+            borderRadius: '',
+            borderWidth: '',
+            // colorHover: '#ffffff',
+            // backgroundHover: '#444444',
+            // borderHover: '#444444',
+            // backgroundHoverOpacity: 1,
+            // borderHoverOpacity: 1,
+            icon: '',
+            iconSide: 'left',
+            iconHover: false,
+            cssClass: '',
+            noFollow: false,
+            gap: 5,
+            responsiveSize: ['', ''],
+            gradient: ['#999999', 1, 0, 100, 'linear', 180, 'center center'],
+            gradientHover: ['#777777', 1, 0, 100, 'linear', 180, 'center center'],
+            btnStyle: 'basic',
+            btnSize: 'standard',
+            backgroundType: 'solid',
+            backgroundHoverType: 'solid',
+            width: ['', '', ''],
+            responsivePaddingBT: ['', ''],
+            responsivePaddingLR: ['', ''],
+            boxShadow: [false, '#000000', 0.2, 1, 1, 2, 0, false],
+            boxShadowHover: [false, '#000000', 0.4, 2, 2, 3, 0, false]
+          }]
+        },
+        letterSpacing: {
+          type: 'number'
+        },
+        widthType: {
+          type: 'string',
+          default: 'auto'
+        },
+        forceFullwidth: {
+          type: 'bool',
+          default: false
+        }
+      },
 
-    const renderSaveBtns = index => {
-      let relAttr;
+      // Render the block components.
+      getEditWrapperProps({
+        blockAlignment
+      }) {
+        if ('left' === blockAlignment || 'right' === blockAlignment || 'center' === blockAlignment) {
+          return {
+            'data-align': blockAlignment
+          };
+        }
+      },
 
-      if ('_blank' === btns[index].target && true === btns[index].noFollow) {
-        relAttr = 'noreferrer noopener nofollow';
-      } else if ('_blank' === btns[index].target) {
-        relAttr = 'noreferrer noopener';
-      } else if (true === btns[index].noFollow) {
-        relAttr = 'nofollow';
-      } else {
-        relAttr = undefined;
-      }
+      edit: InclindAdvancedBtn,
+      save: props => {
+        const {
+          attributes: {
+            btnCount,
+            btns,
+            hAlign,
+            uniqueID,
+            letterSpacing,
+            forceFullwidth,
+            thAlign,
+            mhAlign
+          }
+        } = props;
 
-      let btnSize;
+        const renderSaveBtns = index => {
+          let relAttr;
 
-      if (undefined !== btns[index].paddingLR || undefined !== btns[index].paddingBT) {
-        btnSize = 'custom';
-      } else {
-        btnSize = 'standard';
-      }
+          if ('_blank' === btns[index].target && true === btns[index].noFollow) {
+            relAttr = 'noreferrer noopener nofollow';
+          } else if ('_blank' === btns[index].target) {
+            relAttr = 'noreferrer noopener';
+          } else if (true === btns[index].noFollow) {
+            relAttr = 'nofollow';
+          } else {
+            relAttr = undefined;
+          }
 
-      return React.createElement("div", {
-        className: `kt-btn-wrap kt-btn-wrap-${index}`
-      }, React.createElement("a", {
-        className: `btn kt-btn-${index}-action kt-btn-size-${btns[index].btnSize ? btns[index].btnSize : btnSize} kt-btn-style-${btns[index].btnStyle ? btns[index].btnStyle : 'basic'}
+          let btnSize;
+
+          if (undefined !== btns[index].paddingLR || undefined !== btns[index].paddingBT) {
+            btnSize = 'custom';
+          } else {
+            btnSize = 'standard';
+          }
+
+          return React.createElement("div", {
+            className: `kt-btn-wrap kt-btn-wrap-${index}`
+          }, React.createElement("a", {
+            className: `btn kt-btn-${index}-action kt-btn-size-${btns[index].btnSize ? btns[index].btnSize : btnSize} kt-btn-style-${btns[index].btnStyle ? btns[index].btnStyle : 'basic'}
                 kt-btn-svg-show-${!btns[index].iconHover ? 'always' : 'hover'} kt-btn-has-text-${!btns[index].text ? 'false' : 'true'} ${forceFullwidth ? ' btn-block' : ''}
                 ${!btns[index].icon ? '' : 'btn-icon'}${'video' === btns[index].target ? ' ktblocksvideopop' : ''}${btns[index].cssClass ? ' ' + btns[index].cssClass : ''}
                 ${btns[index].backgroundHoverType === 'gradient' ? ' btn-arrow btn-cta btn-square' : btns[index].backgroundHoverType === 'yellow' ? ' btn-secondary' : 'btn-primary'} `,
-        href: !btns[index].link ? 'javascript:void(0);' : btns[index].link,
-        target: '_blank' === btns[index].target ? btns[index].target : undefined,
-        rel: relAttr,
-        style: {
-          borderRadius: undefined !== btns[index].borderRadius && '' !== btns[index].borderRadius ? btns[index].borderRadius + 'px' : undefined,
-          borderWidth: undefined !== btns[index].borderWidth && '' !== btns[index].borderWidth ? btns[index].borderWidth + 'px' : undefined,
-          letterSpacing: undefined !== letterSpacing && '' !== letterSpacing ? letterSpacing + 'px' : undefined
-        }
-      }, btns[index].icon && 'left' === btns[index].iconSide && React.createElement(_genicon.default, {
-        className: `color-fill--white svg svg--icon js-svg-exists kt-btn-svg-icon-${btns[index].icon} kt-btn-side-${btns[index].iconSide}`,
-        name: btns[index].icon,
-        size: !btns[index].size ? '14' : btns[index].size,
-        icon: _svgicons.default[btns[index].icon]
-      }), React.createElement(RichText.Content, {
-        tagName: 'span',
-        className: "kt-btn-inner-text",
-        value: btns[index].text
-      }), btns[index].icon && 'left' !== btns[index].iconSide && React.createElement(_genicon.default, {
-        className: `color-fill--white svg svg--icon js-svg-exists kt-btn-svg-icon-${btns[index].icon} kt-btn-side-${btns[index].iconSide}`,
-        name: btns[index].icon,
-        size: !btns[index].size ? '14' : btns[index].size,
-        icon: _svgicons.default[btns[index].icon]
-      }), btns[index].backgroundHoverType && 'gradient' === btns[index].backgroundHoverType && !btns[index].icon && React.createElement(_genicon.default, {
-        className: `svg svg--colorable js-svg-exists`,
-        name: `bb`,
-        htmltag: `span`
-      })));
-    };
+            href: !btns[index].link ? 'javascript:void(0);' : btns[index].link,
+            target: '_blank' === btns[index].target ? btns[index].target : undefined,
+            rel: relAttr,
+            style: {
+              borderRadius: undefined !== btns[index].borderRadius && '' !== btns[index].borderRadius ? btns[index].borderRadius + 'px' : undefined,
+              borderWidth: undefined !== btns[index].borderWidth && '' !== btns[index].borderWidth ? btns[index].borderWidth + 'px' : undefined,
+              letterSpacing: undefined !== letterSpacing && '' !== letterSpacing ? letterSpacing + 'px' : undefined
+            }
+          }, btns[index].icon && 'left' === btns[index].iconSide && React.createElement(_genicon.default, {
+            className: `color-fill--white svg svg--icon js-svg-exists kt-btn-svg-icon-${btns[index].icon} kt-btn-side-${btns[index].iconSide}`,
+            name: btns[index].icon,
+            size: !btns[index].size ? '14' : btns[index].size,
+            icon: _svgicons.default[btns[index].icon]
+          }), React.createElement(RichText.Content, {
+            tagName: 'span',
+            className: "kt-btn-inner-text",
+            value: btns[index].text
+          }), btns[index].icon && 'left' !== btns[index].iconSide && React.createElement(_genicon.default, {
+            className: `color-fill--white svg svg--icon js-svg-exists kt-btn-svg-icon-${btns[index].icon} kt-btn-side-${btns[index].iconSide}`,
+            name: btns[index].icon,
+            size: !btns[index].size ? '14' : btns[index].size,
+            icon: _svgicons.default[btns[index].icon]
+          }), btns[index].backgroundHoverType && 'gradient' === btns[index].backgroundHoverType && !btns[index].icon && React.createElement(_genicon.default, {
+            className: `svg svg--colorable js-svg-exists`,
+            name: `bb`,
+            htmltag: `span`
+          })));
+        };
 
-    return React.createElement("div", {
-      className: `kt-btn-align-${hAlign} kt-btn-tablet-align-${thAlign ? thAlign : 'inherit'} kt-btn-mobile-align-${mhAlign ? mhAlign : 'inherit'} kt-btns-wrap kt-btns${uniqueID}`
-    }, (0, _times.default)(btnCount, n => renderSaveBtns(n)));
+        return React.createElement("div", {
+          className: `kt-btn-align-${hAlign} kt-btn-tablet-align-${thAlign ? thAlign : 'inherit'} kt-btn-mobile-align-${mhAlign ? mhAlign : 'inherit'} kt-btns-wrap kt-btns${uniqueID}`
+        }, (0, _times.default)(btnCount, n => renderSaveBtns(n)));
+      }
+    });
   }
-});
+}
 
-},{"../../genicon":36,"../../hex-to-rgba":37,"../../svgicons":40,"../../svgiconsnames":41,"./components/advanced-btn":7,"@fonticonpicker/react-fonticonpicker":43,"lodash/map":164,"lodash/times":169}],9:[function(require,module,exports){
+},{"../../genicon":52,"../../hex-to-rgba":53,"../../svgicons":56,"../../svgiconsnames":57,"./components/advanced-btn":9,"@fonticonpicker/react-fonticonpicker":59,"lodash/map":182,"lodash/times":187}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1474,7 +2376,7 @@ class CallToAction extends Component {
 
 exports.default = CallToAction;
 
-},{}],10:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1514,7 +2416,7 @@ class Inspector extends Component {
 
 exports.default = Inspector;
 
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 
 var _classnames = _interopRequireDefault(require("classnames"));
@@ -1522,6 +2424,10 @@ var _classnames = _interopRequireDefault(require("classnames"));
 var _inspector = _interopRequireDefault(require("./components/inspector"));
 
 var _calltoaction = _interopRequireDefault(require("./components/calltoaction"));
+
+var _icon = _interopRequireDefault(require("../infobox/components/icon"));
+
+var _infobox = _interopRequireDefault(require("../infobox/components/infobox"));
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : {
@@ -1617,71 +2523,77 @@ class InclindCallToAction extends Component {
 
 const category = {
   slug: 'inclind-blocks',
-  title: __('Inclind Blocks')
+  title: __('Custom Blocks')
 }; // Grab the current categories and merge in the new category if not present.
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-call-to-action', {
-  title: __('Call To Action', 'inclind-call-to-action'),
-  description: __('Description', 'inclind-blocks'),
-  category: 'inclind-blocks',
-  keywords: [__('action', 'inclind-call-to-action'), __('call to action', 'inclind-call-to-action'), __('inclind', 'inclind-call-to-action')],
-  attributes: {
-    itemTitle: {
-      selector: '.item-title',
-      type: 'string'
-    },
-    itemContent: {
-      selector: '.lead',
-      type: 'array',
-      source: 'children'
-    },
-    itemButtonText: {
-      type: 'string'
-    },
-    itemButtonLink: {
-      type: 'string',
-      source: 'attribute',
-      selector: '.item-button-link',
-      attribute: 'href'
-    }
-  },
-  // Render the block components.
-  edit: InclindCallToAction,
-  // Save the attributes and markup.
-  save: function (props) {
-    const {
-      itemTitle,
-      itemContent,
-      itemButtonText,
-      itemButtonLink
-    } = props.attributes; // Save the block markup for the front end.
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-    return React.createElement(_calltoaction.default, props, React.createElement("div", {
-      className: "row text-center"
-    }, itemTitle && React.createElement(RichText.Content, {
-      tagName: "h2",
-      className: "item-title text-center col-sm-12 emb-center",
-      value: itemTitle
-    }), React.createElement("div", {
-      className: "col-sm-12"
-    }, itemContent && React.createElement(RichText.Content, {
-      tagName: "p",
-      className: "lead",
-      value: itemContent
-    })), itemButtonText && React.createElement(RichText.Content, {
-      tagName: "a",
-      className: "btn btn-lg btn-secondary item-button-link",
-      value: itemButtonText,
-      href: itemButtonLink
-    })));
+  if (blocks.hasOwnProperty(category.slug + '/inclind-call-to-action') && blocks[category.slug + '/inclind-call-to-action']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-call-to-action', {
+      title: __('Call To Action', 'inclind-call-to-action'),
+      description: __('Description', 'inclind-blocks'),
+      category: 'inclind-blocks',
+      keywords: [__('action', 'inclind-call-to-action'), __('call to action', 'inclind-call-to-action'), __('inclind', 'inclind-call-to-action')],
+      attributes: {
+        itemTitle: {
+          selector: '.item-title',
+          type: 'string'
+        },
+        itemContent: {
+          selector: '.lead',
+          type: 'array',
+          source: 'children'
+        },
+        itemButtonText: {
+          type: 'string'
+        },
+        itemButtonLink: {
+          type: 'string',
+          source: 'attribute',
+          selector: '.item-button-link',
+          attribute: 'href'
+        }
+      },
+      // Render the block components.
+      edit: InclindCallToAction,
+      // Save the attributes and markup.
+      save: function (props) {
+        const {
+          itemTitle,
+          itemContent,
+          itemButtonText,
+          itemButtonLink
+        } = props.attributes; // Save the block markup for the front end.
+
+        return React.createElement(_calltoaction.default, props, React.createElement("div", {
+          className: "row text-center"
+        }, itemTitle && React.createElement(RichText.Content, {
+          tagName: "h2",
+          className: "item-title text-center col-sm-12 emb-center",
+          value: itemTitle
+        }), React.createElement("div", {
+          className: "col-sm-12"
+        }, itemContent && React.createElement(RichText.Content, {
+          tagName: "p",
+          className: "lead",
+          value: itemContent
+        })), itemButtonText && React.createElement(RichText.Content, {
+          tagName: "a",
+          className: "btn btn-lg btn-secondary item-button-link",
+          value: itemButtonText,
+          href: itemButtonLink
+        })));
+      }
+    });
   }
-});
+}
 
-},{"./components/calltoaction":9,"./components/inspector":10,"classnames":44}],12:[function(require,module,exports){
+},{"../infobox/components/icon":30,"../infobox/components/infobox":31,"./components/calltoaction":11,"./components/inspector":12,"classnames":60}],14:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1730,7 +2642,7 @@ class Card extends Component {
 
 exports.default = Card;
 
-},{"classnames":44}],13:[function(require,module,exports){
+},{"classnames":60}],15:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1743,7 +2655,7 @@ const icon = {
 var _default = icon;
 exports.default = _default;
 
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1806,7 +2718,7 @@ class Inspector extends Component {
 
 exports.default = Inspector;
 
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 "use strict";
 
 var _classnames = _interopRequireDefault(require("classnames"));
@@ -1816,6 +2728,8 @@ var _inspector = _interopRequireDefault(require("./components/inspector"));
 var _card = _interopRequireDefault(require("./components/card"));
 
 var _icon = _interopRequireDefault(require("./components/icon"));
+
+var _infobox = _interopRequireDefault(require("../infobox/components/infobox"));
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : {
@@ -1993,109 +2907,115 @@ class InclindCard extends Component {
 
 const category = {
   slug: 'inclind-blocks',
-  title: __('Inclind Blocks')
+  title: __('Custom Blocks')
 }; // Grab the current categories and merge in the new category if not present.
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-card', {
-  title: __('Card', 'inclind-card'),
-  description: __('Description', 'inclind-blocks'),
-  category: 'inclind-blocks',
-  keywords: [__('card', 'inclind-card'), __('inclind', 'inclind-card')],
-  attributes: {
-    cardTitle: {
-      selector: '.card-title',
-      type: 'string'
-    },
-    cardSubtitle: {
-      selector: '.card-subtitle',
-      type: 'string'
-    },
-    cardContent: {
-      type: 'array',
-      selector: '.card-text',
-      source: 'children'
-    },
-    buttonText: {
-      type: 'string'
-    },
-    cardUrl: {
-      type: 'string',
-      source: 'attribute',
-      selector: '.card-link',
-      attribute: 'href'
-    },
-    cardImage: {
-      type: 'string'
-    },
-    cardImageData: {
-      type: 'object',
-      default: {}
-    },
-    cardStyle: {
-      type: 'string',
-      default: ''
-    },
-    cardImageTitle: {
-      type: 'string'
-    },
-    cardImageAlt: {
-      type: 'string'
-    }
-  },
-  // Render the block components.
-  edit: InclindCard,
-  // Save the attributes and markup.
-  save: function (props) {
-    const {
-      buttonText,
-      cardUrl,
-      cardContent,
-      cardSubtitle,
-      cardTitle,
-      cardImage,
-      cardImageAlt,
-      cardImageTitle,
-      cardImageData
-    } = props.attributes;
-    const arrow = '<svg viewBox="0 0 500 500"><path d="' + _icon.default['iconArrow'] + '"></path></svg>'; // Save the block markup for the front end.
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-    return React.createElement(_card.default, props, React.createElement("a", {
-      href: cardUrl,
-      className: "img img-card"
-    }, React.createElement("img", _extends({
-      src: cardImage,
-      className: "card-img-top"
-    }, cardImageData, {
-      alt: cardImageAlt,
-      title: cardImageTitle
-    }))), React.createElement("div", {
-      class: "card-body"
-    }, cardSubtitle && React.createElement(RichText.Content, {
-      tagName: "h6",
-      className: "card-subtitle",
-      value: '<a href="' + cardUrl + '" class="card-link">' + cardSubtitle + '</a>'
-    }), cardTitle && React.createElement(RichText.Content, {
-      tagName: "h3",
-      className: "card-title",
-      value: '<a href="' + cardUrl + '" class="card-link">' + cardTitle + '</a>'
-    }), cardContent && React.createElement(RichText.Content, {
-      tagName: "p",
-      className: "card-text",
-      value: cardContent
-    }), buttonText && React.createElement(RichText.Content, {
-      tagName: "a",
-      className: "btn btn-primary btn-tn icon",
-      value: buttonText + '<span class="svgicon-default">' + arrow + '</span>',
-      href: cardUrl
-    })));
+  if (blocks.hasOwnProperty(category.slug + '/inclind-card') && blocks[category.slug + '/inclind-card']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-card', {
+      title: __('Card', 'inclind-card'),
+      description: __('Description', 'inclind-blocks'),
+      category: 'inclind-blocks',
+      keywords: [__('card', 'inclind-card'), __('inclind', 'inclind-card')],
+      attributes: {
+        cardTitle: {
+          selector: '.card-title',
+          type: 'string'
+        },
+        cardSubtitle: {
+          selector: '.card-subtitle',
+          type: 'string'
+        },
+        cardContent: {
+          type: 'array',
+          selector: '.card-text',
+          source: 'children'
+        },
+        buttonText: {
+          type: 'string'
+        },
+        cardUrl: {
+          type: 'string',
+          source: 'attribute',
+          selector: '.card-link',
+          attribute: 'href'
+        },
+        cardImage: {
+          type: 'string'
+        },
+        cardImageData: {
+          type: 'object',
+          default: {}
+        },
+        cardStyle: {
+          type: 'string',
+          default: ''
+        },
+        cardImageTitle: {
+          type: 'string'
+        },
+        cardImageAlt: {
+          type: 'string'
+        }
+      },
+      // Render the block components.
+      edit: InclindCard,
+      // Save the attributes and markup.
+      save: function (props) {
+        const {
+          buttonText,
+          cardUrl,
+          cardContent,
+          cardSubtitle,
+          cardTitle,
+          cardImage,
+          cardImageAlt,
+          cardImageTitle,
+          cardImageData
+        } = props.attributes;
+        const arrow = '<svg viewBox="0 0 500 500"><path d="' + _icon.default['iconArrow'] + '"></path></svg>'; // Save the block markup for the front end.
+
+        return React.createElement(_card.default, props, React.createElement("a", {
+          href: cardUrl,
+          className: "img img-card"
+        }, React.createElement("img", _extends({
+          src: cardImage,
+          className: "card-img-top"
+        }, cardImageData, {
+          alt: cardImageAlt,
+          title: cardImageTitle
+        }))), React.createElement("div", {
+          class: "card-body"
+        }, cardSubtitle && React.createElement(RichText.Content, {
+          tagName: "h6",
+          className: "card-subtitle",
+          value: '<a href="' + cardUrl + '" class="card-link">' + cardSubtitle + '</a>'
+        }), cardTitle && React.createElement(RichText.Content, {
+          tagName: "h3",
+          className: "card-title",
+          value: '<a href="' + cardUrl + '" class="card-link">' + cardTitle + '</a>'
+        }), cardContent && React.createElement(RichText.Content, {
+          tagName: "p",
+          className: "card-text",
+          value: cardContent
+        }), buttonText && React.createElement(RichText.Content, {
+          tagName: "a",
+          className: "btn btn-primary btn-tn icon",
+          value: buttonText + '<span class="svgicon-default">' + arrow + '</span>',
+          href: cardUrl
+        })));
+      }
+    });
   }
-});
+}
 
-},{"./components/card":12,"./components/icon":13,"./components/inspector":14,"classnames":44}],16:[function(require,module,exports){
+},{"../infobox/components/infobox":31,"./components/card":14,"./components/icon":15,"./components/inspector":16,"classnames":60}],18:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2131,12 +3051,16 @@ class IconGridContainer extends Component {
 
 exports.default = IconGridContainer;
 
-},{}],17:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 "use strict";
 
 var _iconGridContainer = _interopRequireDefault(require("./components/icon-grid-container"));
 
 var _classnames = _interopRequireDefault(require("classnames"));
+
+var _icon = _interopRequireDefault(require("../infobox/components/icon"));
+
+var _infobox = _interopRequireDefault(require("../infobox/components/infobox"));
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : {
@@ -2253,59 +3177,65 @@ class InclindIconGridContainer extends Component {
 
 const category = {
   slug: 'inclind-blocks',
-  title: __('Inclind Blocks')
+  title: __('Custom Blocks')
 }; // Grab the current categories and merge in the new category if not present.
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-icon-grid-container', {
-  title: __('Icon Grid Container', 'inclind-icon-grid-container'),
-  description: __('Description', 'inclind-blocks'),
-  category: 'inclind-blocks',
-  keywords: [__('icon', 'inclind-icon-grid-container'), __('inclind', 'inclind-icon-grid-container'), __('grid container', 'inclind-icon-grid-container')],
-  attributes: {
-    itemTitle: {
-      selector: '.item-title',
-      type: 'string'
-    },
-    itemImage: {
-      type: 'string'
-    },
-    itemImageData: {
-      type: 'object',
-      default: {}
-    }
-  },
-  // Render the block components.
-  edit: InclindIconGridContainer,
-  // Save the attributes and markup.
-  save: function (props) {
-    const {
-      itemTitle,
-      itemImage,
-      itemImageData
-    } = props.attributes; // Save the block markup for the front end.
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-    return React.createElement(_iconGridContainer.default, props, React.createElement("div", {
-      className: "container"
-    }, React.createElement("div", {
-      className: "row text-center"
-    }, itemTitle && React.createElement(RichText.Content, {
-      tagName: "h2",
-      className: "item-title emb-center",
-      value: itemTitle
-    }), React.createElement(InnerBlocks.Content, null)), React.createElement("div", {
-      className: "img img-bg"
-    }, React.createElement("img", _extends({
-      src: itemImage,
-      className: "card-img-top"
-    }, itemImageData)))));
+  if (blocks.hasOwnProperty(category.slug + '/inclind-icon-grid-container') && blocks[category.slug + '/inclind-icon-grid-container']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-icon-grid-container', {
+      title: __('Icon Grid Container', 'inclind-icon-grid-container'),
+      description: __('Description', 'inclind-blocks'),
+      category: 'inclind-blocks',
+      keywords: [__('icon', 'inclind-icon-grid-container'), __('inclind', 'inclind-icon-grid-container'), __('grid container', 'inclind-icon-grid-container')],
+      attributes: {
+        itemTitle: {
+          selector: '.item-title',
+          type: 'string'
+        },
+        itemImage: {
+          type: 'string'
+        },
+        itemImageData: {
+          type: 'object',
+          default: {}
+        }
+      },
+      // Render the block components.
+      edit: InclindIconGridContainer,
+      // Save the attributes and markup.
+      save: function (props) {
+        const {
+          itemTitle,
+          itemImage,
+          itemImageData
+        } = props.attributes; // Save the block markup for the front end.
+
+        return React.createElement(_iconGridContainer.default, props, React.createElement("div", {
+          className: "container"
+        }, React.createElement("div", {
+          className: "row text-center"
+        }, itemTitle && React.createElement(RichText.Content, {
+          tagName: "h2",
+          className: "item-title emb-center",
+          value: itemTitle
+        }), React.createElement(InnerBlocks.Content, null)), React.createElement("div", {
+          className: "img img-bg"
+        }, React.createElement("img", _extends({
+          src: itemImage,
+          className: "card-img-top"
+        }, itemImageData)))));
+      }
+    });
   }
-});
+}
 
-},{"./components/icon-grid-container":16,"classnames":44}],18:[function(require,module,exports){
+},{"../infobox/components/icon":30,"../infobox/components/infobox":31,"./components/icon-grid-container":18,"classnames":60}],20:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2341,7 +3271,7 @@ class IconGridItem extends Component {
 
 exports.default = IconGridItem;
 
-},{}],19:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2444,7 +3374,7 @@ const icon = {
 var _default = icon;
 exports.default = _default;
 
-},{}],20:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2516,7 +3446,7 @@ class Inspector extends Component {
 
 exports.default = Inspector;
 
-},{}],21:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 "use strict";
 
 var _classnames = _interopRequireDefault(require("classnames"));
@@ -2526,6 +3456,8 @@ var _inspector = _interopRequireDefault(require("./components/inspector"));
 var _iconGridItem = _interopRequireDefault(require("./components/icon-grid-item"));
 
 var _icon = _interopRequireDefault(require("./components/icon"));
+
+var _iconGridContainer = _interopRequireDefault(require("../icon-grid-container/components/icon-grid-container"));
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : {
@@ -2590,50 +3522,56 @@ class InclindIconGridItem extends Component {
 
 const category = {
   slug: 'inclind-blocks',
-  title: __('Inclind Blocks')
+  title: __('Custom Blocks')
 }; // Grab the current categories and merge in the new category if not present.
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-icon-grid-item', {
-  title: __('Icon Grid Item', 'inclind-icon-grid-item'),
-  description: __('Description', 'inclind-blocks'),
-  category: 'inclind-blocks',
-  keywords: [__('icon', 'inclind-icon-grid-item'), __('grid', 'inclind-icon-grid-item'), __('inclind', 'inclind-icon-grid-item')],
-  attributes: {
-    itemIcon: {
-      type: 'string',
-      default: ''
-    },
-    itemContent: {
-      selector: '.icon-grid-item-content',
-      type: 'array',
-      source: 'children'
-    }
-  },
-  // Render the block components.
-  edit: InclindIconGridItem,
-  // Save the attributes and markup.
-  save: function (props) {
-    const {
-      itemContent,
-      itemIcon
-    } = props.attributes;
-    const icon = itemIcon !== undefined && itemIcon !== '' && _icon.default[itemIcon] !== undefined ? _icon.default[itemIcon] : ''; // Save the block markup for the front end.
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-    return React.createElement(_iconGridItem.default, props, icon && React.createElement("span", {
-      className: (0, _classnames.default)('svgicon-default', itemIcon)
-    }, icon), itemContent && React.createElement(RichText.Content, {
-      tagName: "p",
-      className: "icon-grid-item-content",
-      value: itemContent
-    }));
+  if (blocks.hasOwnProperty(category.slug + '/inclind-icon-grid-container') && blocks[category.slug + '/inclind-icon-grid-container']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-icon-grid-item', {
+      title: __('Icon Grid Item', 'inclind-icon-grid-item'),
+      description: __('Description', 'inclind-blocks'),
+      category: 'inclind-blocks',
+      keywords: [__('icon', 'inclind-icon-grid-item'), __('grid', 'inclind-icon-grid-item'), __('inclind', 'inclind-icon-grid-item')],
+      attributes: {
+        itemIcon: {
+          type: 'string',
+          default: ''
+        },
+        itemContent: {
+          selector: '.icon-grid-item-content',
+          type: 'array',
+          source: 'children'
+        }
+      },
+      // Render the block components.
+      edit: InclindIconGridItem,
+      // Save the attributes and markup.
+      save: function (props) {
+        const {
+          itemContent,
+          itemIcon
+        } = props.attributes;
+        const icon = itemIcon !== undefined && itemIcon !== '' && _icon.default[itemIcon] !== undefined ? _icon.default[itemIcon] : ''; // Save the block markup for the front end.
+
+        return React.createElement(_iconGridItem.default, props, icon && React.createElement("span", {
+          className: (0, _classnames.default)('svgicon-default', itemIcon)
+        }, icon), itemContent && React.createElement(RichText.Content, {
+          tagName: "p",
+          className: "icon-grid-item-content",
+          value: itemContent
+        }));
+      }
+    });
   }
-});
+}
 
-},{"./components/icon":19,"./components/icon-grid-item":18,"./components/inspector":20,"classnames":44}],22:[function(require,module,exports){
+},{"../icon-grid-container/components/icon-grid-container":18,"./components/icon":21,"./components/icon-grid-item":20,"./components/inspector":22,"classnames":60}],24:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2669,7 +3607,7 @@ class IconLink extends Component {
 
 exports.default = IconLink;
 
-},{}],23:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2821,7 +3759,7 @@ const icon = {
 var _default = icon;
 exports.default = _default;
 
-},{}],24:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2907,7 +3845,7 @@ class Inspector extends Component {
 
 exports.default = Inspector;
 
-},{}],25:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 "use strict";
 
 var _classnames = _interopRequireDefault(require("classnames"));
@@ -2917,6 +3855,8 @@ var _inspector = _interopRequireDefault(require("./components/inspector"));
 var _iconLink = _interopRequireDefault(require("./components/icon-link"));
 
 var _icon = _interopRequireDefault(require("./components/icon"));
+
+var _infobox = _interopRequireDefault(require("../infobox/components/infobox"));
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : {
@@ -2991,57 +3931,1488 @@ class InclindIconLink extends Component {
 
 const category = {
   slug: 'inclind-blocks',
-  title: __('Inclind Blocks')
+  title: __('Custom Blocks')
 }; // Grab the current categories and merge in the new category if not present.
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-icon-link', {
-  title: __('Icon Link', 'inclind-icon-link'),
-  description: __('Description', 'inclind-blocks'),
-  category: 'inclind-blocks',
-  keywords: [__('icon', 'inclind-icon-link'), __('link', 'inclind-icon-link'), __('inclind', 'inclind-icon-link')],
-  attributes: {
-    itemIcon: {
-      type: 'string',
-      default: ''
-    },
-    itemContent: {
-      type: 'string',
-      default: ''
-    },
-    itemLink: {
-      type: 'string',
-      source: 'attribute',
-      selector: '.icon-link',
-      attribute: 'href'
-    }
-  },
-  // Render the block components.
-  edit: InclindIconLink,
-  // Save the attributes and markup.
-  save: function (props) {
-    const {
-      itemContent,
-      itemIcon,
-      itemLink
-    } = props.attributes;
-    const icon = itemIcon !== undefined && itemIcon !== '' && _icon.default[itemIcon] !== undefined ? _icon.default[itemIcon] : ''; // Save the block markup for the front end.
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-    return React.createElement(_iconLink.default, props, icon && React.createElement("span", {
-      className: (0, _classnames.default)('svgicon-default', 'align-middle', itemIcon)
-    }, icon), itemContent && itemLink && React.createElement(RichText.Content, {
-      tagName: "a",
-      href: itemLink,
-      className: "icon-link",
-      value: itemContent
-    }));
+  if (blocks.hasOwnProperty(category.slug + '/inclind-icon-link') && blocks[category.slug + '/inclind-icon-link']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-icon-link', {
+      title: __('Icon Link', 'inclind-icon-link'),
+      description: __('Description', 'inclind-blocks'),
+      category: 'inclind-blocks',
+      keywords: [__('icon', 'inclind-icon-link'), __('link', 'inclind-icon-link'), __('inclind', 'inclind-icon-link')],
+      attributes: {
+        itemIcon: {
+          type: 'string',
+          default: ''
+        },
+        itemContent: {
+          type: 'string',
+          default: ''
+        },
+        itemLink: {
+          type: 'string',
+          source: 'attribute',
+          selector: '.icon-link',
+          attribute: 'href'
+        }
+      },
+      // Render the block components.
+      edit: InclindIconLink,
+      // Save the attributes and markup.
+      save: function (props) {
+        const {
+          itemContent,
+          itemIcon,
+          itemLink
+        } = props.attributes;
+        const icon = itemIcon !== undefined && itemIcon !== '' && _icon.default[itemIcon] !== undefined ? _icon.default[itemIcon] : ''; // Save the block markup for the front end.
+
+        return React.createElement(_iconLink.default, props, icon && React.createElement("span", {
+          className: (0, _classnames.default)('svgicon-default', 'align-middle', itemIcon)
+        }, icon), itemContent && itemLink && React.createElement(RichText.Content, {
+          tagName: "a",
+          href: itemLink,
+          className: "icon-link",
+          value: itemContent
+        }));
+      }
+    });
   }
-});
+}
 
-},{"./components/icon":23,"./components/icon-link":22,"./components/inspector":24,"classnames":44}],26:[function(require,module,exports){
+},{"../infobox/components/infobox":31,"./components/icon":25,"./components/icon-link":24,"./components/inspector":26,"classnames":60}],28:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0; // Setup the block.
+
+const {
+  Component
+} = wp.element;
+/**
+ * Create a AdvancedBtn wrapper Component.
+ */
+
+class Infobox extends Component {
+  constructor(props) {
+    super(...arguments);
+  }
+
+  render() {
+    let className = '';
+
+    if (this.props.className !== 'wp-block-inclind-blocks-inclind-infobox') {
+      className = className + ' ' + this.props.className;
+    }
+
+    return React.createElement("div", {
+      className: className
+    }, this.props.children);
+  }
+
+}
+
+exports.default = Infobox;
+
+},{}],29:[function(require,module,exports){
+"use strict";
+
+var _infobox = _interopRequireDefault(require("./components/infobox"));
+
+var _icons = _interopRequireDefault(require("../../icons"));
+
+var _map = _interopRequireDefault(require("lodash/map"));
+
+var _hexToRgba = _interopRequireDefault(require("../../hex-to-rgba"));
+
+var _genicon = _interopRequireDefault(require("../../genicon"));
+
+var _svgicons = _interopRequireDefault(require("../../svgicons"));
+
+var _svgiconsnames = _interopRequireDefault(require("../../svgiconsnames"));
+
+var _reactFonticonpicker = _interopRequireDefault(require("@fonticonpicker/react-fonticonpicker"));
+
+var _classnames = _interopRequireDefault(require("classnames"));
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    default: obj
+  };
+}
+
+function _extends() {
+  _extends = Object.assign || function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+
+    return target;
+  };
+
+  return _extends.apply(this, arguments);
+} // import FaIco from '../../faicons';
+// Internationalization
+
+
+const __ = Drupal.t; // Extend component
+
+const {
+  Component,
+  Fragment
+} = wp.element; // Register block
+
+const {
+  registerBlockType
+} = wp.blocks; // Register editor components
+
+const {
+  InnerBlocks,
+  BlockAlignmentToolbar,
+  InspectorControls,
+  BlockControls,
+  AlignmentToolbar,
+  PanelColorSettings,
+  MediaUpload,
+  URLInput,
+  RichText,
+  MediaPlaceholder
+} = wp.blockEditor; // Register components
+
+const {
+  Button,
+  IconButton,
+  ButtonGroup,
+  TabPanel,
+  Dashicon,
+  PanelBody,
+  RangeControl,
+  Toolbar,
+  TextControl,
+  ToggleControl,
+  SelectControl,
+  BaseControl
+} = wp.components;
+const {
+  dispatch,
+  select
+} = wp.data;
+/**
+ * This allows for checking to see if the block needs to generate a new ID.
+ */
+
+const ktinfoboxUniqueIDs = [];
+
+class InclindInfobox extends Component {
+  constructor() {
+    super(...arguments);
+    this.showSettings = this.showSettings.bind(this);
+    this.state = {
+      containerPaddingControl: 'linked',
+      containerBorderControl: 'linked',
+      showPreset: false,
+      user: 'admin',
+      settings: {}
+    };
+  }
+
+  componentDidMount() {
+    if (!this.props.attributes.uniqueID) {
+      this.props.setAttributes({
+        uniqueID: '_' + this.props.clientId.substr(2, 9)
+      });
+      ktinfoboxUniqueIDs.push('_' + this.props.clientId.substr(2, 9));
+    } else if (ktinfoboxUniqueIDs.includes(this.props.attributes.uniqueID)) {
+      this.props.setAttributes({
+        uniqueID: '_' + this.props.clientId.substr(2, 9)
+      });
+      ktinfoboxUniqueIDs.push('_' + this.props.clientId.substr(2, 9));
+    } else {
+      ktinfoboxUniqueIDs.push(this.props.attributes.uniqueID);
+    }
+
+    if (this.props.attributes.containerBorderWidth[0] === this.props.attributes.containerBorderWidth[1] && this.props.attributes.containerBorderWidth[0] === this.props.attributes.containerBorderWidth[2] && this.props.attributes.containerBorderWidth[0] === this.props.attributes.containerBorderWidth[3]) {
+      this.setState({
+        containerBorderControl: 'linked'
+      });
+    } else {
+      this.setState({
+        containerBorderControl: 'individual'
+      });
+    }
+
+    if (this.props.attributes.containerPadding[0] === this.props.attributes.containerPadding[1] && this.props.attributes.containerPadding[0] === this.props.attributes.containerPadding[2] && this.props.attributes.containerPadding[0] === this.props.attributes.containerPadding[3]) {
+      this.setState({
+        containerPaddingControl: 'linked'
+      });
+    } else {
+      this.setState({
+        containerPaddingControl: 'individual'
+      });
+    }
+  }
+
+  showSettings(key) {
+    let donot_allow = ['mediaSettings'];
+
+    if (donot_allow.includes(key)) {
+      return false;
+    }
+
+    return true;
+  } // Render element while editing in Gutenberg:
+
+
+  render() {
+    const {
+      attributes: {
+        blockAlignment,
+        backgroundType,
+        backgroundColor,
+        backgroundImage,
+        backgroundImageData,
+        backgroundImageUUID,
+        overlayOpacity,
+        overlayColor,
+        margin,
+        padding,
+        contentWidth,
+        uniqueID,
+        link,
+        linkProperty,
+        target,
+        hAlign,
+        containerBackground,
+        containerBorder,
+        containerBorderWidth,
+        containerBorderRadius,
+        containerPadding,
+        mediaType,
+        mediaImage,
+        mediaIcon,
+        mediaStyle,
+        mediaAlign,
+        displayTitle,
+        title,
+        displayText,
+        contentText,
+        textColor,
+        titleFont,
+        textFont,
+        displayLearnMore,
+        learnMore,
+        learnMoreStyles,
+        containerBackgroundOpacity,
+        containerBorderOpacity,
+        mediaVAlign,
+        mediaAlignMobile,
+        mediaAlignTablet
+      },
+      className,
+      setAttributes,
+      isSelected
+    } = this.props;
+    const {
+      containerBorderControl,
+      containerPaddingControl
+    } = this.state;
+    const startlayoutOptions = [{
+      key: 'skip',
+      name: __('Skip'),
+      icon: __('Skip')
+    }, {
+      key: 'simple',
+      name: __('Simple'),
+      icon: _icons.default.infoSimple
+    }, {
+      key: 'left',
+      name: __('Align Left'),
+      icon: _icons.default.infoLeft
+    }, {
+      key: 'bold',
+      name: __('Bold Background'),
+      icon: _icons.default.infoBackground
+    }, {
+      key: 'image',
+      name: __('Circle Image'),
+      icon: _icons.default.infoImage
+    }];
+    const hasImageBg = backgroundType === 'image';
+    const containerStyle = {
+      backgroundColor: !hasImageBg ? backgroundColor : '#2e358f',
+      backgroundImage: hasImageBg && `url('${backgroundImage}')`,
+      color: hasImageBg && 'white'
+    };
+    const overlayStyle = !hasImageBg ? {} : {
+      display: 'block',
+      backgroundColor: overlayColor || '#2e358f',
+      opacity: parseInt(overlayOpacity, 10) / 100
+    };
+    const wrapperStyle = {
+      maxWidth: contentWidth && `${contentWidth}px`
+    };
+    const classes = [// className,
+    (0, _classnames.default)(`align${blockAlignment ? blockAlignment : 'none'}`), 'infobox p-4 mb-4 bg-primary text-' + hAlign];
+    classes.push('has-overlay');
+    classes.push('text-white');
+
+    if (margin) {
+      classes.push(`my-${margin}`);
+    }
+
+    if (padding) {
+      classes.push(`py-${padding}`);
+    }
+
+    const vOptions = [{
+      label: __('None'),
+      value: ''
+    }, {
+      label: __('Small'),
+      value: '3'
+    }, {
+      label: __('Medium'),
+      value: '4'
+    }, {
+      label: __('Large'),
+      value: '5'
+    }];
+
+    const onSelectImage = (media, field) => {
+      const dataAttrs = {};
+      let uuid = '';
+
+      if (media.data) {
+        if (media.data.hasOwnProperty('entity_uuid')) {
+          uuid = media.data.entity_uuid;
+        }
+
+        dataAttrs[`${field}Data`] = Object.keys(media.data).reduce((result, key) => {
+          result[`data-${key.replace('_', '-')}`] = media.data[key];
+          return result;
+        }, {});
+      }
+
+      setAttributes({
+        [field]: media.url,
+        [`${field}UUID`]: uuid,
+        ...dataAttrs
+      });
+    };
+
+    const onChangeTitle = value => {
+      setAttributes({
+        title: value
+      });
+    };
+
+    const titleTagName = 'h' + titleFont[0].level;
+    const ALLOWED_MEDIA_TYPES = ['image'];
+
+    const onSelectMainImage = media => {
+      saveMediaImage({
+        id: media.id,
+        url: media.url,
+        alt: media.alt,
+        width: media.width,
+        height: media.height,
+        maxWidth: media.width ? media.width : 50,
+        subtype: media.subtype
+      });
+    };
+
+    const changeImageSize = img => {
+      saveMediaImage({
+        url: img.value,
+        width: img.width,
+        height: img.height
+      });
+    };
+
+    const clearImage = () => {
+      saveMediaImage({
+        id: '',
+        url: '',
+        alt: '',
+        width: '',
+        height: '',
+        maxWidth: '',
+        subtype: ''
+      });
+    };
+
+    const onSelectFlipImage = media => {
+      saveMediaImage({
+        flipId: media.id,
+        flipUrl: media.url,
+        flipAlt: media.alt,
+        flipWidth: media.width,
+        flipHeight: media.height,
+        flipSubtype: media.subtype
+      });
+    };
+
+    const clearFlipImage = () => {
+      saveMediaImage({
+        flipId: '',
+        flipUrl: '',
+        flipAlt: '',
+        flipWidth: '',
+        flipHeight: '',
+        flipSubtype: ''
+      });
+    };
+
+    const changeFlipImageSize = img => {
+      saveMediaImage({
+        flipUrl: img.value,
+        flipWidth: img.width,
+        flipHeight: img.height
+      });
+    };
+
+    const isSelectedClass = isSelected ? 'is-selected' : 'not-selected';
+
+    const saveMediaImage = value => {
+      const newUpdate = mediaImage.map((item, index) => {
+        if (0 === index) {
+          item = { ...item,
+            ...value
+          };
+        }
+
+        return item;
+      });
+      setAttributes({
+        mediaImage: newUpdate
+      });
+    };
+
+    const saveMediaIcon = value => {
+      const newUpdate = mediaIcon.map((item, index) => {
+        if (0 === index) {
+          item = { ...item,
+            ...value
+          };
+        }
+
+        return item;
+      });
+      setAttributes({
+        mediaIcon: newUpdate
+      });
+    };
+
+    const saveMediaStyle = value => {
+      const newUpdate = mediaStyle.map((item, index) => {
+        if (0 === index) {
+          item = { ...item,
+            ...value
+          };
+        }
+
+        return item;
+      });
+      setAttributes({
+        mediaStyle: newUpdate
+      });
+    };
+
+    const saveTitleFont = value => {
+      const newUpdate = titleFont.map((item, index) => {
+        if (0 === index) {
+          item = { ...item,
+            ...value
+          };
+        }
+
+        return item;
+      });
+      setAttributes({
+        titleFont: newUpdate
+      });
+    };
+
+    const saveTextFont = value => {
+      const newUpdate = textFont.map((item, index) => {
+        if (0 === index) {
+          item = { ...item,
+            ...value
+          };
+        }
+
+        return item;
+      });
+      setAttributes({
+        textFont: newUpdate
+      });
+    };
+
+    const saveLearnMoreStyles = value => {
+      const newUpdate = learnMoreStyles.map((item, index) => {
+        if (0 === index) {
+          item = { ...item,
+            ...value
+          };
+        }
+
+        return item;
+      });
+      setAttributes({
+        learnMoreStyles: newUpdate
+      });
+    };
+
+    const renderCSS = React.createElement("style", null, mediaStyle[0].borderRadius ? `#kt-info-box${uniqueID} .kt-blocks-info-box-link-wrap .kt-blocks-info-box-media img, #kt-info-box${uniqueID} .kt-blocks-info-box-link-wrap .kt-blocks-info-box-media .editor-media-placeholder { border-radius: ${mediaStyle[0].borderRadius}px; }` : '', mediaStyle[0].hoverBackground ? `#kt-info-box${uniqueID} .kt-blocks-info-box-link-wrap:hover .kt-blocks-info-box-media { background: ${mediaStyle[0].hoverBackground} !important; }` : '');
+
+    const renderSVG = svg => React.createElement(_genicon.default, {
+      name: svg,
+      icon: 'fa' === svg.substring(0, 2) ? FaIco[svg] : _svgicons.default[svg]
+    });
+
+    return React.createElement("div", {
+      id: `kt-info-box${uniqueID}`,
+      className: className
+    }, renderCSS, React.createElement(BlockControls, {
+      key: "controls"
+    }, React.createElement(BlockAlignmentToolbar, {
+      value: blockAlignment,
+      controls: ['center', 'wide', 'full', 'left', 'right'],
+      onChange: value => setAttributes({
+        blockAlignment: value
+      })
+    }), 'image' === mediaType && mediaImage[0].url && React.createElement(Toolbar, null, React.createElement(MediaUpload, {
+      onSelect: onSelectMainImage,
+      type: "image",
+      value: mediaImage[0].id,
+      allowedTypes: ALLOWED_MEDIA_TYPES,
+      render: ({
+        open
+      }) => React.createElement(IconButton, {
+        className: "components-toolbar__control",
+        label: __('Edit Media'),
+        icon: "format-image",
+        onClick: open
+      })
+    })), React.createElement(AlignmentToolbar, {
+      value: hAlign,
+      onChange: value => setAttributes({
+        hAlign: value
+      })
+    })), this.showSettings('allSettings') && React.createElement(InspectorControls, null, React.createElement(PanelBody, null, React.createElement("div", {
+      className: "kt-controls-link-wrap"
+    }, React.createElement("h2", null, __('Link')), React.createElement(URLInput, {
+      className: "kt-btn-link-input",
+      value: link,
+      onChange: value => setAttributes({
+        link: value
+      })
+    })), React.createElement(SelectControl, {
+      label: __('Link Target'),
+      value: target,
+      options: [{
+        value: '_self',
+        label: __('Same Window')
+      }, {
+        value: '_blank',
+        label: __('New Window')
+      }],
+      onChange: value => setAttributes({
+        target: value
+      })
+    }), React.createElement(SelectControl, {
+      label: __('Link Content'),
+      value: linkProperty,
+      options: [{
+        value: 'box',
+        label: __('Entire Box')
+      }, {
+        value: 'learnmore',
+        label: __('Only Learn More Text')
+      }],
+      onChange: value => setAttributes({
+        linkProperty: value
+      })
+    })), this.showSettings('containerSettings') && React.createElement(PanelBody, {
+      title: __('Container Settings'),
+      initialOpen: false
+    }, React.createElement(SelectControl, {
+      label: __('Background Type'),
+      value: backgroundType,
+      options: [{
+        label: __('Solid Color'),
+        value: 'color'
+      }, {
+        label: __('Image'),
+        value: 'image'
+      }],
+      onChange: value => setAttributes({
+        backgroundType: value
+      })
+    }), hasImageBg && React.createElement(BaseControl, {
+      label: __('Choose background image')
+    }, React.createElement(MediaUpload, {
+      allowedTypes: ['image'],
+      onSelect: media => onSelectImage(media, 'backgroundImage'),
+      render: ({
+        open
+      }) => React.createElement(IconButton, {
+        className: "components-toolbar__control",
+        label: __('Edit image'),
+        icon: "format-image",
+        onClick: open
+      })
+    }))), this.showSettings('mediaSettings') && React.createElement(PanelBody, {
+      title: __('Media Settings'),
+      initialOpen: false
+    }, React.createElement(TabPanel, {
+      className: "kt-inspect-tabs kt-spacer-tabs",
+      activeClass: "active-tab",
+      tabs: [{
+        name: 'desk',
+        title: React.createElement(Dashicon, {
+          icon: "desktop"
+        }),
+        className: 'kt-desk-tab'
+      }, {
+        name: 'tablet',
+        title: React.createElement(Dashicon, {
+          icon: "tablet"
+        }),
+        className: 'kt-tablet-tab'
+      }, {
+        name: 'mobile',
+        title: React.createElement(Dashicon, {
+          icon: "smartphone"
+        }),
+        className: 'kt-mobile-tab'
+      }]
+    }, tab => {
+      let tabout;
+
+      if (tab.name) {
+        if ('mobile' === tab.name) {
+          tabout = React.createElement(SelectControl, {
+            label: __('Mobile Media Align'),
+            value: mediaAlignMobile ? mediaAlignMobile : mediaAlign,
+            options: [{
+              value: 'top',
+              label: __('Top')
+            }, {
+              value: 'left',
+              label: __('Left')
+            }, {
+              value: 'right',
+              label: __('Right')
+            }],
+            onChange: value => setAttributes({
+              mediaAlignMobile: value
+            })
+          });
+        } else if ('tablet' === tab.name) {
+          tabout = React.createElement(SelectControl, {
+            label: __('Tablet Media Align'),
+            value: mediaAlignTablet ? mediaAlignTablet : mediaAlign,
+            options: [{
+              value: 'top',
+              label: __('Top')
+            }, {
+              value: 'left',
+              label: __('Left')
+            }, {
+              value: 'right',
+              label: __('Right')
+            }],
+            onChange: value => setAttributes({
+              mediaAlignTablet: value
+            })
+          });
+        } else {
+          tabout = React.createElement(SelectControl, {
+            label: __('Media Align'),
+            value: mediaAlign,
+            options: [{
+              value: 'top',
+              label: __('Top')
+            }, {
+              value: 'left',
+              label: __('Left')
+            }, {
+              value: 'right',
+              label: __('Right')
+            }],
+            onChange: value => setAttributes({
+              mediaAlign: value
+            })
+          });
+        }
+      }
+
+      return React.createElement("div", null, tabout);
+    }), mediaAlign !== 'top' && React.createElement(Fragment, null, React.createElement(SelectControl, {
+      label: __('Media Vertical Align'),
+      value: mediaVAlign,
+      options: [{
+        value: 'top',
+        label: __('Top')
+      }, {
+        value: 'middle',
+        label: __('Middle')
+      }, {
+        value: 'bottom',
+        label: __('Bottom')
+      }],
+      onChange: value => setAttributes({
+        mediaVAlign: value
+      })
+    })), React.createElement(SelectControl, {
+      label: __('Media Type'),
+      value: mediaType,
+      options: [{
+        value: 'icon',
+        label: __('Icon')
+      }, {
+        value: 'image',
+        label: __('Image')
+      }, {
+        value: 'none',
+        label: __('None')
+      }],
+      onChange: value => setAttributes({
+        mediaType: value
+      })
+    }), 'image' === mediaType && React.createElement(Fragment, null, mediaImage[0].url && React.createElement("div", {
+      className: "kb-image-edit-settings-container"
+    }, React.createElement(MediaUpload, {
+      onSelect: onSelectMainImage,
+      type: "image",
+      value: mediaImage[0].id,
+      allowedTypes: ALLOWED_MEDIA_TYPES,
+      render: ({
+        open
+      }) => React.createElement(Button, {
+        className: 'components-button components-icon-button kt-cta-upload-btn kb-upload-inline-btn',
+        onClick: open
+      }, React.createElement(Dashicon, {
+        icon: "format-image"
+      }), __('Edit Media'))
+    }), React.createElement(IconButton, {
+      label: __('clear'),
+      className: "kb-clear-image-btn",
+      icon: "no-alt",
+      onClick: clearImage
+    })), React.createElement(RangeControl, {
+      label: __('Max Image Width'),
+      value: mediaImage[0].maxWidth,
+      onChange: value => saveMediaImage({
+        maxWidth: value
+      }),
+      min: 5,
+      max: 800,
+      step: 1
+    }), React.createElement(RangeControl, {
+      label: __('Image Border Radius (px)'),
+      value: mediaStyle[0].borderRadius,
+      onChange: value => saveMediaStyle({
+        borderRadius: value
+      }),
+      step: 1,
+      min: 0,
+      max: 200
+    })), 'icon' === mediaType && React.createElement(Fragment, null, React.createElement(_reactFonticonpicker.default, {
+      icons: _svgiconsnames.default,
+      value: mediaIcon[0].icon,
+      onChange: value => saveMediaIcon({
+        icon: value
+      }),
+      appendTo: "body",
+      renderFunc: renderSVG,
+      theme: "default",
+      isMulti: false
+    }), React.createElement(RangeControl, {
+      label: __('Icon Size'),
+      value: mediaIcon[0].size,
+      onChange: value => saveMediaIcon({
+        size: value
+      }),
+      min: 5,
+      max: 250,
+      step: 1
+    }), mediaIcon[0].icon && 'fe' === mediaIcon[0].icon.substring(0, 2) && React.createElement(RangeControl, {
+      label: __('Icon Line Width'),
+      value: mediaIcon[0].width,
+      onChange: value => saveMediaIcon({
+        width: value
+      }),
+      step: 0.5,
+      min: 0.5,
+      max: 4
+    }), React.createElement(RangeControl, {
+      label: __('Icon Border Radius (px)'),
+      value: mediaStyle[0].borderRadius,
+      onChange: value => saveMediaStyle({
+        borderRadius: value
+      }),
+      step: 1,
+      min: 0,
+      max: 200
+    }), React.createElement(TextControl, {
+      label: __('Icon Title for Accessibility'),
+      value: mediaIcon[0].title,
+      onChange: value => saveMediaIcon({
+        title: value
+      })
+    }))), this.showSettings('titleSettings') && React.createElement(PanelBody, {
+      title: __('Title Settings'),
+      initialOpen: false
+    }, React.createElement(ToggleControl, {
+      label: __('Show Title'),
+      checked: displayTitle,
+      onChange: value => setAttributes({
+        displayTitle: value
+      })
+    })), this.showSettings('textSettings') && React.createElement(PanelBody, {
+      title: __('Text Settings'),
+      initialOpen: false
+    }, React.createElement(ToggleControl, {
+      label: __('Show Text'),
+      checked: displayText,
+      onChange: value => setAttributes({
+        displayText: value
+      })
+    })), this.showSettings('learnMoreSettings') && React.createElement(PanelBody, {
+      title: __('Learn More Settings'),
+      initialOpen: false
+    }, React.createElement(ToggleControl, {
+      label: __('Show Learn More'),
+      checked: displayLearnMore,
+      onChange: value => setAttributes({
+        displayLearnMore: value
+      })
+    }))), React.createElement("div", _extends({
+      className: `kt-blocks-info-box-link-wrap kt-blocks-info-box-media-align-${mediaAlign} ${isSelectedClass} kt-info-halign-${hAlign} kb-info-box-vertical-media-align-${mediaVAlign}`,
+      style: {
+        borderColor: containerBorder ? (0, _hexToRgba.default)(containerBorder, undefined !== containerBorderOpacity ? containerBorderOpacity : 1) : (0, _hexToRgba.default)('#eeeeee', undefined !== containerBorderOpacity ? containerBorderOpacity : 1),
+        background: containerBackground ? (0, _hexToRgba.default)(containerBackground, undefined !== containerBackgroundOpacity ? containerBackgroundOpacity : 1) : (0, _hexToRgba.default)('#f2f2f2', undefined !== containerBackgroundOpacity ? containerBackgroundOpacity : 1),
+        borderRadius: containerBorderRadius + 'px',
+        borderWidth: containerBorderWidth ? containerBorderWidth[0] + 'px ' + containerBorderWidth[1] + 'px ' + containerBorderWidth[2] + 'px ' + containerBorderWidth[3] + 'px' : '',
+        padding: containerPadding ? containerPadding[0] + 'px ' + containerPadding[1] + 'px ' + containerPadding[2] + 'px ' + containerPadding[3] + 'px' : '',
+        backgroundColor: !hasImageBg ? backgroundColor : '#2e358f',
+        backgroundImage: hasImageBg && `url('${backgroundImage}')`,
+        'background-size': hasImageBg && `cover`,
+        color: hasImageBg && 'white'
+      }
+    }, backgroundImageData), React.createElement("div", {
+      className: "g-section-overlay",
+      style: overlayStyle
+    }), React.createElement("div", {
+      className: "g-section-wrapper",
+      style: wrapperStyle
+    }, 'none' !== mediaType && React.createElement("div", {
+      className: `${classes.join(' ')} kt-blocks-info-box-media`,
+      style: {
+        borderColor: mediaStyle[0].border,
+        backgroundColor: mediaStyle[0].background,
+        borderRadius: mediaStyle[0].borderRadius + 'px',
+        borderWidth: mediaStyle[0].borderWidth ? mediaStyle[0].borderWidth[0] + 'px ' + mediaStyle[0].borderWidth[1] + 'px ' + mediaStyle[0].borderWidth[2] + 'px ' + mediaStyle[0].borderWidth[3] + 'px' : '',
+        padding: mediaStyle[0].padding ? mediaStyle[0].padding[0] + 'px ' + mediaStyle[0].padding[1] + 'px ' + mediaStyle[0].padding[2] + 'px ' + mediaStyle[0].padding[3] + 'px' : '',
+        margin: mediaStyle[0].margin ? mediaStyle[0].margin[0] + 'px ' + mediaStyle[0].margin[1] + 'px ' + mediaStyle[0].margin[2] + 'px ' + mediaStyle[0].margin[3] + 'px' : ''
+      }
+    }, !mediaImage[0].url && 'image' === mediaType && React.createElement(MediaPlaceholder, {
+      icon: "format-image",
+      labels: {
+        title: __('Media area')
+      },
+      onSelect: onSelectMainImage,
+      accept: "image/*",
+      allowedTypes: ALLOWED_MEDIA_TYPES
+    }), mediaImage[0].url && 'image' === mediaType && React.createElement("div", {
+      className: "kadence-info-box-image-inner-intrisic-container",
+      style: {
+        maxWidth: mediaImage[0].maxWidth + 'px'
+      }
+    }, React.createElement("div", {
+      className: `kadence-info-box-image-intrisic ${'svg+xml' === mediaImage[0].subtype ? ' kb-info-box-image-type-svg' : ''}`,
+      style: {
+        paddingBottom: isNaN(mediaImage[0].height) ? undefined : mediaImage[0].height / mediaImage[0].width * 100 + '%',
+        height: isNaN(mediaImage[0].height) ? undefined : 0
+      }
+    }, React.createElement("div", {
+      className: "kadence-info-box-image-inner-intrisic"
+    }, React.createElement("img", {
+      src: mediaImage[0].url,
+      alt: mediaImage[0].alt,
+      width: mediaImage[0].subtype && 'svg+xml' === mediaImage[0].subtype ? mediaImage[0].maxWidth : mediaImage[0].width,
+      height: mediaImage[0].height,
+      className: `${mediaImage[0].id ? `kt-info-box-image wp-image-${mediaImage[0].id}` : 'kt-info-box-image wp-image-offsite'} ${mediaImage[0].subtype && 'svg+xml' === mediaImage[0].subtype ? ' kt-info-svg-image' : ''}`
+    })))), 'icon' === mediaType && React.createElement("div", {
+      className: `kadence-info-box-icon-container`
+    }, React.createElement("div", {
+      className: 'kadence-info-box-icon-inner-container'
+    }, React.createElement(_genicon.default, {
+      className: `kt-info-svg-icon kt-info-svg-icon-${mediaIcon[0].icon}`,
+      name: mediaIcon[0].icon,
+      size: !mediaIcon[0].size ? '14' : mediaIcon[0].size,
+      icon: 'fa' === mediaIcon[0].icon.substring(0, 2) ? FaIco[mediaIcon[0].icon] : _svgicons.default[mediaIcon[0].icon],
+      htmltag: "span",
+      strokeWidth: 'fe' === mediaIcon[0].icon.substring(0, 2) ? mediaIcon[0].width : undefined,
+      style: {
+        display: 'block',
+        color: mediaIcon[0].color ? mediaIcon[0].color : undefined
+      }
+    })))), React.createElement("div", {
+      className: 'kt-infobox-textcontent text-center infobox-content text-white'
+    }, displayTitle && React.createElement(RichText, {
+      className: "info-box-title",
+      tagName: titleTagName,
+      placeholder: __('Title'),
+      onChange: onChangeTitle,
+      value: title,
+      style: {
+        fontWeight: titleFont[0].weight,
+        color: 'white',
+        fontSize: titleFont[0].size[0] + titleFont[0].sizeType,
+        lineHeight: titleFont[0].lineHeight && titleFont[0].lineHeight[0] ? titleFont[0].lineHeight[0] + titleFont[0].lineType : undefined,
+        fontFamily: titleFont[0].family ? titleFont[0].family : '',
+        padding: titleFont[0].padding ? titleFont[0].padding[0] + 'px ' + titleFont[0].padding[1] + 'px ' + titleFont[0].padding[2] + 'px ' + titleFont[0].padding[3] + 'px' : '',
+        margin: titleFont[0].margin ? titleFont[0].margin[0] + 'px ' + titleFont[0].margin[1] + 'px ' + titleFont[0].margin[2] + 'px ' + titleFont[0].margin[3] + 'px' : ''
+      },
+      keepPlaceholderOnFocus: true
+    }), displayText && React.createElement(RichText, {
+      className: "info-box-text text-white",
+      tagName: 'p',
+      placeholder: __('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean diam dolor, accumsan sed rutrum vel, dapibus et leo.'),
+      onChange: value => setAttributes({
+        contentText: value
+      }),
+      value: contentText,
+      style: {
+        fontWeight: textFont[0].weight,
+        color: textColor,
+        fontSize: textFont[0].size[0] + textFont[0].sizeType,
+        lineHeight: textFont[0].lineHeight && textFont[0].lineHeight[0] ? textFont[0].lineHeight[0] + textFont[0].lineType : undefined,
+        fontFamily: textFont[0].family ? textFont[0].family : ''
+      },
+      keepPlaceholderOnFocus: true
+    }), displayLearnMore && React.createElement("button", {
+      className: "kt-blocks-info-box-learnmore-wrap btn btn-secondary"
+    }, React.createElement(RichText, {
+      className: "info-learnmore",
+      tagName: 'div',
+      placeholder: __('Learn More'),
+      onChange: value => setAttributes({
+        learnMore: value
+      }),
+      value: learnMore,
+      keepPlaceholderOnFocus: true
+    }))))));
+  }
+
+} //  Start Drupal Specific.
+
+
+const category = {
+  slug: 'inclind-blocks',
+  title: __('Custom Blocks')
+}; // Grab the current categories and merge in the new category if not present.
+
+const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
+dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
+
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
+
+  if (blocks.hasOwnProperty(category.slug + '/inclind-infobox') && blocks[category.slug + '/inclind-infobox']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-infobox', {
+      title: __('Infobox (Bootstrap)', 'inclind-infobox'),
+      description: __('Add infobox with background image/overlay.', 'inclind-infobox'),
+      category: 'inclind-blocks',
+      keywords: [__('Info', 'inclind-infobox'), __('Infobox', 'inclind-infobox'), __('inclind', 'inclind-infobox'), __('custom', 'inclind-infobox')],
+      attributes: {
+        blockAlignment: {
+          type: 'string',
+          default: 'none'
+        },
+        backgroundType: {
+          type: 'string',
+          default: 'color'
+        },
+        backgroundColor: {
+          type: 'string',
+          default: '#2e358f'
+        },
+        backgroundImage: {
+          type: 'string',
+          default: 'https://placeimg.com/1200/600/nature/grayscale'
+        },
+        backgroundImageUUID: {
+          type: 'string',
+          default: ''
+        },
+        backgroundImageData: {
+          type: 'object',
+          default: {}
+        },
+        overlayOpacity: {
+          type: 'number',
+          default: 80
+        },
+        overlayColor: {
+          type: 'string',
+          default: '#2e358f'
+        },
+        padding: {
+          type: 'string',
+          default: ''
+        },
+        margin: {
+          type: 'string',
+          default: ''
+        },
+        contentWidth: {
+          type: 'number'
+        },
+        uniqueID: {
+          type: 'string',
+          default: ''
+        },
+        link: {
+          type: 'string',
+          source: 'attribute',
+          attribute: 'href',
+          selector: 'a'
+        },
+        linkProperty: {
+          type: 'string',
+          default: 'learnmore'
+        },
+        target: {
+          type: 'string',
+          source: 'attribute',
+          attribute: 'target',
+          selector: 'a',
+          default: '_self'
+        },
+        hAlign: {
+          type: 'string',
+          default: 'center'
+        },
+        containerBackground: {
+          type: 'string',
+          default: '#f2f2f2'
+        },
+        containerBackgroundOpacity: {
+          type: 'number',
+          default: 1
+        },
+        containerHoverBackground: {
+          type: 'string',
+          default: '#f2f2f2'
+        },
+        containerHoverBackgroundOpacity: {
+          type: 'number',
+          default: 1
+        },
+        containerBorder: {
+          type: 'string',
+          default: '#eeeeee'
+        },
+        containerBorderOpacity: {
+          type: 'number',
+          default: 1
+        },
+        containerHoverBorder: {
+          type: 'string',
+          default: '#eeeeee'
+        },
+        containerHoverBorderOpacity: {
+          type: 'number',
+          default: 1
+        },
+        containerBorderWidth: {
+          type: 'array',
+          default: [0, 0, 0, 0]
+        },
+        containerBorderRadius: {
+          type: 'number',
+          default: 0
+        },
+        containerPadding: {
+          type: 'array',
+          default: [20, 20, 20, 20]
+        },
+        mediaType: {
+          type: 'string',
+          default: 'none'
+        },
+        mediaAlign: {
+          type: 'string',
+          default: 'top'
+        },
+        mediaImage: {
+          type: 'array',
+          default: [{
+            url: '',
+            id: '',
+            alt: '',
+            width: '',
+            height: '',
+            maxWidth: '',
+            flipUrl: '',
+            flipId: '',
+            flipAlt: '',
+            flipWidth: '',
+            flipHeight: '',
+            subtype: '',
+            flipSubtype: ''
+          }]
+        },
+        mediaIcon: {
+          type: 'array',
+          default: [{
+            icon: 'fe_aperture',
+            size: 50,
+            width: 2,
+            title: '',
+            color: '#444444',
+            hoverColor: '#444444',
+            flipIcon: ''
+          }]
+        },
+        mediaStyle: {
+          type: 'array',
+          default: [{
+            background: 'transparent',
+            hoverBackground: 'transparent',
+            border: '#444444',
+            hoverBorder: '#444444',
+            borderRadius: 0,
+            borderWidth: [0, 0, 0, 0],
+            padding: [10, 10, 10, 10],
+            margin: [0, 15, 0, 15]
+          }]
+        },
+        displayTitle: {
+          type: 'bool',
+          default: true
+        },
+        title: {
+          type: 'array',
+          source: 'children',
+          selector: '.info-box-title',
+          default: __('Title')
+        },
+        titleFont: {
+          type: 'array',
+          default: [{
+            level: 3,
+            size: ['', '', ''],
+            sizeType: 'px',
+            lineHeight: ['', '', ''],
+            lineType: 'px',
+            letterSpacing: '',
+            textTransform: '',
+            family: '',
+            google: false,
+            style: '',
+            weight: '',
+            variant: '',
+            subset: '',
+            loadGoogle: true,
+            padding: [0, 0, 0, 0],
+            paddingControl: 'linked',
+            margin: [5, 0, 10, 0],
+            marginControl: 'individual'
+          }]
+        },
+        displayText: {
+          type: 'bool',
+          default: true
+        },
+        contentText: {
+          type: 'array',
+          source: 'children',
+          selector: '.info-box-text',
+          default: __('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean diam dolor, accumsan sed rutrum vel, dapibus et leo.')
+        },
+        textColor: {
+          type: 'string',
+          default: '#555555'
+        },
+        textHoverColor: {
+          type: 'string',
+          default: ''
+        },
+        textFont: {
+          type: 'array',
+          default: [{
+            size: ['', '', ''],
+            sizeType: 'px',
+            lineHeight: ['', '', ''],
+            lineType: 'px',
+            letterSpacing: '',
+            family: '',
+            google: '',
+            style: '',
+            weight: '',
+            variant: '',
+            subset: '',
+            loadGoogle: true
+          }]
+        },
+        displayLearnMore: {
+          type: 'bool',
+          default: true
+        },
+        learnMore: {
+          type: 'array',
+          source: 'children',
+          selector: '.info-learnmore',
+          default: __('Learn More')
+        },
+        learnMoreStyles: {
+          type: 'array',
+          default: [{
+            size: ['', '', ''],
+            sizeType: 'px',
+            lineHeight: ['', '', ''],
+            lineType: 'px',
+            letterSpacing: '',
+            family: '',
+            google: '',
+            style: '',
+            weight: '',
+            variant: '',
+            subset: '',
+            loadGoogle: true,
+            padding: [4, 8, 4, 8],
+            paddingControl: 'individual',
+            margin: [10, 0, 10, 0],
+            marginControl: 'individual',
+            color: '',
+            background: 'transparent',
+            border: '#555555',
+            borderRadius: 0,
+            borderWidth: [0, 0, 0, 0],
+            borderControl: 'linked',
+            colorHover: '#ffffff',
+            backgroundHover: '#444444',
+            borderHover: '#444444',
+            hoverEffect: 'revealBorder'
+          }]
+        },
+        mediaVAlign: {
+          type: 'string',
+          default: 'middle'
+        },
+        mediaAlignMobile: {
+          type: 'string',
+          default: 'top'
+        },
+        mediaAlignTablet: {
+          type: 'string',
+          default: 'top'
+        }
+      },
+
+      // Render the block components.
+      getEditWrapperProps({
+        blockAlignment
+      }) {
+        if ('left' === blockAlignment || 'right' === blockAlignment || 'center' === blockAlignment) {
+          return {
+            'data-align': blockAlignment
+          };
+        }
+      },
+
+      edit: InclindInfobox,
+      save: props => {
+        const {
+          attributes: {
+            blockAlignment,
+            backgroundType,
+            backgroundColor,
+            backgroundImage,
+            backgroundImageData,
+            backgroundImageUUID,
+            overlayOpacity,
+            overlayColor,
+            margin,
+            padding,
+            contentWidth,
+            uniqueID,
+            link,
+            linkProperty,
+            target,
+            hAlign,
+            mediaType,
+            mediaImage,
+            mediaIcon,
+            mediaAlign,
+            displayTitle,
+            title,
+            titleFont,
+            displayText,
+            contentText,
+            displayLearnMore,
+            learnMore,
+            mediaAlignMobile,
+            mediaAlignTablet
+          }
+        } = props;
+        const hasImageBg = backgroundType === 'image'; // const containerStyle = {
+        //   backgroundColor: !hasImageBg ? backgroundColor : '#2e358f',
+        //   backgroundImage: hasImageBg && `url('${backgroundImage}')`,
+        //   'background-size': hasImageBg && `cover`,
+        //   color: hasImageBg && 'white',
+        // };
+
+        const overlayStyle = !hasImageBg ? {} : {
+          display: 'block',
+          backgroundColor: overlayColor || '#2e358f',
+          opacity: parseInt(overlayOpacity, 10) / 100
+        };
+        const wrapperStyle = {
+          maxWidth: contentWidth && `${contentWidth}px`
+        };
+        const classes = [// className,
+        (0, _classnames.default)(`align${blockAlignment ? blockAlignment : 'none'}`), 'infobox p-4 mb-4 bg-primary text-' + hAlign];
+        const titleTagName = 'h' + titleFont[0].level;
+        const image = React.createElement("div", {
+          className: "kadence-info-box-image-inner-intrisic-container",
+          style: {
+            maxWidth: mediaImage[0].maxWidth + 'px'
+          }
+        }, React.createElement("div", {
+          className: `kadence-info-box-image-intrisic ${'svg+xml' === mediaImage[0].subtype ? ' kb-info-box-image-type-svg' : ''}`,
+          style: {
+            paddingBottom: isNaN(mediaImage[0].height) ? undefined : mediaImage[0].height / mediaImage[0].width * 100 + '%',
+            height: isNaN(mediaImage[0].height) ? undefined : 0,
+            width: isNaN(mediaImage[0].width) || 'svg+xml' === mediaImage[0].subtype ? mediaImage[0].maxWidth + 'px' : mediaImage[0].width + 'px',
+            maxWidth: '100%'
+          }
+        }, React.createElement("div", {
+          className: "kadence-info-box-image-inner-intrisic"
+        }, React.createElement("img", {
+          src: mediaImage[0].url,
+          alt: mediaImage[0].alt,
+          width: mediaImage[0].subtype && 'svg+xml' === mediaImage[0].subtype ? mediaImage[0].maxWidth : mediaImage[0].width,
+          height: mediaImage[0].height,
+          className: `${mediaImage[0].id ? `kt-info-box-image wp-image-${mediaImage[0].id}` : 'kt-info-box-image wp-image-offsite'} ${mediaImage[0].subtype && 'svg+xml' === mediaImage[0].subtype ? ' kt-info-svg-image' : ''}`
+        }))));
+        const icon = React.createElement("div", {
+          className: `kadence-info-box-icon-container`
+        }, React.createElement("div", {
+          className: 'kadence-info-box-icon-inner-container'
+        }, React.createElement(_genicon.default, {
+          className: `kt-info-svg-icon kt-info-svg-icon-${mediaIcon[0].icon}`,
+          name: mediaIcon[0].icon,
+          size: !mediaIcon[0].size ? '14' : mediaIcon[0].size,
+          icon: 'fa' === mediaIcon[0].icon.substring(0, 2) ? FaIco[mediaIcon[0].icon] : _svgicons.default[mediaIcon[0].icon],
+          htmltag: "span",
+          strokeWidth: 'fe' === mediaIcon[0].icon.substring(0, 2) ? mediaIcon[0].width : undefined,
+          style: {
+            display: 'block'
+          }
+        })));
+        const learnMoreOutput = React.createElement(RichText.Content, {
+          className: "info-learnmore btn btn-secondary btn-sm",
+          tagName: 'button',
+          value: learnMore,
+          type: 'button'
+        });
+        const learnMoreLinkOutput = React.createElement("a", {
+          href: link,
+          target: '_blank' === target ? target : undefined,
+          rel: '_blank' === target ? 'noopener noreferrer' : undefined
+        }, React.createElement(RichText.Content, {
+          className: "info-learnmore btn btn-secondary btn-sm",
+          tagName: 'button',
+          value: learnMore,
+          type: 'button'
+        }));
+        const textOutput = React.createElement("div", {
+          className: "info-content"
+        }, displayTitle && React.createElement(RichText.Content, {
+          className: "info-box-title info-title text-white",
+          tagName: titleTagName,
+          value: title
+        }), displayText && React.createElement(RichText.Content, {
+          className: "info-box-text info-text",
+          tagName: 'p',
+          value: contentText
+        }), displayLearnMore && link !== undefined && linkProperty === 'learnmore' && learnMoreLinkOutput, displayLearnMore && (linkProperty !== 'learnmore' || link === undefined) && learnMoreOutput);
+        classes.push('has-overlay');
+
+        if (margin) {
+          classes.push(`my-${margin}`);
+        }
+
+        if (padding) {
+          classes.push(`py-${padding}`);
+        } // Render the section on Front-end:
+
+
+        return React.createElement("div", {
+          id: `kt-info-box${uniqueID}`,
+          className: classes.join(' ')
+        }, React.createElement("div", {
+          className: "infobox-image"
+        }, React.createElement("div", {
+          className: "overlay-wrapper"
+        }, React.createElement("div", {
+          className: "overlay bg-primary"
+        }), React.createElement("img", {
+          "data-image-style": "480x480",
+          "data-entity-type": "file",
+          "data-entity-uuid": `${backgroundImageUUID}`,
+          src: `${backgroundImage}`,
+          alt: "",
+          className: "image image--jumbotron image--overlay img-fluid js-image-exists"
+        }))), React.createElement("div", {
+          className: "g-section-wrapper",
+          style: wrapperStyle
+        }, linkProperty !== 'learnmore' && link !== undefined && React.createElement("a", {
+          className: ``,
+          target: '_blank' === target ? target : undefined,
+          rel: '_blank' === target ? 'noopener noreferrer' : undefined,
+          href: link
+        }, React.createElement("div", {
+          className: "infobox-content text-white row align-items-center"
+        }, 'none' !== mediaType && React.createElement("div", {
+          className: `media-container py-4`
+        }, React.createElement("div", {
+          className: `kt-blocks-info-box-media`
+        }, mediaImage[0].url && 'image' === mediaType && image, 'icon' === mediaType && icon)), textOutput)), (linkProperty === 'learnmore' || link === undefined) && React.createElement("div", {
+          className: "infobox-content text-white row align-items-center"
+        }, 'none' !== mediaType && React.createElement("div", {
+          className: `media-container py-4`
+        }, React.createElement("div", {
+          className: `kt-blocks-info-box-media`
+        }, mediaImage[0].url && 'image' === mediaType && image, 'icon' === mediaType && icon)), textOutput)));
+      }
+    });
+  }
+}
+
+},{"../../genicon":52,"../../hex-to-rgba":53,"../../icons":54,"../../svgicons":56,"../../svgiconsnames":57,"./components/infobox":28,"@fonticonpicker/react-fonticonpicker":59,"classnames":60,"lodash/map":182}],30:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3054,7 +5425,7 @@ const icon = {
 var _default = icon;
 exports.default = _default;
 
-},{}],27:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3077,7 +5448,7 @@ class Infobox extends Component {
   render() {
     let className = 'infobox mb-0 row';
 
-    if (this.props.className !== 'wp-block-inclind-blocks-inclind-infobox') {
+    if (this.props.className !== 'wp-block-inclind-blocks-inclind-infobox-simple') {
       className = className + ' ' + this.props.className;
     }
 
@@ -3090,7 +5461,7 @@ class Infobox extends Component {
 
 exports.default = Infobox;
 
-},{}],28:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3128,7 +5499,7 @@ class Inspector extends Component {
 
 exports.default = Inspector;
 
-},{}],29:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 "use strict";
 
 var _classnames = _interopRequireDefault(require("classnames"));
@@ -3216,56 +5587,62 @@ const category = {
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-infobox', {
-  title: __('Infobox', 'inclind-infobox'),
-  description: __('Description', 'inclind-blocks'),
-  category: 'inclind-blocks',
-  keywords: [__('info', 'inclind-infobox'), __('infobox', 'inclind-infobox'), __('inclind', 'inclind-infobox')],
-  attributes: {
-    itemTitle: {
-      selector: '.infobox-heading',
-      type: 'string'
-    },
-    itemContent: {
-      selector: '.infobox-content',
-      type: 'array',
-      source: 'children'
-    }
-  },
-  // Render the block components.
-  edit: InclindInfobox,
-  // Save the attributes and markup.
-  save: function (props) {
-    const {
-      itemTitle,
-      itemContent
-    } = props.attributes;
-    const iconHelp = '<svg viewBox="0 0 500 500"><path d="' + _icon.default['iconHelp'] + '"></path></svg>'; // Save the block markup for the front end.
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-    return React.createElement(_infobox.default, props, React.createElement("div", {
-      className: "col-lg-10"
-    }, itemTitle && React.createElement(RichText.Content, {
-      tagName: "h4",
-      className: "infobox-heading",
-      value: itemTitle
-    }), itemContent && React.createElement(RichText.Content, {
-      tagName: "p",
-      className: "infobox-content",
-      value: itemContent
-    })), React.createElement("div", {
-      className: "col-lg-2 text-center"
-    }, React.createElement("span", {
-      className: "svgicon-default _ionicons_svg_ios-help-circle",
-      dangerouslySetInnerHTML: {
-        __html: iconHelp
+  if (blocks.hasOwnProperty(category.slug + '/inclind-infobox-simple') && blocks[category.slug + '/inclind-infobox-simple']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-infobox-simple', {
+      title: __('Infobox', 'inclind-infobox-simple'),
+      description: __('Description', 'inclind-blocks'),
+      category: 'inclind-blocks',
+      keywords: [__('info', 'inclind-infobox-simple'), __('infobox', 'inclind-infobox-simple'), __('inclind', 'inclind-infobox-simple')],
+      attributes: {
+        itemTitle: {
+          selector: '.infobox-heading',
+          type: 'string'
+        },
+        itemContent: {
+          selector: '.infobox-content',
+          type: 'array',
+          source: 'children'
+        }
+      },
+      // Render the block components.
+      edit: InclindInfobox,
+      // Save the attributes and markup.
+      save: function (props) {
+        const {
+          itemTitle,
+          itemContent
+        } = props.attributes;
+        const iconHelp = '<svg viewBox="0 0 500 500"><path d="' + _icon.default['iconHelp'] + '"></path></svg>'; // Save the block markup for the front end.
+
+        return React.createElement(_infobox.default, props, React.createElement("div", {
+          className: "col-lg-10"
+        }, itemTitle && React.createElement(RichText.Content, {
+          tagName: "h4",
+          className: "infobox-heading",
+          value: itemTitle
+        }), itemContent && React.createElement(RichText.Content, {
+          tagName: "p",
+          className: "infobox-content",
+          value: itemContent
+        })), React.createElement("div", {
+          className: "col-lg-2 text-center"
+        }, React.createElement("span", {
+          className: "svgicon-default _ionicons_svg_ios-help-circle",
+          dangerouslySetInnerHTML: {
+            __html: iconHelp
+          }
+        })));
       }
-    })));
+    });
   }
-});
+}
 
-},{"./components/icon":26,"./components/infobox":27,"./components/inspector":28,"classnames":44}],30:[function(require,module,exports){
+},{"./components/icon":30,"./components/infobox":31,"./components/inspector":32,"classnames":60}],34:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3301,9 +5678,9 @@ class Infographic extends Component {
 
 exports.default = Infographic;
 
-},{}],31:[function(require,module,exports){
-arguments[4][3][0].apply(exports,arguments)
-},{"dup":3}],32:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
+arguments[4][5][0].apply(exports,arguments)
+},{"dup":5}],36:[function(require,module,exports){
 "use strict";
 
 var _classnames = _interopRequireDefault(require("classnames"));
@@ -3311,6 +5688,10 @@ var _classnames = _interopRequireDefault(require("classnames"));
 var _inspector = _interopRequireDefault(require("./components/inspector"));
 
 var _infographic = _interopRequireDefault(require("./components/infographic"));
+
+var _icon = _interopRequireDefault(require("../infobox/components/icon"));
+
+var _infobox = _interopRequireDefault(require("../infobox/components/infobox"));
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : {
@@ -3394,59 +5775,1745 @@ class InclindInfographic extends Component {
 
 const category = {
   slug: 'inclind-blocks',
-  title: __('Inclind Blocks')
+  title: __('Custom Blocks')
 }; // Grab the current categories and merge in the new category if not present.
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-infographic', {
-  title: __('Infographic', 'inclind-infographic'),
-  description: __('Description', 'inclind-blocks'),
-  category: 'inclind-blocks',
-  keywords: [__('info', 'inclind-infographic'), __('infogrpahic', 'inclind-infographic'), __('inclind', 'inclind-infographic')],
-  attributes: {
-    itemTitle: {
-      selector: '.infographic-title',
-      type: 'string'
-    },
-    itemContentTop: {
-      selector: '.infographic-content-top',
-      type: 'string'
-    },
-    itemContentBottom: {
-      selector: '.infographic-content-bottoom',
-      type: 'string'
-    }
-  },
-  // Render the block components.
-  edit: InclindInfographic,
-  // Save the attributes and markup.
-  save: function (props) {
-    const {
-      itemTitle,
-      itemContentTop,
-      itemContentBottom
-    } = props.attributes; // Save the block markup for the front end.
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-    return React.createElement(_infographic.default, props, React.createElement("p", null, itemTitle && React.createElement(RichText.Content, {
-      tagName: "span",
-      className: "h6 orange infographic-title",
-      value: itemTitle
-    }), React.createElement("br", null), itemContentTop && React.createElement(RichText.Content, {
-      tagName: "span",
-      className: "h1 infogrpahic-content-top",
-      value: itemContentTop
-    })), React.createElement("p", null, itemContentBottom && React.createElement(RichText.Content, {
-      tagName: "span",
-      className: "h4 infogrpahic-content-bottom",
-      value: itemContentBottom
-    })));
+  if (blocks.hasOwnProperty(category.slug + '/inclind-infographic') && blocks[category.slug + '/inclind-infographic']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-infographic', {
+      title: __('Infographic', 'inclind-infographic'),
+      description: __('Description', 'inclind-blocks'),
+      category: 'inclind-blocks',
+      keywords: [__('info', 'inclind-infographic'), __('infogrpahic', 'inclind-infographic'), __('inclind', 'inclind-infographic')],
+      attributes: {
+        itemTitle: {
+          selector: '.infographic-title',
+          type: 'string'
+        },
+        itemContentTop: {
+          selector: '.infographic-content-top',
+          type: 'string'
+        },
+        itemContentBottom: {
+          selector: '.infographic-content-bottoom',
+          type: 'string'
+        }
+      },
+      // Render the block components.
+      edit: InclindInfographic,
+      // Save the attributes and markup.
+      save: function (props) {
+        const {
+          itemTitle,
+          itemContentTop,
+          itemContentBottom
+        } = props.attributes; // Save the block markup for the front end.
+
+        return React.createElement(_infographic.default, props, React.createElement("p", null, itemTitle && React.createElement(RichText.Content, {
+          tagName: "span",
+          className: "h6 orange infographic-title",
+          value: itemTitle
+        }), React.createElement("br", null), itemContentTop && React.createElement(RichText.Content, {
+          tagName: "span",
+          className: "h1 infogrpahic-content-top",
+          value: itemContentTop
+        })), React.createElement("p", null, itemContentBottom && React.createElement(RichText.Content, {
+          tagName: "span",
+          className: "h4 infogrpahic-content-bottom",
+          value: itemContentBottom
+        })));
+      }
+    });
   }
-});
+}
 
-},{"./components/infographic":30,"./components/inspector":31,"classnames":44}],33:[function(require,module,exports){
+},{"../infobox/components/icon":30,"../infobox/components/infobox":31,"./components/infographic":34,"./components/inspector":35,"classnames":60}],37:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0; // Setup the block.
+
+const {
+  Component
+} = wp.element;
+/**
+ * Create a AdvancedBtn wrapper Component.
+ */
+
+class Jumbotron extends Component {
+  constructor(props) {
+    super(...arguments);
+  }
+
+  render() {
+    let className = '';
+
+    if (this.props.className !== 'wp-block-inclind-blocks-inclind-jumbotron') {
+      className = className + ' ' + this.props.className;
+    }
+
+    return React.createElement("div", {
+      className: className
+    }, this.props.children);
+  }
+
+}
+
+exports.default = Jumbotron;
+
+},{}],38:[function(require,module,exports){
+"use strict";
+
+var _jumbotron = _interopRequireDefault(require("./components/jumbotron"));
+
+var _icons = _interopRequireDefault(require("../../icons"));
+
+var _map = _interopRequireDefault(require("lodash/map"));
+
+var _hexToRgba = _interopRequireDefault(require("../../hex-to-rgba"));
+
+var _genicon = _interopRequireDefault(require("../../genicon"));
+
+var _svgicons = _interopRequireDefault(require("../../svgicons"));
+
+var _svgiconsnames = _interopRequireDefault(require("../../svgiconsnames"));
+
+var _reactFonticonpicker = _interopRequireDefault(require("@fonticonpicker/react-fonticonpicker"));
+
+var _classnames = _interopRequireDefault(require("classnames"));
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    default: obj
+  };
+} // Import block dependencies and components
+// Internationalization
+
+
+const __ = Drupal.t; // Extend component
+
+const {
+  Component,
+  Fragment
+} = wp.element; // Register block
+
+const {
+  registerBlockType
+} = wp.blocks; // Register editor components
+
+const {
+  BlockAlignmentToolbar,
+  InspectorControls,
+  BlockControls,
+  AlignmentToolbar,
+  MediaUpload,
+  URLInput,
+  RichText
+} = wp.blockEditor; // Register components
+
+const {
+  IconButton,
+  PanelBody,
+  ToggleControl,
+  SelectControl,
+  BaseControl
+} = wp.components;
+const {
+  dispatch,
+  select
+} = wp.data;
+/**
+ * This allows for checking to see if the block needs to generate a new ID.
+ */
+
+const ktjumbotronUniqueIDs = [];
+
+class InclindJumbotron extends Component {
+  constructor() {
+    super(...arguments);
+    this.showSettings = this.showSettings.bind(this);
+    this.state = {
+      settings: {}
+    };
+  }
+
+  componentDidMount() {
+    if (!this.props.attributes.uniqueID) {
+      this.props.setAttributes({
+        uniqueID: '_' + this.props.clientId.substr(2, 9)
+      });
+      ktjumbotronUniqueIDs.push('_' + this.props.clientId.substr(2, 9));
+    } else if (ktjumbotronUniqueIDs.includes(this.props.attributes.uniqueID)) {
+      this.props.setAttributes({
+        uniqueID: '_' + this.props.clientId.substr(2, 9)
+      });
+      ktjumbotronUniqueIDs.push('_' + this.props.clientId.substr(2, 9));
+    } else {
+      ktjumbotronUniqueIDs.push(this.props.attributes.uniqueID);
+    }
+  }
+
+  showSettings(key) {
+    let donot_allow = ['mediaSettings'];
+
+    if (donot_allow.includes(key)) {
+      return false;
+    }
+
+    return true;
+  } // Render element while editing in Gutenberg:
+
+
+  render() {
+    const {
+      attributes: {
+        blockAlignment,
+        backgroundColor,
+        backgroundImage,
+        backgroundImageUUID,
+        uniqueID,
+        link,
+        target,
+        hAlign,
+        displayTitle,
+        displayScriptTitle,
+        title,
+        titleScript,
+        displayText,
+        contentText,
+        displayLearnMore,
+        learnMore
+      },
+      className,
+      setAttributes,
+      isSelected
+    } = this.props;
+    const startlayoutOptions = [{
+      key: 'skip',
+      name: __('Skip'),
+      icon: __('Skip')
+    }, {
+      key: 'simple',
+      name: __('Simple'),
+      icon: _icons.default.infoSimple
+    }, {
+      key: 'left',
+      name: __('Align Left'),
+      icon: _icons.default.infoLeft
+    }, {
+      key: 'bold',
+      name: __('Bold Background'),
+      icon: _icons.default.infoBackground
+    }, {
+      key: 'image',
+      name: __('Circle Image'),
+      icon: _icons.default.infoImage
+    }];
+    const hasImageBg = true;
+    const align_class = ['jtr-content', 'col-xs-12'];
+
+    if (hAlign == 'right') {
+      align_class.push('float-right', 'col-lg-7', 'text-right');
+    } else if (hAlign == 'center') {
+      align_class.push('col-lg-8', 'offset-lg-2', 'text-center');
+    } else {
+      align_class.push('col-lg-7');
+    }
+
+    const classes = [className, (0, _classnames.default)(`align${blockAlignment ? blockAlignment : 'none'}`)];
+
+    const onSelectImage = (media, field) => {
+      const dataAttrs = {};
+      let uuid = '';
+
+      if (media.data) {
+        if (media.data.hasOwnProperty('entity_uuid')) {
+          uuid = media.data.entity_uuid;
+        }
+
+        dataAttrs[`${field}Data`] = Object.keys(media.data).reduce((result, key) => {
+          result[`data-${key.replace('_', '-')}`] = media.data[key];
+          return result;
+        }, {});
+      }
+
+      setAttributes({
+        [field]: media.url,
+        [`${field}UUID`]: uuid,
+        ...dataAttrs
+      });
+    };
+
+    const isSelectedClass = isSelected ? 'is-selected' : 'not-selected';
+    return React.createElement("div", {
+      id: `kt-jtr-box${uniqueID}`,
+      className: classes.join(' ')
+    }, React.createElement(BlockControls, {
+      key: "controls"
+    }, React.createElement(BlockAlignmentToolbar, {
+      value: blockAlignment,
+      controls: ['wide', 'full'],
+      onChange: value => setAttributes({
+        blockAlignment: value
+      })
+    }), React.createElement(AlignmentToolbar, {
+      value: hAlign,
+      onChange: value => setAttributes({
+        hAlign: value
+      })
+    })), this.showSettings('allSettings') && React.createElement(InspectorControls, null, React.createElement(PanelBody, null, React.createElement("div", {
+      className: "kt-controls-link-wrap"
+    }, React.createElement("h2", null, __('Link')), React.createElement(URLInput, {
+      className: "kt-btn-link-input",
+      value: link,
+      onChange: value => setAttributes({
+        link: value
+      })
+    })), React.createElement(SelectControl, {
+      label: __('Link Target'),
+      value: target,
+      options: [{
+        value: '_self',
+        label: __('Same Window')
+      }, {
+        value: '_blank',
+        label: __('New Window')
+      }],
+      onChange: value => setAttributes({
+        target: value
+      })
+    })), this.showSettings('containerSettings') && React.createElement(PanelBody, {
+      title: __('Container Settings'),
+      initialOpen: false
+    }, React.createElement(BaseControl, {
+      label: __('Choose background image')
+    }, React.createElement(MediaUpload, {
+      allowedTypes: ['image'],
+      onSelect: media => onSelectImage(media, 'backgroundImage'),
+      render: ({
+        open
+      }) => React.createElement(IconButton, {
+        className: "components-toolbar__control",
+        label: __('Edit image'),
+        icon: "format-image",
+        onClick: open
+      })
+    }))), this.showSettings('titleSettings') && React.createElement(PanelBody, {
+      title: __('Title Settings'),
+      initialOpen: false
+    }, React.createElement(ToggleControl, {
+      label: __('Show Title'),
+      checked: displayTitle,
+      onChange: value => setAttributes({
+        displayTitle: value
+      })
+    }), React.createElement(ToggleControl, {
+      label: __('Show Script Header (cursive)'),
+      checked: displayScriptTitle,
+      onChange: value => setAttributes({
+        displayScriptTitle: value
+      })
+    })), this.showSettings('textSettings') && React.createElement(PanelBody, {
+      title: __('Text Settings'),
+      initialOpen: false
+    }, React.createElement(ToggleControl, {
+      label: __('Show Text'),
+      checked: displayText,
+      onChange: value => setAttributes({
+        displayText: value
+      })
+    })), this.showSettings('learnMoreSettings') && React.createElement(PanelBody, {
+      title: __('Learn More Settings'),
+      initialOpen: false
+    }, React.createElement(ToggleControl, {
+      label: __('Show Learn More'),
+      checked: displayLearnMore,
+      onChange: value => setAttributes({
+        displayLearnMore: value
+      })
+    }))), React.createElement("div", {
+      className: `jumbotron jumbotron-fluid ${isSelectedClass}`,
+      style: {
+        backgroundColor: !hasImageBg ? backgroundColor : '#2e358f',
+        backgroundImage: hasImageBg && `url('${backgroundImage}')`,
+        'background-size': hasImageBg && `cover`,
+        color: hasImageBg && 'white'
+      }
+    }, React.createElement("div", {
+      className: "container jumbotron-text-container"
+    }, React.createElement("div", {
+      className: 'kt-jumbotron-textcontent jtr-content col-xs-12  col-lg-7'
+    }, displayScriptTitle && React.createElement(RichText, {
+      className: "jtr-script script h1 text-primary",
+      tagName: 'span',
+      placeholder: __('Title Script'),
+      onChange: value => setAttributes({
+        titleScript: value
+      }),
+      value: titleScript,
+      style: {
+        fontWeight: '400',
+        color: 'rgb(46, 53, 143)',
+        fontSize: '42px',
+        lineHeight: '1',
+        fontFamily: 'Outbound, cursive'
+      },
+      keepPlaceholderOnFocus: true
+    }), React.createElement("br", null), displayTitle && React.createElement(RichText, {
+      className: "jtr-title lead h2 caps text-primary",
+      tagName: 'span',
+      placeholder: __('Title'),
+      onChange: val => setAttributes({
+        title: val
+      }),
+      value: title,
+      style: {
+        fontWeight: '800',
+        textTransform: 'uppercase',
+        color: 'rgb(46, 53, 143)',
+        fontSize: '50px',
+        lineHeight: '1.2',
+        fontFamily: 'Montserrat, sans-serif'
+      },
+      keepPlaceholderOnFocus: true
+    }), displayText && React.createElement(RichText, {
+      className: "jtr-text jumbotron-text text-black",
+      tagName: 'p',
+      placeholder: __('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean diam dolor, accumsan sed rutrum vel, dapibus et leo.'),
+      onChange: value => setAttributes({
+        contentText: value
+      }),
+      value: contentText,
+      style: {
+        fontWeight: '600',
+        color: 'black',
+        fontSize: '22px',
+        lineHeight: '28px',
+        fontFamily: 'Montserrat, sans'
+      },
+      keepPlaceholderOnFocus: true
+    }), displayLearnMore && link !== undefined && React.createElement("p", {
+      class: "lead mt-5 d-none d-sm-block"
+    }, React.createElement("button", {
+      className: "btn btn-arrow btn-lg btn-secondary"
+    }, React.createElement(RichText, {
+      className: "jtr-learnmore",
+      tagName: 'span',
+      placeholder: __('Link this button in settings..'),
+      onChange: value => setAttributes({
+        learnMore: value
+      }),
+      value: learnMore,
+      keepPlaceholderOnFocus: true
+    }), React.createElement("div", {
+      className: "color-fill--secondary svg svg--icon js-svg-exists"
+    }, React.createElement("svg", null, React.createElement("use", {
+      "xlink:href": "/themes/custom/particle/dist/app-drupal/assets/spritemap.svg#sprite-chevron-right"
+    })))))))));
+  }
+
+} //  Start Drupal Specific.
+
+
+const category = {
+  slug: 'inclind-blocks',
+  title: __('Custom Blocks')
+}; // Grab the current categories and merge in the new category if not present.
+
+const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
+dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
+
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
+
+  if (blocks.hasOwnProperty(category.slug + '/inclind-jumbotron') && blocks[category.slug + '/inclind-jumbotron']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-jumbotron', {
+      title: __('Hero (Jumbotron)', 'inclind-jumbotron'),
+      description: __('Add jumbotron with background image/overlay.', 'inclind-jumbotron'),
+      category: 'inclind-blocks',
+      keywords: [__('Hero', 'inclind-jumbotron'), __('Info', 'inclind-jumbotron'), __('inclind', 'inclind-jumbotron'), __('custom', 'inclind-jumbotron')],
+      attributes: {
+        blockAlignment: {
+          type: 'string',
+          default: 'none'
+        },
+        backgroundColor: {
+          type: 'string',
+          default: '#2e358f'
+        },
+        backgroundImage: {
+          type: 'string',
+          default: 'https://placeimg.com/1200/600/nature/grayscale'
+        },
+        backgroundImageUUID: {
+          type: 'string',
+          default: ''
+        },
+        uniqueID: {
+          type: 'string',
+          default: ''
+        },
+        link: {
+          type: 'string',
+          source: 'attribute',
+          attribute: 'href',
+          selector: 'a'
+        },
+        target: {
+          type: 'string',
+          source: 'attribute',
+          attribute: 'target',
+          selector: 'a',
+          default: '_self'
+        },
+        hAlign: {
+          type: 'string',
+          default: 'left'
+        },
+        displayTitle: {
+          type: 'bool',
+          default: true
+        },
+        displayScriptTitle: {
+          type: 'bool',
+          default: true
+        },
+        titleScript: {
+          type: 'array',
+          source: 'children',
+          selector: 'span.jtr-script',
+          default: __('Title Script will be in cursive font.')
+        },
+        title: {
+          type: 'array',
+          source: 'children',
+          selector: 'span.jtr-title',
+          default: __('Title')
+        },
+        displayText: {
+          type: 'bool',
+          default: true
+        },
+        contentText: {
+          type: 'array',
+          source: 'children',
+          selector: 'p.jtr-text',
+          default: __('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean diam dolor, accumsan sed rutrum vel, dapibus et leo.')
+        },
+        displayLearnMore: {
+          type: 'bool',
+          default: true
+        },
+        learnMore: {
+          type: 'array',
+          source: 'children',
+          selector: '.jtr-learnmore',
+          default: __('Link this button in settings..')
+        }
+      },
+
+      // Render the block components.
+      getEditWrapperProps({
+        blockAlignment
+      }) {
+        if ('left' === blockAlignment || 'right' === blockAlignment || 'center' === blockAlignment) {
+          return {
+            'data-align': blockAlignment
+          };
+        }
+      },
+
+      edit: InclindJumbotron,
+      save: props => {
+        const {
+          attributes: {
+            blockAlignment,
+            backgroundImage,
+            backgroundImageUUID,
+            uniqueID,
+            link,
+            target,
+            hAlign,
+            displayTitle,
+            displayScriptTitle,
+            title,
+            titleScript,
+            displayText,
+            contentText,
+            displayLearnMore,
+            learnMore
+          }
+        } = props;
+        const align_class = ['jtr-content', 'col-xs-12'];
+
+        if (hAlign == 'right') {
+          align_class.push('float-right', 'col-lg-7', 'text-right');
+        } else if (hAlign == 'center') {
+          align_class.push('col-lg-8', 'offset-lg-2', 'text-center');
+        } else {
+          align_class.push('col-lg-7');
+        }
+
+        const classes = [// className,
+        (0, _classnames.default)(`align${blockAlignment ? blockAlignment : 'none'}`), 'jumbotron jumbotron-fluid']; // const learnMoreOutput = (
+        //     <RichText.Content
+        //         className="jtr-learnmore btn btn-secondary btn-sm"
+        //         tagName={'button'}
+        //         value={learnMore}
+        //         type={'button'}
+        //     />
+        // );
+
+        const learnMoreLinkOutput = React.createElement("p", {
+          className: "lead mt-5 d-none d-sm-block"
+        }, React.createElement("a", {
+          href: link,
+          target: '_blank' === target ? target : undefined,
+          rel: '_blank' === target ? 'noopener noreferrer' : undefined
+        }, React.createElement("button", {
+          className: "btn btn-arrow btn-lg btn-secondary"
+        }, React.createElement(RichText.Content, {
+          className: "jtr-learnmore",
+          tagName: 'span',
+          placeholder: __('Link this button in settings..'),
+          value: learnMore
+        }), React.createElement("div", {
+          className: "color-fill--secondary svg svg--icon js-svg-exists"
+        }, React.createElement("svg", null, React.createElement("use", {
+          "xlink:href": "/themes/custom/particle/dist/app-drupal/assets/spritemap.svg#sprite-chevron-right"
+        }))))));
+        const textOutput = React.createElement("div", {
+          className: align_class.join(' ')
+        }, displayScriptTitle && React.createElement(RichText.Content, {
+          className: "jtr-script script h1 text-primary",
+          tagName: 'span',
+          value: titleScript
+        }), React.createElement("br", null), displayTitle && React.createElement(RichText.Content, {
+          className: "jtr-title lead h2 caps text-primary",
+          tagName: 'span',
+          value: title
+        }), displayText && React.createElement(RichText.Content, {
+          className: "jtr-text jumbotron-text text-black",
+          tagName: 'p',
+          value: contentText
+        }), displayLearnMore && link !== undefined && learnMoreLinkOutput); // Render the Jumbotron on Front-end:
+
+        return React.createElement("div", {
+          id: `kt-jtr-box${uniqueID}`,
+          className: classes.join(' ')
+        }, React.createElement("div", {
+          className: "jumbotron-image"
+        }, React.createElement("div", {
+          className: "overlay-wrapper"
+        }, React.createElement("div", {
+          className: "overlay gradient"
+        }), React.createElement("img", {
+          "data-image-style": "1200x400",
+          "data-entity-type": "file",
+          "data-entity-uuid": `${backgroundImageUUID}`,
+          src: `${backgroundImage}`,
+          alt: "",
+          className: "image image--jumbotron image--overlay img-fluid js-image-exists"
+        }))), React.createElement("div", {
+          className: "container jumbotron-text-container"
+        }, textOutput));
+      }
+    });
+  }
+}
+
+},{"../../genicon":52,"../../hex-to-rgba":53,"../../icons":54,"../../svgicons":56,"../../svgiconsnames":57,"./components/jumbotron":37,"@fonticonpicker/react-fonticonpicker":59,"classnames":60,"lodash/map":182}],39:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0; // Setup the block.
+
+const {
+  Component
+} = wp.element;
+/**
+ * Create a LinkCards wrapper Component.
+ */
+
+class LinkCards extends Component {
+  constructor(props) {
+    super(...arguments);
+  }
+
+  render() {
+    let className = '';
+
+    if (this.props.className !== 'wp-block-inclind-blocks-inclind-link-cards') {
+      className = className + ' ' + this.props.className;
+    }
+
+    return React.createElement("div", {
+      className: className
+    }, this.props.children);
+  }
+
+}
+
+exports.default = LinkCards;
+
+},{}],40:[function(require,module,exports){
+"use strict";
+
+var _linkCards = _interopRequireDefault(require("./components/link-cards"));
+
+var _times = _interopRequireDefault(require("lodash/times"));
+
+var _map = _interopRequireDefault(require("lodash/map"));
+
+var _reactFonticonpicker = _interopRequireDefault(require("@fonticonpicker/react-fonticonpicker"));
+
+var _genicon = _interopRequireDefault(require("../../genicon"));
+
+var _svgicons = _interopRequireDefault(require("../../svgicons"));
+
+var _svgiconsnames = _interopRequireDefault(require("../../svgiconsnames"));
+
+var _hexToRgba = _interopRequireDefault(require("../../hex-to-rgba"));
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    default: obj
+  };
+} // Import block dependencies and components
+// import Icon from "../infobox/components/icon";
+// import Infobox from "../infobox/components/infobox";
+// Internationalization
+
+
+const __ = Drupal.t; // Extend component
+
+const {
+  Component,
+  Fragment
+} = wp.element; // Register block
+
+const {
+  registerBlockType
+} = wp.blocks; // Register editor components
+
+const {
+  RichText,
+  URLInput,
+  InspectorControls,
+  BlockControls,
+  AlignmentToolbar
+} = wp.blockEditor; // Register components
+
+const {
+  IconButton,
+  Dashicon,
+  TabPanel,
+  Button,
+  PanelBody,
+  RangeControl,
+  TextControl,
+  ButtonGroup,
+  SelectControl,
+  ToggleControl
+} = wp.components;
+const {
+  dispatch,
+  select
+} = wp.data;
+/**
+ * This allows for checking to see if the block needs to generate a new ID.
+ */
+
+const ktadvancedbuttonUniqueIDs = [];
+
+class InclindLinkCards extends Component {
+  constructor() {
+    super(...arguments);
+    this.saveArrayUpdate = this.saveArrayUpdate.bind(this);
+    this.state = {
+      btnFocused: 'false',
+      btnLink: false,
+      user: 'admin',
+      settings: {}
+    };
+  }
+
+  componentDidMount() {
+    if (!this.props.attributes.uniqueID) {
+      this.props.setAttributes({
+        uniqueID: '_' + this.props.clientId.substr(2, 9)
+      });
+      ktadvancedbuttonUniqueIDs.push('_' + this.props.clientId.substr(2, 9));
+    } else if (ktadvancedbuttonUniqueIDs.includes(this.props.attributes.uniqueID)) {
+      this.props.setAttributes({
+        uniqueID: '_' + this.props.clientId.substr(2, 9)
+      });
+      ktadvancedbuttonUniqueIDs.push('_' + this.props.clientId.substr(2, 9));
+    } else {
+      ktadvancedbuttonUniqueIDs.push(this.props.attributes.uniqueID);
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (!this.props.isSelected && prevProps.isSelected && this.state.btnFocused) {
+      this.setState({
+        btnFocused: 'false'
+      });
+    }
+  }
+
+  showSettings(key) {
+    let donot_allow = ['backgroundSettings'];
+
+    if (donot_allow.includes(key)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  saveArrayUpdate(value, index) {
+    const {
+      attributes,
+      setAttributes
+    } = this.props;
+    const {
+      btns
+    } = attributes;
+    const newItems = btns.map((item, thisIndex) => {
+      if (index === thisIndex) {
+        item = { ...item,
+          ...value
+        };
+      }
+
+      return item;
+    });
+    setAttributes({
+      btns: newItems
+    });
+  }
+
+  render() {
+    const {
+      attributes: {
+        uniqueID,
+        btnCount,
+        btns,
+        hAlign,
+        forceFullwidth,
+        btnLayoutStyle,
+        thAlign,
+        mhAlign
+      },
+      className,
+      setAttributes,
+      isSelected
+    } = this.props;
+    const bgType = [{
+      key: 'solid',
+      name: __('Solid Blue')
+    }, {
+      key: 'yellow',
+      name: __('Solid Yellow')
+    }, {
+      key: 'gradient',
+      name: __('No BG (plain)')
+    }];
+    const gridLayout = [{
+      key: 'grid',
+      name: __('2 columns')
+    }, {
+      key: 'inline',
+      name: __('Automatic')
+    }, {
+      key: 'banners',
+      name: __('Single Row')
+    }];
+
+    const renderBtns = index => {
+      let btnbg;
+      let btnGrad;
+      let btnGrad2;
+
+      if (undefined !== btns[index].backgroundType && 'gradient' === btns[index].backgroundType) {
+        btnGrad = 'transparent' === btns[index].background || undefined === btns[index].background ? 'rgba(255,255,255,0)' : (0, _hexToRgba.default)(btns[index].background, btns[index].backgroundOpacity !== undefined ? btns[index].backgroundOpacity : 1);
+        btnGrad2 = undefined !== btns[index].gradient && undefined !== btns[index].gradient[0] && '' !== btns[index].gradient[0] ? (0, _hexToRgba.default)(btns[index].gradient[0], undefined !== btns[index].gradient && btns[index].gradient[1] !== undefined ? btns[index].gradient[1] : 1) : (0, _hexToRgba.default)('#999999', undefined !== btns[index].gradient && btns[index].gradient[1] !== undefined ? btns[index].gradient[1] : 1);
+
+        if (undefined !== btns[index].gradient && 'radial' === btns[index].gradient[4]) {
+          btnbg = `radial-gradient(at ${undefined === btns[index].gradient[6] ? 'center center' : btns[index].gradient[6]}, ${btnGrad} ${undefined === btns[index].gradient[2] ? '0' : btns[index].gradient[2]}%, ${btnGrad2} ${undefined === btns[index].gradient[3] ? '100' : btns[index].gradient[3]}%)`;
+        } else if (undefined === btns[index].gradient || 'radial' !== btns[index].gradient[4]) {
+          btnbg = `linear-gradient(${undefined !== btns[index].gradient && undefined !== btns[index].gradient[5] ? btns[index].gradient[5] : '180'}deg, ${btnGrad} ${undefined !== btns[index].gradient && undefined !== btns[index].gradient[2] ? btns[index].gradient[2] : '0'}%, ${btnGrad2} ${undefined !== btns[index].gradient && undefined !== btns[index].gradient[3] ? btns[index].gradient[3] : '100'}%)`;
+        }
+      } else {
+        btnbg = 'transparent' === btns[index].background || undefined === btns[index].background ? undefined : (0, _hexToRgba.default)(btns[index].background, btns[index].backgroundOpacity !== undefined ? btns[index].backgroundOpacity : 1);
+      }
+
+      return React.createElement("button", {
+        type: 'button',
+        className: `btn btn-area-wrap kt-btn-${index}-area ${!btns[index].icon ? '' : 'btn-icon'}
+                  ${btns[index].backgroundHoverType === 'gradient' ? ' btn-arrow btn-cta btn-square' : btns[index].backgroundHoverType === 'yellow' ? ' btn-secondary' : 'btn-primary'}
+                  `
+      }, btns[index].icon && 'left' === btns[index].iconSide && React.createElement(_genicon.default, {
+        className: `color-fill--white svg svg--icon js-svg-exists kt-btn-svg-icon kt-btn-svg-icon-${btns[index].icon} kt-btn-side-${btns[index].iconSide}`,
+        name: btns[index].icon,
+        size: !btns[index].size ? '14' : btns[index].size,
+        icon: _svgicons.default[btns[index].icon]
+      }), React.createElement(RichText, {
+        tagName: "div",
+        placeholder: __('Button...', 'inclind-link-cards'),
+        value: btns[index].text,
+        unstableOnFocus: () => {
+          if (index >= 1) {
+            const bt = 'btn' + index;
+            onFocusAnyBtn(bt);
+          } // if (1 === index) {
+          //   onFocusBtn1();
+          // }
+          // else if (2 === index) {
+          //   onFocusBtn2();
+          // }
+          // else if (3 === index) {
+          //   onFocusBtn3();
+          // }
+          // else if (4 === index) {
+          //   onFocusBtn4();
+          // }
+          else {
+              onFocusBtn();
+            }
+        },
+        onChange: value => {
+          this.saveArrayUpdate({
+            text: value
+          }, index);
+        },
+        allowedFormats: ['core/bold', 'core/italic', 'core/strikethrough'],
+        className: 'kt-button-text',
+        keepPlaceholderOnFocus: true
+      }), btns[index].icon && 'left' !== btns[index].iconSide && React.createElement(_genicon.default, {
+        className: `color-fill--white svg svg--icon js-svg-exists kt-btn-svg-icon-${btns[index].icon} kt-btn-side-${btns[index].iconSide}`,
+        name: btns[index].icon,
+        size: !btns[index].size ? '14' : btns[index].size,
+        icon: _svgicons.default[btns[index].icon]
+      }), btns[index].backgroundHoverType && 'gradient' === btns[index].backgroundHoverType && !btns[index].icon && React.createElement(_genicon.default, {
+        className: `svg svg--colorable js-svg-exists`,
+        name: `bb`,
+        htmltag: `span`
+      }), isSelected && (this.state.btnFocused && 'btn' + [index] === this.state.btnFocused || this.state.btnFocused && 'false' === this.state.btnFocused && '0' === index) && React.createElement("form", {
+        key: 'form-link',
+        onSubmit: event => event.preventDefault(),
+        className: "blocks-button__inline-link"
+      }, React.createElement(URLInput, {
+        value: btns[index].link,
+        onChange: value => {
+          this.saveArrayUpdate({
+            link: value
+          }, index);
+        }
+      }), React.createElement(IconButton, {
+        icon: 'editor-break',
+        label: __('Apply', 'inclind-link-cards'),
+        type: 'submit'
+      })));
+    };
+
+    const onFocusBtn = () => {
+      if ('btn0' !== this.state.btnFocused) {
+        this.setState({
+          btnFocused: 'btn0'
+        });
+      }
+    };
+
+    const onFocusAnyBtn = bt => {
+      if (bt !== this.state.btnFocused) {
+        this.setState({
+          btnFocused: bt
+        });
+      }
+    };
+
+    const onFocusBtn1 = () => {
+      if ('btn1' !== this.state.btnFocused) {
+        this.setState({
+          btnFocused: 'btn1'
+        });
+      }
+    };
+
+    const onFocusBtn2 = () => {
+      if ('btn2' !== this.state.btnFocused) {
+        this.setState({
+          btnFocused: 'btn2'
+        });
+      }
+    };
+
+    const onFocusBtn3 = () => {
+      if ('btn3' !== this.state.btnFocused) {
+        this.setState({
+          btnFocused: 'btn3'
+        });
+      }
+    };
+
+    const onFocusBtn4 = () => {
+      if ('btn4' !== this.state.btnFocused) {
+        this.setState({
+          btnFocused: 'btn4'
+        });
+      }
+    };
+
+    const tabControls = index => {
+      return React.createElement(PanelBody, {
+        title: __('Button', 'inclind-link-cards') + ' ' + (index + 1) + ' ' + __('Settings', 'inclind-link-cards'),
+        initialOpen: false
+      }, React.createElement("h2", {
+        className: "side-h2-label"
+      }, __('Button Link', 'inclind-link-cards')), React.createElement("div", {
+        className: "kt-btn-link-group"
+      }, React.createElement(URLInput, {
+        value: btns[index].link,
+        className: "kt-btn-link-input",
+        onChange: value => {
+          this.saveArrayUpdate({
+            link: value
+          }, index);
+        }
+      }), React.createElement(IconButton, {
+        className: "kt-link-settings",
+        icon: 'arrow-down-alt2',
+        label: __('Link Settings', 'inclind-link-cards'),
+        onClick: () => this.setState({
+          btnLink: this.state.btnLink ? false : true
+        })
+      })), this.state.btnLink && React.createElement(Fragment, null, React.createElement("div", {
+        className: "kt-spacer-sidebar-15"
+      }), React.createElement(SelectControl, {
+        label: __('Link Target', 'inclind-link-cards'),
+        value: btns[index].target,
+        options: [{
+          value: '_self',
+          label: __('Same Window', 'inclind-link-cards')
+        }, {
+          value: '_blank',
+          label: __('New Window', 'inclind-link-cards')
+        }],
+        onChange: value => {
+          this.saveArrayUpdate({
+            target: value
+          }, index);
+        }
+      }), React.createElement(ToggleControl, {
+        label: __('Set link to nofollow?', 'inclind-link-cards'),
+        checked: undefined !== btns[index].noFollow ? btns[index].noFollow : false,
+        onChange: value => this.saveArrayUpdate({
+          noFollow: value
+        }, index)
+      })), this.showSettings('backgroundSettings') && React.createElement(Fragment, null, React.createElement("div", {
+        className: "components-base-control__field"
+      }, React.createElement("label", {
+        className: "kt-beside-btn-group"
+      }, __('Background Type', 'inclind-link-cards')), React.createElement(ButtonGroup, {
+        className: "kt-button-size-type-options",
+        "aria-label": __('Background Type', 'inclind-link-cards')
+      }, (0, _map.default)(bgType, ({
+        name,
+        key
+      }) => React.createElement(Button, {
+        key: key,
+        className: "kt-btn-size-btn",
+        isSmall: true,
+        isPrimary: (undefined !== btns[index].backgroundHoverType ? btns[index].backgroundHoverType : 'solid') === key,
+        "aria-pressed": (undefined !== btns[index].backgroundHoverType ? btns[index].backgroundHoverType : 'solid') === key,
+        onClick: () => this.saveArrayUpdate({
+          backgroundHoverType: key
+        }, index)
+      }, name))))), React.createElement(Fragment, null, React.createElement("h2", {
+        className: "kt-tool"
+      }, __('Icon Settings', 'inclind-link-cards')), React.createElement("div", {
+        className: "kt-select-icon-container"
+      }, React.createElement(_reactFonticonpicker.default, {
+        icons: _svgiconsnames.default,
+        value: btns[index].icon,
+        onChange: value => {
+          this.saveArrayUpdate({
+            icon: value
+          }, index);
+        },
+        appendTo: "body",
+        renderFunc: renderSVG,
+        theme: "default",
+        isMulti: false
+      }))), React.createElement(TextControl, {
+        label: __('Add Custom CSS Class', 'inclind-link-cards'),
+        value: btns[index].cssClass ? btns[index].cssClass : '',
+        onChange: value => this.saveArrayUpdate({
+          cssClass: value
+        }, index)
+      }));
+    };
+
+    const renderSVG = svg => React.createElement(_genicon.default, {
+      name: svg,
+      icon: _svgicons.default[svg]
+    });
+
+    const renderArray = React.createElement(Fragment, null, (0, _times.default)(btnCount, n => tabControls(n)));
+    const renderPreviewArray = React.createElement("div", null, (0, _times.default)(btnCount, n => renderBtns(n)));
+
+    const renderBtnCSS = index => {
+      let btnbg;
+      let btnGrad;
+      let btnGrad2;
+      let btnRad = '0';
+      let btnBox = '';
+      let btnBox2 = '';
+      return `#kt-btns_${uniqueID} .kt-button-${index}:hover {
+					color: ${btns[index].colorHover} !important;
+					border-color: ${(0, _hexToRgba.default)(undefined === btns[index].borderHover ? '#444444' : btns[index].borderHover, btns[index].borderHoverOpacity !== undefined ? btns[index].borderHoverOpacity : 1)} !important;
+					box-shadow: ${btnBox} !important;
+				}
+				#kt-btns_${uniqueID} .kt-button-${index}::before {
+					background: ${btnbg};
+					box-shadow: ${btnBox2};
+					border-radius: ${btnRad}px;
+				}`;
+    };
+
+    const renderCSS = React.createElement("style", null, (0, _times.default)(btnCount, n => renderBtnCSS(n)));
+    return React.createElement(Fragment, null, renderCSS, React.createElement("div", {
+      id: `kt-btns_${uniqueID}`,
+      className: `${className} kt-btn-align-${hAlign}${forceFullwidth ? ' kt-force-btn-fullwidth' : ''}`
+    }, React.createElement(BlockControls, null, React.createElement(AlignmentToolbar, {
+      value: hAlign,
+      onChange: value => setAttributes({
+        hAlign: value
+      })
+    })), React.createElement(Fragment, null, React.createElement(InspectorControls, null, React.createElement(PanelBody, {
+      title: __('Button Count', 'inclind-link-cards'),
+      initialOpen: true
+    }, React.createElement(RangeControl, {
+      label: __('Number of Buttons', 'inclind-link-cards'),
+      value: btnCount,
+      onChange: newcount => {
+        const newbtns = btns;
+
+        if (newbtns.length < newcount) {
+          const amount = Math.abs(newcount - newbtns.length);
+          {
+            (0, _times.default)(amount, n => {
+              newbtns.push({
+                text: newbtns[0].text,
+                link: newbtns[0].link,
+                target: newbtns[0].target,
+                size: newbtns[0].size,
+                paddingBT: newbtns[0].paddingBT,
+                paddingLR: newbtns[0].paddingLR,
+                color: newbtns[0].color,
+                background: newbtns[0].background,
+                border: newbtns[0].border,
+                backgroundOpacity: newbtns[0].backgroundOpacity,
+                borderOpacity: newbtns[0].borderOpacity,
+                colorHover: newbtns[0].colorHover,
+                backgroundHover: newbtns[0].backgroundHover,
+                borderHover: newbtns[0].borderHover,
+                backgroundHoverOpacity: newbtns[0].backgroundHoverOpacity,
+                borderHoverOpacity: newbtns[0].borderHoverOpacity,
+                icon: newbtns[0].icon,
+                iconSide: newbtns[0].iconSide,
+                iconHover: newbtns[0].iconHover,
+                cssClass: newbtns[0].cssClass ? newbtns[0].cssClass : '',
+                noFollow: newbtns[0].noFollow ? newbtns[0].noFollow : false,
+                // responsiveSize:
+                // (newbtns[0].responsiveSize ?
+                // newbtns[0].responsiveSize : ['',
+                // '']),
+                gradient: newbtns[0].gradient ? newbtns[0].gradient : ['#999999', 1, 0, 100, 'linear', 180, 'center center'],
+                gradientHover: newbtns[0].gradientHover ? newbtns[0].gradientHover : ['#777777', 1, 0, 100, 'linear', 180, 'center center'],
+                btnStyle: newbtns[0].btnStyle ? newbtns[0].btnStyle : 'basic',
+                backgroundType: newbtns[0].backgroundType ? newbtns[0].backgroundType : 'solid',
+                backgroundHoverType: newbtns[0].backgroundHoverType ? newbtns[0].backgroundHoverType : 'solid',
+                width: newbtns[0].width ? newbtns[0].width : ['', '', ''] // responsivePaddingBT:
+                // (newbtns[0].responsivePaddingBT ?
+                // newbtns[0].responsivePaddingBT :
+                // ['', '']), responsivePaddingLR:
+                // (newbtns[0].responsivePaddingLR ?
+                // newbtns[0].responsivePaddingLR :
+                // ['', '']), boxShadow:
+                // (newbtns[0].boxShadow ?
+                // newbtns[0].boxShadow : [false,
+                // '#000000', 0.2, 1, 1, 2, 0, false]),
+                // boxShadowHover:
+                // (newbtns[0].boxShadowHover ?
+                // newbtns[0].boxShadowHover : [false,
+                // '#000000', 0.4, 2, 2, 3, 0, false]),
+
+              });
+            });
+          }
+          setAttributes({
+            btns: newbtns
+          });
+          this.saveArrayUpdate({
+            iconSide: btns[0].iconSide
+          }, 0);
+        }
+
+        setAttributes({
+          btnCount: newcount
+        });
+      },
+      min: 1,
+      max: 24
+    }), React.createElement(Fragment, null, React.createElement("div", {
+      className: "components-base-control__field"
+    }, React.createElement("label", {
+      className: "kt-beside-btn-group"
+    }, __('Grid / Layout Options', 'inclind-link-cards')), React.createElement(ButtonGroup, {
+      className: "kt-button-size-type-options",
+      "aria-label": __('Button Layout', 'inclind-link-cards')
+    }, (0, _map.default)(gridLayout, ({
+      name,
+      key
+    }) => React.createElement(Button, {
+      key: key,
+      className: "kt-btn-grid-btn",
+      isSmall: true,
+      isPrimary: btnLayoutStyle === key,
+      "aria-pressed": btnLayoutStyle === key,
+      onClick: () => setAttributes({
+        btnLayoutStyle: key
+      })
+    }, name)))))), renderArray)), React.createElement("div", {
+      id: `animate-id${uniqueID}`,
+      className: 'btn-inner-wrap'
+    }, renderPreviewArray)));
+  }
+
+} //  Start Drupal Specific.
+
+
+const category = {
+  slug: 'inclind-blocks',
+  title: __('Custom Blocks')
+}; // Grab the current categories and merge in the new category if not present.
+
+const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
+dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
+
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
+
+  if (blocks.hasOwnProperty(category.slug + '/inclind-link-cards') && blocks[category.slug + '/inclind-link-cards']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-link-cards', {
+      title: __('Button Group', 'inclind-link-cards'),
+      description: __('Create a row or grid of buttons (links). Style each one.', 'inclind-link-cards'),
+      category: 'inclind-blocks',
+      keywords: [__('Button', 'inclind-link-cards'), __('Button grid', 'inclind-link-cards'), __('inclind', 'inclind-link-cards'), __('custom', 'inclind-link-cards')],
+      attributes: {
+        hAlign: {
+          type: 'string',
+          default: 'center'
+        },
+        thAlign: {
+          type: 'string',
+          default: ''
+        },
+        mhAlign: {
+          type: 'string',
+          default: ''
+        },
+        btnCount: {
+          type: 'number',
+          default: 1
+        },
+        uniqueID: {
+          type: 'string',
+          default: ''
+        },
+        btns: {
+          type: 'array',
+          default: [{
+            text: 'Start Button...',
+            link: '',
+            target: '_self',
+            size: '',
+            paddingBT: '',
+            paddingLR: '',
+            color: '#555555',
+            background: '',
+            border: '#555555',
+            backgroundOpacity: 1,
+            borderOpacity: 1,
+            colorHover: '#ffffff',
+            backgroundHover: '#444444',
+            borderHover: '#444444',
+            backgroundHoverOpacity: 1,
+            borderHoverOpacity: 1,
+            icon: '',
+            iconSide: 'left',
+            iconHover: false,
+            cssClass: '',
+            noFollow: false,
+            gradient: ['#999999', 1, 0, 100, 'linear', 180, 'center center'],
+            gradientHover: ['#777777', 1, 0, 100, 'linear', 180, 'center center'],
+            btnStyle: 'basic',
+            backgroundType: 'yellow',
+            backgroundHoverType: 'yellow',
+            width: ['', '', '']
+          }]
+        },
+        forceFullwidth: {
+          type: 'bool',
+          default: false
+        },
+        btnLayoutStyle: {
+          type: 'string',
+          default: 'inline'
+        }
+      },
+
+      // Render the block components.
+      getEditWrapperProps({
+        blockAlignment
+      }) {
+        if ('left' === blockAlignment || 'right' === blockAlignment || 'center' === blockAlignment) {
+          return {
+            'data-align': blockAlignment
+          };
+        }
+      },
+
+      edit: InclindLinkCards,
+      save: props => {
+        const {
+          attributes: {
+            btnCount,
+            btns,
+            hAlign,
+            uniqueID,
+            forceFullwidth,
+            thAlign,
+            mhAlign,
+            btnLayoutStyle
+          }
+        } = props;
+
+        const renderSaveBtns = (index, layout) => {
+          let relAttr;
+
+          if ('_blank' === btns[index].target && true === btns[index].noFollow) {
+            relAttr = 'noreferrer noopener nofollow';
+          } else if ('_blank' === btns[index].target) {
+            relAttr = 'noreferrer noopener';
+          } else if (true === btns[index].noFollow) {
+            relAttr = 'nofollow';
+          } else {
+            relAttr = undefined;
+          }
+
+          return React.createElement("div", {
+            className: `${layout} kt-btn-wrap kt-btn-wrap-${index}`
+          }, React.createElement("a", {
+            className: `btn kt-btn-${index}-action
+                kt-btn-svg-show-${!btns[index].iconHover ? 'always' : 'hover'} kt-btn-has-text-${!btns[index].text ? 'false' : 'true'}
+                ${!btns[index].icon ? '' : 'btn-icon'}${btns[index].cssClass ? ' ' + btns[index].cssClass : ''}
+                ${btns[index].backgroundHoverType === 'gradient' ? ' btn-arrow btn-cta btn-square' : btns[index].backgroundHoverType === 'yellow' ? ' btn-secondary' : 'btn-primary'} `,
+            href: !btns[index].link ? 'javascript:void(0);' : btns[index].link,
+            target: '_blank' === btns[index].target ? btns[index].target : undefined,
+            rel: relAttr
+          }, btns[index].icon && 'left' === btns[index].iconSide && React.createElement(_genicon.default, {
+            className: `color-fill--white svg svg--icon js-svg-exists kt-btn-svg-icon-${btns[index].icon} kt-btn-side-${btns[index].iconSide}`,
+            name: btns[index].icon,
+            size: !btns[index].size ? '14' : btns[index].size,
+            icon: _svgicons.default[btns[index].icon]
+          }), React.createElement(RichText.Content, {
+            tagName: 'span',
+            className: "kt-btn-inner-text",
+            value: btns[index].text
+          }), btns[index].icon && 'left' !== btns[index].iconSide && React.createElement(_genicon.default, {
+            className: `color-fill--white svg svg--icon js-svg-exists kt-btn-svg-icon-${btns[index].icon} kt-btn-side-${btns[index].iconSide}`,
+            name: btns[index].icon,
+            size: !btns[index].size ? '14' : btns[index].size,
+            icon: _svgicons.default[btns[index].icon]
+          }), btns[index].backgroundHoverType && 'gradient' === btns[index].backgroundHoverType && !btns[index].icon && React.createElement(_genicon.default, {
+            className: `svg svg--colorable js-svg-exists`,
+            name: `bb`,
+            htmltag: `span`
+          })));
+        };
+
+        let gridClasses = 'justify-content-center link-card-grid row button-layout-inline'; // for "inline"
+
+        let btnClasses = 'col-xs-12 col-md-6 col-lg-4 mb-4';
+
+        if (btnLayoutStyle == 'grid') {
+          gridClasses = 'justify-content-center link-card-grid row button-layout-grid';
+          btnClasses = 'col-xs-12 col-sm-6 pb-2 pr-1 pl-1';
+        } else if (btnLayoutStyle == 'banners') {
+          gridClasses = 'justify-content-center link-card-grid row button-layout-banner';
+          btnClasses = 'col m-0 p-0';
+        }
+
+        return React.createElement("div", {
+          className: `${gridClasses} kt-btn-align-${hAlign} kt-btn-tablet-align-${thAlign ? thAlign : 'inherit'} kt-btn-mobile-align-${mhAlign ? mhAlign : 'inherit'} kt-btns${uniqueID}`
+        }, (0, _times.default)(btnCount, n => renderSaveBtns(n, btnClasses)));
+      }
+    });
+  }
+}
+
+},{"../../genicon":52,"../../hex-to-rgba":53,"../../svgicons":56,"../../svgiconsnames":57,"./components/link-cards":39,"@fonticonpicker/react-fonticonpicker":59,"lodash/map":182,"lodash/times":187}],41:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0; // Setup the block.
+
+const {
+  Component
+} = wp.element;
+/**
+ * Create a Pane wrapper Component.
+ */
+
+class Pane extends Component {
+  constructor(props) {
+    super(...arguments);
+  }
+
+  render() {
+    let className = ''; // if (this.props.className !== 'wp-block-inclind-blocks-inclind-pane') {
+    //   className = className + ' card ' + this.props.className
+    // }
+
+    return React.createElement("div", {
+      className: className
+    }, this.props.children);
+  }
+
+}
+
+exports.default = Pane;
+
+},{}],42:[function(require,module,exports){
+"use strict";
+
+var _pane = _interopRequireDefault(require("./components/pane"));
+
+var _genicon = _interopRequireDefault(require("../../genicon"));
+
+var _svgiconsnames = _interopRequireDefault(require("../../svgiconsnames"));
+
+var _svgicons = _interopRequireDefault(require("../../svgicons"));
+
+var _reactFonticonpicker = _interopRequireDefault(require("@fonticonpicker/react-fonticonpicker"));
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    default: obj
+  };
+} // Import block dependencies and components
+// import classnames from "classnames";
+// Internationalization
+
+
+const __ = Drupal.t; // Extend component
+
+const {
+  Component,
+  Fragment
+} = wp.element; // Register block
+
+const {
+  registerBlockType
+} = wp.blocks; // Register editor components
+
+const {
+  InnerBlocks,
+  RichText
+} = wp.blockEditor; // Register components
+
+const {
+  PanelBody
+} = wp.components;
+const {
+  dispatch,
+  select
+} = wp.data;
+/**
+ * This allows for checking to see if the block needs to generate a new ID.
+ */
+
+const ktpaneUniqueIDs = [];
+const ktpaneUniqueIDsCount = [];
+
+class InclindPane extends Component {
+  constructor() {
+    super(...arguments);
+  }
+
+  componentDidMount() {
+    if (!this.props.attributes.uniqueID) {
+      this.props.setAttributes({
+        uniqueID: '_' + this.props.clientId.substr(2, 9)
+      });
+      ktpaneUniqueIDs.push('_' + this.props.clientId.substr(2, 9));
+    } else if (ktpaneUniqueIDs.includes(this.props.attributes.uniqueID)) {
+      this.props.setAttributes({
+        uniqueID: '_' + this.props.clientId.substr(2, 9)
+      });
+      ktpaneUniqueIDs.push('_' + this.props.clientId.substr(2, 9));
+    } else {
+      ktpaneUniqueIDs.push(this.props.attributes.uniqueID);
+    }
+
+    const rootID = wp.data.select('core/block-editor').getBlockRootClientId(this.props.clientId);
+
+    if (!this.props.attributes.id) {
+      const accordionBlock = wp.data.select('core/block-editor').getBlocksByClientId(rootID);
+      const newPaneCount = accordionBlock[0].attributes.paneCount + 1;
+      this.props.setAttributes({
+        id: newPaneCount
+      });
+
+      if (undefined === ktpaneUniqueIDsCount[rootID]) {
+        ktpaneUniqueIDsCount.push(rootID);
+        ktpaneUniqueIDsCount[rootID].push(newPaneCount);
+      } else if (undefined !== ktpaneUniqueIDsCount[rootID]) {
+        ktpaneUniqueIDsCount[rootID].push(newPaneCount);
+      }
+
+      wp.data.dispatch('core/block-editor').updateBlockAttributes(rootID, {
+        paneCount: newPaneCount
+      });
+    } else if (undefined === ktpaneUniqueIDsCount[rootID]) {
+      ktpaneUniqueIDsCount[rootID] = [this.props.attributes.id];
+    } else if (undefined !== ktpaneUniqueIDsCount[rootID]) {
+      if (ktpaneUniqueIDsCount[rootID].includes(this.props.attributes.id)) {
+        const accordionBlock = wp.data.select('core/block-editor').getBlocksByClientId(rootID);
+        const newPaneCount = accordionBlock[0].attributes.paneCount + 1;
+        this.props.setAttributes({
+          id: newPaneCount
+        });
+        wp.data.dispatch('core/block-editor').updateBlockAttributes(rootID, {
+          paneCount: newPaneCount
+        });
+        ktpaneUniqueIDsCount[rootID].push(newPaneCount);
+      } else {
+        ktpaneUniqueIDsCount[rootID].push(this.props.attributes.id);
+      }
+    }
+  } // Render element while editing in Gutenberg:
+
+
+  render() {
+    const {
+      attributes: {
+        id,
+        uniqueID,
+        parentID,
+        startCollapsed,
+        title,
+        icon,
+        iconSide,
+        hideLabel,
+        titleTag
+      },
+      setAttributes
+    } = this.props;
+
+    const renderSVG = svg => React.createElement(_genicon.default, {
+      name: svg,
+      icon: 'fa' === svg.substring(0, 2) ? FaIco[svg] : _svgicons.default[svg]
+    });
+
+    const HtmlTagOut = !titleTag ? 'div' : titleTag;
+    return React.createElement("div", {
+      className: `kt-accordion-pane kt-accordion-pane-${id} kt-pane${uniqueID}`
+    }, React.createElement(HtmlTagOut, {
+      className: 'kt-accordion-header-wrap'
+    }, React.createElement("div", {
+      className: `kt-blocks-accordion-header kt-acccordion-button-label-${hideLabel ? 'hide' : 'show'}`
+    }, React.createElement("div", {
+      className: "kt-blocks-accordion-title-wrap"
+    }, icon && 'left' === iconSide && React.createElement(_genicon.default, {
+      className: `kt-btn-svg-icon kt-btn-svg-icon-${icon} kt-btn-side-${iconSide}`,
+      name: icon,
+      icon: 'fa' === icon.substring(0, 2) ? FaIco[icon] : _svgicons.default[icon]
+    }), React.createElement(RichText, {
+      className: "kt-blocks-accordion-title",
+      tagName: 'div',
+      placeholder: __('Add Title'),
+      onChange: value => setAttributes({
+        title: value
+      }),
+      value: title,
+      keepPlaceholderOnFocus: true
+    }), icon && 'right' === iconSide && React.createElement(_genicon.default, {
+      className: `kt-btn-svg-icon kt-btn-svg-icon-${icon} kt-btn-side-${iconSide}`,
+      name: icon,
+      icon: 'fa' === icon.substring(0, 2) ? FaIco[icon] : _svgicons.default[icon]
+    })), React.createElement("div", {
+      className: "kt-blocks-accordion-icon-trigger"
+    }))), React.createElement("div", {
+      className: 'kt-accordion-panel'
+    }, React.createElement("div", {
+      className: 'kt-accordion-panel-inner'
+    }, React.createElement(InnerBlocks, {
+      templateLock: false
+    }))));
+  }
+
+} //  Start Drupal Specific.
+
+
+const category = {
+  slug: 'inclind-blocks',
+  title: __('Custom Blocks')
+}; // Grab the current categories and merge in the new category if not present.
+
+const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
+dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
+
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
+
+  if (blocks.hasOwnProperty(category.slug + '/accordion-bootstrap') && blocks[category.slug + '/accordion-bootstrap']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-pane', {
+      title: __('Pane', 'inclind-pane'),
+      description: __('Accordion pane.', 'inclind-pane'),
+      parent: [category.slug + '/accordion-bootstrap'],
+      category: 'inclind-blocks',
+      attributes: {
+        id: {
+          type: 'number',
+          default: 1
+        },
+        title: {
+          type: 'array',
+          source: 'children',
+          selector: '.kt-blocks-accordion-title',
+          default: ''
+        },
+        titleTag: {
+          type: 'string',
+          default: 'h5'
+        },
+        hideLabel: {
+          type: 'bool',
+          default: false
+        },
+        startCollapsed: {
+          type: 'bool',
+          default: false
+        },
+        icon: {
+          type: 'string',
+          default: ''
+        },
+        iconSide: {
+          type: 'string',
+          default: 'right'
+        },
+        uniqueID: {
+          type: 'string',
+          default: ''
+        },
+        parentID: {
+          type: 'string',
+          default: ''
+        }
+      },
+      supports: {
+        inserter: false,
+        reusable: false,
+        html: false,
+        anchor: true
+      },
+
+      getEditWrapperProps(attributes) {
+        return {
+          'data-pane': attributes.id
+        };
+      },
+
+      edit: InclindPane,
+      save: props => {
+        const {
+          attributes: {
+            id,
+            uniqueID,
+            parentID,
+            startCollapsed,
+            title,
+            icon,
+            iconSide,
+            hideLabel,
+            titleTag
+          }
+        } = props;
+        const HtmlTagOut = !titleTag ? 'h5' : titleTag; // Render the section on Front-end:
+
+        return React.createElement("div", {
+          className: `card mb-0 pane-${id} pane${uniqueID}`
+        }, React.createElement("div", {
+          className: "card-header p-0",
+          id: `acc-header${uniqueID}`
+        }, React.createElement(HtmlTagOut, {
+          className: `mb-0 ${icon ? 'has-icon' : ''}`
+        }, icon && 'left' === iconSide && React.createElement(_genicon.default, {
+          className: `btn-svg-icon btn-svg-icon-${icon} btn-side-${iconSide}`,
+          name: icon,
+          icon: _svgicons.default[icon]
+        }), React.createElement("button", {
+          className: "p-4 pr-6 col-12 btn btn-link text-left",
+          type: "button",
+          "data-toggle": "collapse",
+          "data-target": `#acc-body${uniqueID}`,
+          "aria-expanded": "false" // aria-expanded={`${((!startCollapsed && id == 1) ? 'true' : 'false')}`}
+          ,
+          "aria-controls": `acc-body${uniqueID}`
+        }, React.createElement(RichText.Content, {
+          className: 'kt-blocks-accordion-title acc-title-inner',
+          tagName: 'span',
+          value: title
+        })), icon && 'right' === iconSide && React.createElement(_genicon.default, {
+          className: `btn-svg-icon btn-svg-icon-${icon} btn-side-${iconSide}`,
+          name: icon,
+          icon: _svgicons.default[icon]
+        }))), React.createElement("div", {
+          id: `acc-body${uniqueID}` // className={`collapse ${((!startCollapsed && id == 1) ? 'show' : '')}`}
+          ,
+          className: "collapse",
+          "aria-labelledby": `acc-header${uniqueID}`,
+          "data-parent": `#${parentID}`
+        }, React.createElement("div", {
+          className: "card-body"
+        }, React.createElement(InnerBlocks.Content, null))));
+      }
+    });
+  }
+}
+
+},{"../../genicon":52,"../../svgicons":56,"../../svgiconsnames":57,"./components/pane":41,"@fonticonpicker/react-fonticonpicker":59}],43:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3487,7 +7554,7 @@ class SectionWrap extends Component {
 
 exports.default = SectionWrap;
 
-},{}],34:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 "use strict";
 
 var _sectionWrap = _interopRequireDefault(require("./components/section-wrap"));
@@ -3516,7 +7583,9 @@ function _extends() {
   };
 
   return _extends.apply(this, arguments);
-} // Internationalization
+} // import GenIcon from "../../genicon";
+// import Ico from "../../svgicons";
+// Internationalization
 
 
 const __ = Drupal.t; // Extend component
@@ -3720,141 +7789,2184 @@ const category = {
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-section-wrap', {
-  title: __('Section Wrapper', 'inclind-section-wrap'),
-  description: __('Wrap the content into a container and select full width display or contained to a grid. Adds ability to turn on/off gradient on the wrapper.', 'inclind-section-wrap'),
-  category: 'inclind-blocks',
-  keywords: [__('Section', 'inclind-section-wrap'), __('Wrapper', 'inclind-section-wrap'), __('inclind', 'inclind-section-wrap'), __('custom', 'inclind-section-wrap')],
-  attributes: {
-    backgroundType: {
-      type: 'string',
-      default: 'none'
-    },
-    backgroundColor: {
-      type: 'string',
-      default: '#2e358f'
-    },
-    backgroundImage: {
-      type: 'string',
-      default: 'https://placeimg.com/1200/600/nature/grayscale'
-    },
-    backgroundImageData: {
-      type: 'object',
-      default: {}
-    },
-    overlayOpacity: {
-      type: 'number',
-      default: 80
-    },
-    overlayColor: {
-      type: 'string',
-      default: '#2e358f'
-    },
-    padding: {
-      type: 'string',
-      default: ''
-    },
-    margin: {
-      type: 'string',
-      default: ''
-    },
-    align: {
-      type: 'string',
-      default: 'none'
-    },
-    contentWidth: {
-      type: 'number'
-    },
-    uniqueID: {
-      type: 'string',
-      default: ''
-    },
-    hAlign: {
-      type: 'string',
-      default: 'left'
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
+
+  if (blocks.hasOwnProperty(category.slug + '/inclind-section-wrap') && blocks[category.slug + '/inclind-section-wrap']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-section-wrap', {
+      title: __('Section Wrapper', 'inclind-section-wrap'),
+      description: __('Wrap the content into a container and select full width display or contained to a grid. Adds ability to turn on/off gradient on the wrapper.', 'inclind-section-wrap'),
+      category: 'inclind-blocks',
+      keywords: [__('Section', 'inclind-section-wrap'), __('Wrapper', 'inclind-section-wrap'), __('inclind', 'inclind-section-wrap'), __('custom', 'inclind-section-wrap')],
+      attributes: {
+        backgroundType: {
+          type: 'string',
+          default: 'none'
+        },
+        backgroundColor: {
+          type: 'string',
+          default: '#2e358f'
+        },
+        backgroundImage: {
+          type: 'string',
+          default: 'https://placeimg.com/1200/600/nature/grayscale'
+        },
+        backgroundImageData: {
+          type: 'object',
+          default: {}
+        },
+        overlayOpacity: {
+          type: 'number',
+          default: 80
+        },
+        overlayColor: {
+          type: 'string',
+          default: '#2e358f'
+        },
+        padding: {
+          type: 'string',
+          default: ''
+        },
+        margin: {
+          type: 'string',
+          default: ''
+        },
+        align: {
+          type: 'string',
+          default: 'none'
+        },
+        contentWidth: {
+          type: 'number'
+        },
+        uniqueID: {
+          type: 'string',
+          default: ''
+        },
+        hAlign: {
+          type: 'string',
+          default: 'left'
+        }
+      },
+
+      // Render the block components.
+      getEditWrapperProps({
+        blockAlignment
+      }) {
+        if ('left' === blockAlignment || 'right' === blockAlignment || 'center' === blockAlignment) {
+          return {
+            'data-align': blockAlignment
+          };
+        }
+      },
+
+      edit: InclindSectionWrap,
+      save: props => {
+        const {
+          attributes: {
+            backgroundType,
+            backgroundColor,
+            backgroundImage,
+            backgroundImageData,
+            overlayOpacity,
+            overlayColor,
+            align,
+            margin,
+            padding,
+            contentWidth,
+            uniqueID,
+            hAlign
+          }
+        } = props;
+        const hasImageBg = backgroundType === 'image';
+        const containerStyle = {
+          backgroundColor: !hasImageBg && backgroundType !== 'none' ? backgroundColor : '',
+          backgroundImage: hasImageBg && `url('${backgroundImage}')`,
+          'background-size': 'cover'
+        };
+        const overlayStyle = !hasImageBg ? {} : {
+          display: 'block',
+          backgroundColor: overlayColor || '#2e358f',
+          opacity: parseInt(overlayOpacity, 10) / 100
+        };
+        const wrapperStyle = {
+          maxWidth: contentWidth && `${contentWidth}px`
+        };
+        const classes = [`text-${hAlign}`, `py-4`, (0, _classnames.default)(`align${align ? align : 'none'}`)];
+
+        if (backgroundType === 'gradient') {
+          classes.push('gradient-bg');
+          classes.push('has-overlay');
+        } else if (backgroundType === 'gray') {
+          classes.push('bg-lighter-gray');
+        } else if (backgroundType !== 'none') {
+          classes.push('has-overlay');
+          classes.push('text-white');
+        }
+
+        if (margin) {
+          classes.push(`my-${margin}`);
+        }
+
+        if (padding) {
+          classes.push(`py-${padding}`);
+        } // Render the section on Front-end:
+
+
+        return React.createElement("div", _extends({
+          className: classes.join(' '),
+          style: containerStyle
+        }, backgroundImageData), React.createElement("div", {
+          className: "g-section-overlay",
+          style: backgroundType !== 'gradient' && backgroundType !== 'none' ? overlayStyle : ''
+        }), React.createElement("div", {
+          className: `g-section-wrapper ${align == 'full' ? ' container' : ' container-fluid'}`,
+          style: wrapperStyle
+        }, React.createElement(InnerBlocks.Content, null)));
+      }
+    });
+  }
+}
+
+},{"./components/section-wrap":43,"classnames":60}],45:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0; // Setup the block.
+
+const {
+  Component
+} = wp.element;
+/**
+ * Create a Tab wrapper Component.
+ */
+
+class Tab extends Component {
+  constructor(props) {
+    super(...arguments);
+  }
+
+  render() {
+    let className = '';
+
+    if (this.props.className !== 'wp-block-inclind-blocks-inclind-tab') {
+      className = className + ' ' + this.props.className;
     }
-  },
 
-  // Render the block components.
-  getEditWrapperProps({
-    blockAlignment
-  }) {
-    if ('left' === blockAlignment || 'right' === blockAlignment || 'center' === blockAlignment) {
-      return {
-        'data-align': blockAlignment
-      };
+    return React.createElement("div", {
+      className: className
+    }, this.props.children);
+  }
+
+}
+
+exports.default = Tab;
+
+},{}],46:[function(require,module,exports){
+"use strict";
+
+var _tab = _interopRequireDefault(require("./components/tab"));
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    default: obj
+  };
+} // Import block dependencies and components
+// import attributes from "../tabs/attributes";
+// import edit from "../tabs/edit";
+// import save from "../tabs/save";
+// Internationalization
+
+
+const __ = Drupal.t; // Extend component
+
+const {
+  Component,
+  Fragment
+} = wp.element; // Register block
+
+const {
+  registerBlockType
+} = wp.blocks; // Register editor components
+
+const {
+  InnerBlocks
+} = wp.blockEditor; // Register components
+// const {
+//   Fragment,
+//   Component,
+// } = wp.components;
+
+const {
+  dispatch,
+  select
+} = wp.data;
+/**
+ * This allows for checking to see if the block needs to generate a new ID.
+ */
+
+const kttabUniqueIDs = [];
+
+class InclindTab extends Component {
+  constructor() {
+    super(...arguments);
+    this.state = {
+      settings: {}
+    };
+  }
+
+  componentDidMount() {
+    if (!this.props.attributes.uniqueID) {
+      this.props.setAttributes({
+        uniqueID: '_' + this.props.clientId.substr(2, 9)
+      });
+      kttabUniqueIDs.push('_' + this.props.clientId.substr(2, 9));
+    } else if (kttabUniqueIDs.includes(this.props.attributes.uniqueID)) {
+      this.props.setAttributes({
+        uniqueID: '_' + this.props.clientId.substr(2, 9)
+      });
+      kttabUniqueIDs.push('_' + this.props.clientId.substr(2, 9));
+    } else {
+      kttabUniqueIDs.push(this.props.attributes.uniqueID);
     }
-  },
+  } // Render element while editing in Gutenberg:
 
-  edit: InclindSectionWrap,
-  save: props => {
+
+  render() {
     const {
       attributes: {
-        backgroundType,
-        backgroundColor,
-        backgroundImage,
-        backgroundImageData,
-        overlayOpacity,
-        overlayColor,
-        align,
-        margin,
-        padding,
-        contentWidth,
+        id,
         uniqueID,
-        hAlign
+        parentID
       }
-    } = props;
-    const hasImageBg = backgroundType === 'image';
-    const containerStyle = {
-      backgroundColor: !hasImageBg && backgroundType !== 'none' ? backgroundColor : '',
-      backgroundImage: hasImageBg && `url('${backgroundImage}')`,
-      'background-size': 'cover'
-    };
-    const overlayStyle = !hasImageBg ? {} : {
-      display: 'block',
-      backgroundColor: overlayColor || '#2e358f',
-      opacity: parseInt(overlayOpacity, 10) / 100
-    };
-    const wrapperStyle = {
-      maxWidth: contentWidth && `${contentWidth}px`
-    };
-    const classes = [`text-${hAlign}`, `py-4`, (0, _classnames.default)(`align${align ? align : 'none'}`)];
-
-    if (backgroundType === 'gradient') {
-      classes.push('gradient-bg');
-      classes.push('has-overlay');
-    } else if (backgroundType === 'gray') {
-      classes.push('bg-lighter-gray');
-    } else if (backgroundType !== 'none') {
-      classes.push('has-overlay');
-      classes.push('text-white');
-    }
-
-    if (margin) {
-      classes.push(`my-${margin}`);
-    }
-
-    if (padding) {
-      classes.push(`py-${padding}`);
-    } // Render the section on Front-end:
-
-
-    return React.createElement("div", _extends({
-      className: classes.join(' '),
-      style: containerStyle
-    }, backgroundImageData), React.createElement("div", {
-      className: "g-section-overlay",
-      style: backgroundType !== 'gradient' && backgroundType !== 'none' ? overlayStyle : ''
-    }), React.createElement("div", {
-      className: `g-section-wrapper ${align == 'full' ? ' container' : ' container-fluid'}`,
-      style: wrapperStyle
-    }, React.createElement(InnerBlocks.Content, null)));
+    } = this.props;
+    return React.createElement(Fragment, null, React.createElement("div", {
+      className: `kt-tab-inner-content kt-inner-tab-${id} kt-inner-tab${uniqueID}`
+    }, React.createElement(InnerBlocks, {
+      templateLock: false
+    })));
   }
-});
 
-},{"./components/section-wrap":33,"classnames":44}],35:[function(require,module,exports){
+} //  Start Drupal Specific.
+
+
+const category = {
+  slug: 'inclind-blocks',
+  title: __('Custom Blocks')
+}; // Grab the current categories and merge in the new category if not present.
+
+const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
+dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
+
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
+
+  if (blocks.hasOwnProperty(category.slug + '/inclind-tabs') && blocks[category.slug + '/inclind-tabs']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-tab', {
+      title: __('Tab (Bootstrap)', 'inclind-tab'),
+      description: __('Single Tab element for Tabs creation.', 'inclind-tab'),
+      category: 'inclind-blocks',
+      parent: [category.slug + '/inclind-tabs'],
+      keywords: [__('Tab', 'inclind-tab'), __('inclind', 'inclind-tab'), __('custom', 'inclind-tab')],
+      attributes: {
+        id: {
+          type: 'number',
+          default: 1
+        },
+        uniqueID: {
+          type: 'string',
+          default: ''
+        },
+        parentID: {
+          type: 'string',
+          default: ''
+        }
+      },
+      supports: {
+        inserter: false,
+        reusable: false,
+        html: false
+      },
+
+      // Render the block components.
+      getEditWrapperProps(attributes) {
+        return {
+          'data-tab': attributes.id
+        };
+      },
+
+      edit: InclindTab,
+
+      save({
+        attributes
+      }) {
+        const {
+          id,
+          uniqueID,
+          parentID
+        } = attributes;
+        const backupAnchor = `${parentID}-tab-${id}`;
+        const ref = `${parentID}-tabcontent-${id}`;
+        const sel_tab = `${id == 1 ? 'true' : 'false'}`;
+        const sel_tab_class = `${id == 1 ? 'show active' : ''}`; // Render the Tab on Front-end:
+
+        return React.createElement("div", {
+          className: `tab-pane fade ${sel_tab_class}`,
+          id: `${ref}`,
+          role: "tabpanel",
+          "aria-labelledby": `${backupAnchor}`
+        }, React.createElement(InnerBlocks.Content, null)) // <div
+        //     className={`kt-tab-inner-content kt-inner-tab-${id} kt-inner-tab${uniqueID}`}>
+        //   <div className={'kt-tab-inner-content-inner'}>
+        //     <InnerBlocks.Content/>
+        //   </div>
+        // </div>
+        ;
+      }
+
+    });
+  }
+}
+
+},{"./components/tab":45}],47:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+/**
+ * @file
+ * BLOCK: Inclind Tabs Attributes.
+ */
+// Internationalization.
+
+const __ = Drupal.t;
+const attributes = {
+  uniqueID: {
+    type: 'string',
+    default: ''
+  },
+  tabCount: {
+    type: 'number',
+    default: 3
+  },
+  layout: {
+    type: 'string',
+    default: 'tabs'
+  },
+  mobileLayout: {
+    type: 'string',
+    default: 'inherit'
+  },
+  tabletLayout: {
+    type: 'string',
+    default: 'inherit'
+  },
+  currentTab: {
+    type: 'number',
+    default: 1
+  },
+  minHeight: {
+    type: 'number',
+    default: ''
+  },
+  maxWidth: {
+    type: 'number',
+    default: ''
+  },
+  contentBgColor: {
+    type: 'string',
+    default: ''
+  },
+  contentBorderColor: {
+    type: 'string',
+    default: ''
+  },
+  contentBorder: {
+    type: 'array',
+    default: [1, 1, 1, 1]
+  },
+  contentBorderControl: {
+    type: 'string',
+    default: 'linked'
+  },
+  innerPadding: {
+    type: 'array',
+    default: [20, 20, 20, 20]
+  },
+  innerPaddingControl: {
+    type: 'string',
+    default: 'linked'
+  },
+  innerPaddingM: {
+    type: 'array'
+  },
+  tabAlignment: {
+    type: 'string',
+    default: 'left'
+  },
+  blockAlignment: {
+    type: 'string',
+    default: 'none'
+  },
+  titles: {
+    type: 'array',
+    default: [{
+      text: __('Tab 1'),
+      icon: '',
+      iconSide: 'right',
+      onlyIcon: false,
+      subText: '',
+      anchor: ''
+    }, {
+      text: __('Tab 2'),
+      icon: '',
+      iconSide: 'right',
+      onlyIcon: false,
+      subText: '',
+      anchor: ''
+    }, {
+      text: __('Tab 3'),
+      icon: '',
+      iconSide: 'right',
+      onlyIcon: false,
+      subText: '',
+      anchor: ''
+    }]
+  },
+  iSize: {
+    type: 'number',
+    default: 14
+  },
+  titleColor: {
+    type: 'string'
+  },
+  titleColorHover: {
+    type: 'string'
+  },
+  titleColorActive: {
+    type: 'string'
+  },
+  titleBg: {
+    type: 'string'
+  },
+  titleBgHover: {
+    type: 'string'
+  },
+  titleBgActive: {
+    type: 'string',
+    default: '#ffffff'
+  },
+  titleBorder: {
+    type: 'string'
+  },
+  titleBorderHover: {
+    type: 'string'
+  },
+  titleBorderActive: {
+    type: 'string'
+  },
+  titleBorderWidth: {
+    type: 'array'
+  },
+  titleBorderControl: {
+    type: 'string',
+    default: 'individual'
+  },
+  titleBorderRadius: {
+    type: 'array'
+  },
+  titleBorderRadiusControl: {
+    type: 'string',
+    default: 'individual'
+  },
+  titlePadding: {
+    type: 'array'
+  },
+  titlePaddingControl: {
+    type: 'string',
+    default: 'individual'
+  },
+  titleMargin: {
+    type: 'array'
+  },
+  titleMarginControl: {
+    type: 'string',
+    default: 'individual'
+  },
+  size: {
+    type: 'number'
+  },
+  sizeType: {
+    type: 'string',
+    default: 'px'
+  },
+  lineHeight: {
+    type: 'number'
+  },
+  lineType: {
+    type: 'string',
+    default: 'px'
+  },
+  tabSize: {
+    type: 'number'
+  },
+  tabLineHeight: {
+    type: 'number'
+  },
+  mobileSize: {
+    type: 'number'
+  },
+  mobileLineHeight: {
+    type: 'number'
+  },
+  letterSpacing: {
+    type: 'number'
+  },
+  typography: {
+    type: 'string',
+    default: ''
+  },
+  googleFont: {
+    type: 'boolean',
+    default: false
+  },
+  loadGoogleFont: {
+    type: 'boolean',
+    default: true
+  },
+  fontSubset: {
+    type: 'string',
+    default: ''
+  },
+  fontVariant: {
+    type: 'string',
+    default: ''
+  },
+  fontWeight: {
+    type: 'string',
+    default: 'regular'
+  },
+  fontStyle: {
+    type: 'string',
+    default: 'normal'
+  },
+  startTab: {
+    type: 'number',
+    default: ''
+  },
+  showPresets: {
+    type: 'bool',
+    default: false
+  },
+  subtitleFont: {
+    type: 'array',
+    default: [{
+      size: ['', '', ''],
+      sizeType: 'px',
+      lineHeight: ['', '', ''],
+      lineType: 'px',
+      letterSpacing: '',
+      textTransform: '',
+      family: '',
+      google: false,
+      style: '',
+      weight: '',
+      variant: '',
+      subset: '',
+      loadGoogle: true,
+      padding: [0, 0, 0, 0],
+      paddingControl: 'linked',
+      margin: [0, 0, 0, 0],
+      marginControl: 'linked'
+    }]
+  },
+  enableSubtitle: {
+    type: 'bool',
+    default: false
+  },
+  widthType: {
+    type: 'string',
+    default: 'normal'
+  },
+  tabWidth: {
+    type: 'array',
+    default: [4, '', '']
+  },
+  gutter: {
+    type: 'array',
+    default: [10, '', '']
+  }
+};
+var _default = attributes;
+exports.default = _default;
+
+},{}],48:[function(require,module,exports){
+"use strict";
+
+var _attributes = _interopRequireDefault(require("./attributes"));
+
+var _classnames = _interopRequireDefault(require("classnames"));
+
+var _times = _interopRequireDefault(require("lodash/times"));
+
+var _edit = _interopRequireDefault(require("./edit"));
+
+var _save = _interopRequireDefault(require("./save"));
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    default: obj
+  };
+}
+/**
+ * @file
+ * BLOCK: Inclind Tabs.
+ */
+// Import Attributes.
+// Import Edit.
+// Import Save.
+// import Icon from "../infobox/components/icon";
+// import Infobox from "../infobox/components/infobox";
+// Internationalization
+
+
+const __ = Drupal.t; // Internal block libraries.
+
+const {
+  sprintf
+} = wp.i18n;
+const {
+  registerBlockType
+} = wp.blocks;
+const {
+  Fragment
+} = wp.element;
+const {
+  select,
+  dispatch
+} = wp.data;
+const {
+  InnerBlocks,
+  RichText
+} = wp.blockEditor;
+/**
+ * Strip alpha-numeric characters from a string.
+ *
+ * @param string
+ *   The string to be stripped.
+ *
+ * @return {*}
+ *   The transformed string.
+ */
+
+function stripStringRender(string) {
+  return string.toLowerCase().replace(/[^0-9a-z-]/g, '');
+} // Initialize a Category for the block.
+
+
+const category = {
+  slug: 'inclind-blocks',
+  title: __('Custom Blocks')
+}; // Grab the current categories and merge in the new category if not present.
+
+const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
+dispatch('core/blocks').setCategories([category, ...currentCategories]);
+
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
+
+  if (blocks.hasOwnProperty(category.slug + '/inclind-tabs') && blocks[category.slug + '/inclind-tabs']) {
+    // Register the block.
+    registerBlockType('inclind-blocks/inclind-tabs', {
+      title: __('Tabs'),
+      category: 'inclind-blocks',
+      keywords: [__('tabs'), __('tab'), __('Inclind')],
+      supports: {
+        anchor: true
+      },
+      attributes: _attributes.default,
+
+      /**
+       * Implement getEditoorWrapperProps().
+       *
+       * @param blockAlignment
+       *   Alignment property value.
+       *
+       * @return {{"data-align": *}}
+       *   An object containing data attributes for the wrapper.
+       */
+      getEditWrapperProps({
+        blockAlignment
+      }) {
+        if ('full' === blockAlignment || 'wide' === blockAlignment || 'center' === blockAlignment) {
+          return {
+            'data-align': blockAlignment
+          };
+        }
+      },
+
+      edit: _edit.default,
+      save: _save.default // deprecated: [
+      //   {
+      //     attributes: {
+      //       uniqueID: {
+      //         type: 'string',
+      //         default: '',
+      //       },
+      //       tabCount: {
+      //         type: 'number',
+      //         default: 3,
+      //       },
+      //       layout: {
+      //         type: 'string',
+      //         default: 'tabs',
+      //       },
+      //       mobileLayout: {
+      //         type: 'string',
+      //         default: 'inherit',
+      //       },
+      //       tabletLayout: {
+      //         type: 'string',
+      //         default: 'inherit',
+      //       },
+      //       currentTab: {
+      //         type: 'number',
+      //         default: 1,
+      //       },
+      //       minHeight: {
+      //         type: 'number',
+      //         default: '',
+      //       },
+      //       maxWidth: {
+      //         type: 'number',
+      //         default: '',
+      //       },
+      //       contentBgColor: {
+      //         type: 'string',
+      //         default: '',
+      //       },
+      //       contentBorderColor: {
+      //         type: 'string',
+      //         default: '',
+      //       },
+      //       contentBorder: {
+      //         type: 'array',
+      //         default: [ 1, 1, 1, 1 ],
+      //       },
+      //       contentBorderControl: {
+      //         type: 'string',
+      //         default: 'linked',
+      //       },
+      //       innerPadding: {
+      //         type: 'array',
+      //         default: [ 20, 20, 20, 20 ],
+      //       },
+      //       innerPaddingControl: {
+      //         type: 'string',
+      //         default: 'linked',
+      //       },
+      //       innerPaddingM: {
+      //         type: 'array',
+      //       },
+      //       tabAlignment: {
+      //         type: 'string',
+      //         default: 'left',
+      //       },
+      //       blockAlignment: {
+      //         type: 'string',
+      //         default: 'none',
+      //       },
+      //       titles: {
+      //         type: 'array',
+      //         default: [ {
+      //           text: __('Tab 1'),
+      //           icon: '',
+      //           iconSide: 'right',
+      //           onlyIcon: false,
+      //         }, {
+      //           text: __('Tab 2'),
+      //           icon: '',
+      //           iconSide: 'right',
+      //           onlyIcon: false,
+      //         }, {
+      //           text: __('Tab 3'),
+      //           icon: '',
+      //           iconSide: 'right',
+      //           onlyIcon: false,
+      //         } ],
+      //       },
+      //       iSize: {
+      //         type: 'number',
+      //         default: 14,
+      //       },
+      //       titleColor: {
+      //         type: 'string',
+      //       },
+      //       titleColorHover: {
+      //         type: 'string',
+      //       },
+      //       titleColorActive: {
+      //         type: 'string',
+      //       },
+      //       titleBg: {
+      //         type: 'string',
+      //       },
+      //       titleBgHover: {
+      //         type: 'string',
+      //       },
+      //       titleBgActive: {
+      //         type: 'string',
+      //         default: '#ffffff',
+      //       },
+      //       titleBorder: {
+      //         type: 'string',
+      //       },
+      //       titleBorderHover: {
+      //         type: 'string',
+      //       },
+      //       titleBorderActive: {
+      //         type: 'string',
+      //       },
+      //       titleBorderWidth: {
+      //         type: 'array',
+      //       },
+      //       titleBorderControl: {
+      //         type: 'string',
+      //         default: 'individual',
+      //       },
+      //       titleBorderRadius: {
+      //         type: 'array',
+      //       },
+      //       titleBorderRadiusControl: {
+      //         type: 'string',
+      //         default: 'individual',
+      //       },
+      //       titlePadding: {
+      //         type: 'array',
+      //       },
+      //       titlePaddingControl: {
+      //         type: 'string',
+      //         default: 'individual',
+      //       },
+      //       titleMargin: {
+      //         type: 'array',
+      //       },
+      //       titleMarginControl: {
+      //         type: 'string',
+      //         default: 'individual',
+      //       },
+      //       size: {
+      //         type: 'number',
+      //       },
+      //       sizeType: {
+      //         type: 'string',
+      //         default: 'px',
+      //       },
+      //       lineHeight: {
+      //         type: 'number',
+      //       },
+      //       lineType: {
+      //         type: 'string',
+      //         default: 'px',
+      //       },
+      //       tabSize: {
+      //         type: 'number',
+      //       },
+      //       tabLineHeight: {
+      //         type: 'number',
+      //       },
+      //       mobileSize: {
+      //         type: 'number',
+      //       },
+      //       mobileLineHeight: {
+      //         type: 'number',
+      //       },
+      //       letterSpacing: {
+      //         type: 'number',
+      //       },
+      //       typography: {
+      //         type: 'string',
+      //         default: '',
+      //       },
+      //       googleFont: {
+      //         type: 'boolean',
+      //         default: false,
+      //       },
+      //       loadGoogleFont: {
+      //         type: 'boolean',
+      //         default: true,
+      //       },
+      //       fontSubset: {
+      //         type: 'string',
+      //         default: '',
+      //       },
+      //       fontVariant: {
+      //         type: 'string',
+      //         default: '',
+      //       },
+      //       fontWeight: {
+      //         type: 'string',
+      //         default: 'regular',
+      //       },
+      //       fontStyle: {
+      //         type: 'string',
+      //         default: 'normal',
+      //       },
+      //     },
+      //     save: ({attributes}) => {
+      //       const { tabCount, blockAlignment, currentTab, mobileLayout, layout, tabletLayout, uniqueID, titles, iSize, maxWidth, tabAlignment } = attributes;
+      //       const layoutClass = (! layout ? 'tabs' : layout);
+      //       const tabLayoutClass = (! tabletLayout ? 'inherit' : tabletLayout);
+      //       const mobileLayoutClass = (! mobileLayout ? 'inherit' : mobileLayout);
+      //       const accordionClass = ((mobileLayout && 'accordion' === mobileLayout) || (tabletLayout && 'accordion' === tabletLayout) ? 'kt-create-accordion' : '');
+      //       const classId = (! uniqueID ? 'notset' : uniqueID);
+      //       const classes = classnames(`align${ blockAlignment }`);
+      //       const innerClasses = classnames(`kt-tabs-wrap kt-tabs-id${ classId } kt-tabs-has-${ tabCount }-tabs kt-active-tab-${ currentTab } kt-tabs-layout-${ layoutClass } kt-tabs-tablet-layout-${ tabLayoutClass } kt-tabs-mobile-layout-${ mobileLayoutClass } kt-tab-alignment-${ tabAlignment } ${ accordionClass }`);
+      //       const renderTitles = (index) => {
+      //         return (
+      //           <Fragment>
+      //             <li id={ `tab-${ ( titles[ index ] && titles[ index ].text ? stripStringRender( titles[ index ].text.toString() ) : stripStringRender( __( 'Tab' ) + ( 1 + index ) ) ) }` } className={ `kt-title-item kt-title-item-${ 1 + index } kt-tabs-svg-show-${ ( titles[ index ] && titles[ index ].onlyIcon ? 'only' : 'always' ) } kt-tabs-icon-side-${ ( titles[ index ] && titles[ index ].iconSide ? titles[ index ].iconSide : 'right' ) } kt-tab-title-${ ( 1 + index === currentTab ? 'active' : 'inactive' ) }` }>
+      //               <a href={ `#tab-${ ( titles[ index ] && titles[ index ].text ? stripStringRender( titles[ index ].text.toString() ) : stripStringRender( __( 'Tab' ) + ( 1 + index ) ) ) }` } data-tab={ 1 + index } className={ `kt-tab-title kt-tab-title-${ 1 + index } ` } >
+      //                 <RichText.Content
+      //                   tagName="span"
+      //                   value={ ( titles[ index ] && titles[ index ].text ? titles[ index ].text : sprintf( __( 'Tab %d' ), ( 1 + index ) ) ) }
+      //                   className={ 'kt-title-text' }
+      //                 />
+      //               </a>
+      //             </li>
+      //           </Fragment>
+      //         );
+      //       };
+      //       return (
+      //         <div className={ classes } >
+      //           <div className={ innerClasses } style={ {
+      //             maxWidth: ( maxWidth ? maxWidth + 'px' : 'none' ),
+      //           } }>
+      //             <ul className="kt-tabs-title-list">
+      //               { times( tabCount, n => renderTitles( n ) ) }
+      //             </ul>
+      //             <div className="kt-tabs-content-wrap">
+      //               <InnerBlocks.Content />
+      //             </div>
+      //           </div>
+      //         </div>
+      //       );
+      //     },
+      //   },
+      // ],
+
+    });
+  }
+}
+
+},{"./attributes":47,"./edit":49,"./save":50,"classnames":60,"lodash/times":187}],49:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _icons = _interopRequireDefault(require("../../icons"));
+
+var _times = _interopRequireDefault(require("lodash/times"));
+
+var _map = _interopRequireDefault(require("lodash/map"));
+
+var _classnames = _interopRequireDefault(require("classnames"));
+
+var _memize = _interopRequireDefault(require("memize"));
+
+var _filter = _interopRequireDefault(require("lodash/filter"));
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    default: obj
+  };
+}
+/**
+ * @file
+ * BLOCK: Inclind Tabs Editor.
+ */
+// Import Icons.
+// Import External.
+// Internationalization
+
+
+const __ = Drupal.t; // Internal block libraries.
+
+const {
+  sprintf
+} = wp.i18n;
+const {
+  createBlock
+} = wp.blocks;
+const {
+  compose
+} = wp.compose;
+const {
+  withSelect,
+  withDispatch
+} = wp.data;
+const {
+  Component,
+  Fragment
+} = wp.element;
+const {
+  InnerBlocks,
+  InspectorControls,
+  RichText,
+  BlockControls,
+  AlignmentToolbar,
+  BlockAlignmentToolbar
+} = wp.blockEditor;
+const {
+  Button,
+  ButtonGroup,
+  Tooltip,
+  TabPanel,
+  IconButton,
+  Dashicon,
+  PanelBody,
+  ToggleControl,
+  TextControl
+} = wp.components;
+const ALLOWED_BLOCKS = ['inclind-blocks/inclind-tab'];
+/**
+ * Regular expression matching invalid anchor characters for replacement.
+ *
+ * @type {RegExp}
+ */
+
+const ANCHOR_REGEX = /[\s#]/g;
+/**
+ * Returns the layouts configuration for a given number of panes.
+ *
+ * @param {number} panes Number of panes.
+ * @param {string} parent The ID of the Parent container.
+ *
+ * @return {Object[]} Panes layout configuration.
+ */
+
+const getPanesTemplate = (0, _memize.default)((panes, parent) => {
+  return (0, _times.default)(panes, n => ['inclind-blocks/inclind-tab', {
+    id: n + 1,
+    parentID: parent
+  }]);
+}); // This allows for checking to see if the block needs to generate a new ID.
+
+const kttabsUniqueIDs = [];
+/**
+ * Class InclindTabs.
+ */
+
+class InclindTabs extends Component {
+  /**
+   * InclindTabs Constructor.
+   */
+  constructor() {
+    super(...arguments);
+    this.showSettings = this.showSettings.bind(this);
+    this.onMoveForward = this.onMoveForward.bind(this);
+    this.onMoveBack = this.onMoveBack.bind(this);
+    this.state = {
+      hovered: 'false',
+      showPreset: false,
+      settings: {}
+    };
+  }
+
+  componentDidMount() {
+    if (!this.props.attributes.uniqueID) {
+      if (this.props.attributes.showPresets) {
+        this.setState({
+          showPreset: true
+        });
+      }
+
+      this.props.setAttributes({
+        uniqueID: '_' + this.props.clientId.substr(2, 9)
+      });
+      kttabsUniqueIDs.push('_' + this.props.clientId.substr(2, 9));
+    } else if (kttabsUniqueIDs.includes(this.props.attributes.uniqueID)) {
+      this.props.setAttributes({
+        uniqueID: '_' + this.props.clientId.substr(2, 9)
+      });
+      kttabsUniqueIDs.push('_' + this.props.clientId.substr(2, 9));
+    } else {
+      kttabsUniqueIDs.push(this.props.attributes.uniqueID);
+    }
+
+    const blockSettings = {};
+
+    if (blockSettings['inclind-blocks/inclind-tabs'] !== undefined && typeof blockSettings['inclind-blocks/inclind-tabs'] === 'object') {
+      this.setState({
+        settings: blockSettings['inclind-blocks/inclind-tabs']
+      });
+    }
+  }
+  /**
+   * Returns a value determining whether or not to show various settings.
+   *
+   * This can probably be removed since we are not checking roles on the editor
+   * side.
+   *
+   * @param key
+   *   String value that was the WP User Role.
+   *
+   * @return {boolean}
+   *   Return TRUE indicating show all settings.
+   */
+
+
+  showSettings(key) {
+    return true;
+  }
+  /**
+   * Save updates to the attributes arry when content changes are made to tabs.
+   *
+   * @param value
+   * @param index
+   */
+
+
+  saveArrayUpdate(value, index) {
+    const {
+      attributes,
+      setAttributes
+    } = this.props;
+    const {
+      titles
+    } = attributes;
+    const newItems = titles.map((item, thisIndex) => {
+      if (index === thisIndex) {
+        item = { ...item,
+          ...value
+        };
+      }
+
+      return item;
+    });
+    setAttributes({
+      titles: newItems
+    });
+  }
+  /**
+   * Move the tab titles and call to move the tab.
+   *
+   * @param oldIndex
+   * @param newIndex
+   */
+
+
+  onMove(oldIndex, newIndex) {
+    const titles = [...this.props.attributes.titles];
+    titles.splice(newIndex, 1, this.props.attributes.titles[oldIndex]);
+    titles.splice(oldIndex, 1, this.props.attributes.titles[newIndex]);
+    this.props.setAttributes({
+      titles: titles,
+      currentTab: parseInt(newIndex + 1)
+    });
+
+    if (this.props.attributes.startTab === oldIndex + 1) {
+      this.props.setAttributes({
+        startTab: newIndex + 1
+      });
+    } else if (this.props.attributes.startTab === newIndex + 1) {
+      this.props.setAttributes({
+        startTab: oldIndex + 1
+      });
+    }
+
+    this.props.moveTab(this.props.tabsBlock.innerBlocks[oldIndex].clientId, newIndex);
+    this.props.resetOrder();
+    this.props.setAttributes({
+      currentTab: parseInt(newIndex + 1)
+    });
+  }
+  /**
+   * Handler for moving a tab to the right.
+   *
+   * @param oldIndex
+   *   The current position of the tab being moved.
+   *
+   * @return {function(...[*]=)}
+   */
+
+
+  onMoveForward(oldIndex) {
+    return () => {
+      if (oldIndex === this.props.realTabsCount - 1) {
+        return;
+      }
+
+      this.onMove(oldIndex, oldIndex + 1);
+    };
+  }
+  /**
+   * Handler for moving a tab to the left.
+   *
+   * @param oldIndex
+   *   The current position of the tab being moved.
+   *
+   * @return {function(...[*]=)}
+   */
+
+
+  onMoveBack(oldIndex) {
+    return () => {
+      if (oldIndex === 0) {
+        return;
+      }
+
+      this.onMove(oldIndex, oldIndex - 1);
+    };
+  }
+  /**
+   * Render Callback for the Editor.
+   *
+   * @return {*}
+   */
+
+
+  render() {
+    const {
+      attributes: {
+        uniqueID,
+        tabCount,
+        blockAlignment,
+        mobileLayout,
+        currentTab,
+        tabletLayout,
+        layout,
+        innerPadding,
+        minHeight,
+        maxWidth,
+        titles,
+        titleColor,
+        titleColorHover,
+        titleColorActive,
+        titleBg,
+        titleBgHover,
+        titleBgActive,
+        size,
+        sizeType,
+        lineType,
+        lineHeight,
+        tabLineHeight,
+        tabSize,
+        mobileSize,
+        mobileLineHeight,
+        letterSpacing,
+        borderRadius,
+        titleBorderWidth,
+        titleBorderControl,
+        titleBorder,
+        titleBorderHover,
+        titleBorderActive,
+        typography,
+        fontVariant,
+        fontWeight,
+        fontStyle,
+        fontSubset,
+        googleFont,
+        loadGoogleFont,
+        innerPaddingControl,
+        contentBorder,
+        contentBorderControl,
+        contentBorderColor,
+        titlePadding,
+        titlePaddingControl,
+        titleMargin,
+        titleMarginControl,
+        contentBgColor,
+        tabAlignment,
+        titleBorderRadiusControl,
+        titleBorderRadius,
+        iSize,
+        startTab,
+        enableSubtitle,
+        subtitleFont,
+        tabWidth,
+        gutter,
+        widthType
+      },
+      clientId,
+      className,
+      setAttributes
+    } = this.props;
+    const layoutClass = !layout ? 'tabs' : layout;
+    const sizeTypes = [{
+      key: 'px',
+      name: __('px')
+    }, {
+      key: 'em',
+      name: __('em')
+    }];
+    const gconfig = {
+      google: {
+        families: [typography + (fontVariant ? ':' + fontVariant : '')]
+      }
+    };
+    const sgconfig = {
+      google: {
+        families: [(subtitleFont && subtitleFont[0] && subtitleFont[0].family ? subtitleFont[0].family : '') + (subtitleFont && subtitleFont[0] && subtitleFont[0].variant ? ':' + subtitleFont[0].variant : '')]
+      }
+    };
+    const sconfig = subtitleFont && subtitleFont[0] && subtitleFont[0].google ? sgconfig : '';
+
+    const saveSubtitleFont = value => {
+      let tempSubFont;
+
+      if (undefined === subtitleFont || undefined !== subtitleFont && undefined === subtitleFont[0]) {
+        tempSubFont = [{
+          size: ['', '', ''],
+          sizeType: 'px',
+          lineHeight: ['', '', ''],
+          lineType: 'px',
+          letterSpacing: '',
+          textTransform: '',
+          family: '',
+          google: false,
+          style: '',
+          weight: '',
+          variant: '',
+          subset: '',
+          loadGoogle: true,
+          padding: [0, 0, 0, 0],
+          paddingControl: 'linked',
+          margin: [0, 0, 0, 0],
+          marginControl: 'linked'
+        }];
+      } else {
+        tempSubFont = subtitleFont;
+      }
+
+      const newUpdate = tempSubFont.map((item, index) => {
+        if (0 === index) {
+          item = { ...item,
+            ...value
+          };
+        }
+
+        return item;
+      });
+      setAttributes({
+        subtitleFont: newUpdate
+      });
+    };
+
+    const startlayoutOptions = [{
+      key: 'skip',
+      name: __('Skip'),
+      icon: __('Skip')
+    }, {
+      key: 'simple',
+      name: __('Simple'),
+      icon: _icons.default.tabsSimple
+    }, {
+      key: 'boldbg',
+      name: __('Boldbg'),
+      icon: _icons.default.tabsBold
+    }, {
+      key: 'center',
+      name: __('Center'),
+      icon: _icons.default.tabsCenter
+    }, {
+      key: 'vertical',
+      name: __('Vertical'),
+      icon: _icons.default.tabsVertical
+    }];
+
+    const setInitalLayout = key => {
+      if ('skip' === key) {} else if ('simple' === key) {
+        setAttributes({
+          layout: 'tabs',
+          tabAlignment: 'left',
+          size: 1.1,
+          sizeType: 'em',
+          lineHeight: 1.4,
+          lineType: 'em',
+          titleBorderWidth: [1, 1, 0, 1],
+          titleBorderControl: 'individual',
+          titleBorderRadius: [4, 4, 0, 0],
+          titleBorderRadiusControl: 'individual',
+          titlePadding: [8, 20, 8, 20],
+          titlePaddingControl: 'individual',
+          titleMargin: [0, 8, -1, 0],
+          titleMarginControl: 'individual',
+          titleColor: '#444444',
+          titleColorHover: '#444444',
+          titleColorActive: '#444444',
+          titleBg: '#ffffff',
+          titleBgHover: '#ffffff',
+          titleBgActive: '#ffffff',
+          titleBorder: '#eeeeee',
+          titleBorderHover: '#e2e2e2',
+          titleBorderActive: '#bcbcbc',
+          contentBgColor: '#ffffff',
+          contentBorderColor: '#bcbcbc',
+          contentBorder: [1, 1, 1, 1],
+          contentBorderControl: 'linked'
+        });
+      } else if ('boldbg' === key) {
+        setAttributes({
+          layout: 'tabs',
+          tabAlignment: 'left',
+          size: 1.1,
+          sizeType: 'em',
+          lineHeight: 1.4,
+          lineType: 'em',
+          titleBorderWidth: [0, 0, 0, 0],
+          titleBorderControl: 'linked',
+          titleBorderRadius: [4, 4, 0, 0],
+          titleBorderRadiusControl: 'individual',
+          titlePadding: [8, 20, 8, 20],
+          titlePaddingControl: 'individual',
+          titleMargin: [0, 8, 0, 0],
+          titleMarginControl: 'individual',
+          titleColor: '#222222',
+          titleColorHover: '#222222',
+          titleColorActive: '#ffffff',
+          titleBg: '#eeeeee',
+          titleBgHover: '#e2e2e2',
+          titleBgActive: '#0a6689',
+          titleBorder: '#eeeeee',
+          titleBorderHover: '#eeeeee',
+          titleBorderActive: '#eeeeee',
+          contentBgColor: '#ffffff',
+          contentBorderColor: '#0a6689',
+          contentBorder: [3, 0, 0, 0],
+          contentBorderControl: 'individual'
+        });
+      } else if ('center' === key) {
+        setAttributes({
+          layout: 'tabs',
+          tabAlignment: 'center',
+          size: 1.1,
+          sizeType: 'em',
+          lineHeight: 1.4,
+          lineType: 'em',
+          titleBorderWidth: [0, 0, 4, 0],
+          titleBorderControl: 'individual',
+          titleBorderRadius: [4, 4, 0, 0],
+          titleBorderRadiusControl: 'individual',
+          titlePadding: [8, 20, 8, 20],
+          titlePaddingControl: 'individual',
+          titleMargin: [0, 8, 0, 0],
+          titleMarginControl: 'individual',
+          titleColor: '#555555',
+          titleColorHover: '#555555',
+          titleColorActive: '#0a6689',
+          titleBg: '#ffffff',
+          titleBgHover: '#ffffff',
+          titleBgActive: '#ffffff',
+          titleBorder: '#ffffff',
+          titleBorderHover: '#eeeeee',
+          titleBorderActive: '#0a6689',
+          contentBgColor: '#ffffff',
+          contentBorderColor: '#eeeeee',
+          contentBorder: [1, 0, 0, 0],
+          contentBorderControl: 'individual'
+        });
+      } else if ('vertical' === key) {
+        setAttributes({
+          layout: 'vtabs',
+          mobileLayout: 'accordion',
+          tabAlignment: 'left',
+          size: 1.1,
+          sizeType: 'em',
+          lineHeight: 1.4,
+          lineType: 'em',
+          titleBorderWidth: [4, 0, 4, 4],
+          titleBorderControl: 'individual',
+          titleBorderRadius: [10, 0, 0, 10],
+          titleBorderRadiusControl: 'individual',
+          titlePadding: [12, 8, 12, 20],
+          titlePaddingControl: 'individual',
+          titleMargin: [0, -4, 10, 0],
+          titleMarginControl: 'individual',
+          titleColor: '#444444',
+          titleColorHover: '#444444',
+          titleColorActive: '#444444',
+          titleBg: '#eeeeee',
+          titleBgHover: '#e9e9e9',
+          titleBgActive: '#ffffff',
+          titleBorder: '#eeeeee',
+          titleBorderHover: '#e9e9e9',
+          titleBorderActive: '#eeeeee',
+          contentBgColor: '#ffffff',
+          contentBorderColor: '#eeeeee',
+          contentBorder: [4, 4, 4, 4],
+          contentBorderControl: 'linked',
+          minHeight: 400
+        });
+      }
+    };
+
+    const config = googleFont ? gconfig : '';
+    const fontMin = sizeType === 'em' ? 0.2 : 5;
+    const fontMax = sizeType === 'em' ? 12 : 200;
+    const fontStep = sizeType === 'em' ? 0.1 : 1;
+    const lineMin = lineType === 'px' ? 5 : 0.2;
+    const lineMax = lineType === 'px' ? 200 : 12;
+    const lineStep = lineType === 'px' ? 1 : 0.1;
+    const tabLayoutClass = !tabletLayout ? 'inherit' : tabletLayout;
+    const mobileLayoutClass = !mobileLayout ? 'inherit' : mobileLayout;
+    const classes = (0, _classnames.default)(className, `kt-tabs-wrap kt-tabs-id${uniqueID} kt-tabs-has-${tabCount}-tabs kt-active-tab-${currentTab} kt-tabs-layout-${layoutClass} kt-tabs-block kt-tabs-tablet-layout-${tabLayoutClass} kt-tabs-mobile-layout-${mobileLayoutClass} kt-tab-alignment-${tabAlignment}`); // Unique HTML ID for tabs:
+
+    const acc_unique_id = `tabs_${this.props.clientId.substr(2, 9)}`;
+    const mLayoutOptions = [{
+      key: 'tabs',
+      name: __('Tabs'),
+      icon: _icons.default.tabs
+    }, {
+      key: 'vtabs',
+      name: __('Vertical Tabs'),
+      icon: _icons.default.vtabs
+    }, {
+      key: 'accordion',
+      name: __('Accordion'),
+      icon: _icons.default.accordion
+    }];
+    const layoutOptions = [{
+      key: 'tabs',
+      name: __('Tabs'),
+      icon: _icons.default.tabs
+    }, {
+      key: 'vtabs',
+      name: __('Vertical Tabs'),
+      icon: _icons.default.vtabs
+    }];
+    const mobileControls = React.createElement("div", null, React.createElement(PanelBody, null, React.createElement("p", {
+      className: "components-base-control__label"
+    }, __('Mobile Layout')), React.createElement(ButtonGroup, {
+      "aria-label": __('Mobile Layout')
+    }, (0, _map.default)(mLayoutOptions, ({
+      name,
+      key,
+      icon
+    }) => React.createElement(Tooltip, {
+      text: name
+    }, React.createElement(Button, {
+      key: key,
+      className: "kt-layout-btn kt-tablayout",
+      isSmall: true,
+      isPrimary: mobileLayout === key,
+      "aria-pressed": mobileLayout === key,
+      onClick: () => setAttributes({
+        mobileLayout: key
+      })
+    }, icon))))));
+    const tabletControls = React.createElement(PanelBody, null, React.createElement("p", {
+      className: "components-base-control__label"
+    }, __('Tablet Layout')), React.createElement(ButtonGroup, {
+      "aria-label": __('Tablet Layout')
+    }, (0, _map.default)(mLayoutOptions, ({
+      name,
+      key,
+      icon
+    }) => React.createElement(Tooltip, {
+      text: name
+    }, React.createElement(Button, {
+      key: key,
+      className: "kt-layout-btn kt-tablayout",
+      isSmall: true,
+      isPrimary: tabletLayout === key,
+      "aria-pressed": tabletLayout === key,
+      onClick: () => setAttributes({
+        tabletLayout: key
+      })
+    }, icon)))));
+    const deskControls = React.createElement(Fragment, null, React.createElement(PanelBody, null, React.createElement("p", {
+      className: "components-base-control__label"
+    }, __('Layout')), React.createElement(ButtonGroup, {
+      "aria-label": __('Layout')
+    }, (0, _map.default)(layoutOptions, ({
+      name,
+      key,
+      icon
+    }) => React.createElement(Tooltip, {
+      text: name
+    }, React.createElement(Button, {
+      key: key,
+      className: "kt-layout-btn kt-tablayout",
+      isSmall: true,
+      isPrimary: layout === key,
+      "aria-pressed": layout === key,
+      onClick: () => {
+        setAttributes({
+          layout: key
+        });
+      }
+    }, icon))))));
+    const tabControls = React.createElement(TabPanel, {
+      className: "kt-inspect-tabs",
+      activeClass: "active-tab",
+      tabs: [{
+        name: 'desk',
+        title: React.createElement(Dashicon, {
+          icon: "desktop"
+        }),
+        className: 'kt-desk-tab'
+      }, {
+        name: 'tablet',
+        title: React.createElement(Dashicon, {
+          icon: "tablet"
+        }),
+        className: 'kt-tablet-tab'
+      }, {
+        name: 'mobile',
+        title: React.createElement(Dashicon, {
+          icon: "smartphone"
+        }),
+        className: 'kt-mobile-tab'
+      }]
+    }, tab => {
+      let tabout; // if ( tab.name ) {
+      // if ( 'mobile' === tab.name ) {
+      //   tabout = mobileControls;
+      // } else if ( 'tablet' === tab.name ) {
+      //   tabout = tabletControls;
+      // } else {
+
+      tabout = deskControls; // }
+      // }
+
+      return React.createElement("div", null, tabout);
+    });
+
+    const renderTitles = index => {
+      const subFont = subtitleFont && subtitleFont[0] && undefined !== subtitleFont[0].sizeType ? subtitleFont : [{
+        size: ['', '', ''],
+        sizeType: 'px',
+        lineHeight: ['', '', ''],
+        lineType: 'px',
+        letterSpacing: '',
+        textTransform: '',
+        family: '',
+        google: false,
+        style: '',
+        weight: '',
+        variant: '',
+        subset: '',
+        loadGoogle: true,
+        padding: [0, 0, 0, 0],
+        paddingControl: 'linked',
+        margin: [0, 0, 0, 0],
+        marginControl: 'linked'
+      }];
+      return React.createElement(Fragment, null, React.createElement("li", {
+        className: `kt-title-item kt-title-item-${index} kt-tabs-svg-show-${titles[index] && titles[index].onlyIcon ? 'only' : 'always'} kt-tabs-icon-side-${titles[index] && titles[index].iconSide ? titles[index].iconSide : 'right'} kt-tabs-has-icon-${titles[index] && titles[index].icon ? 'true' : 'false'} kt-tab-title-${1 + index === currentTab ? 'active' : 'inactive'}${enableSubtitle ? ' kb-tabs-have-subtitle' : ''}`,
+        style: {
+          margin: titleMargin ? titleMargin[0] + 'px ' + ('tabs' === layout && widthType === 'percent' ? '0px ' : titleMargin[1] + 'px ') + titleMargin[2] + 'px ' + ('tabs' === layout && widthType === 'percent' ? '0px ' : titleMargin[3] + 'px ') : ''
+        }
+      }, React.createElement("div", {
+        className: `kt-tab-title kt-tab-title-${1 + index}`,
+        style: {
+          backgroundColor: titleBg,
+          color: titleColor,
+          fontSize: size + sizeType,
+          lineHeight: lineHeight + lineType,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          letterSpacing: letterSpacing + 'px',
+          fontFamily: typography ? typography : '',
+          borderTopLeftRadius: borderRadius + 'px',
+          borderTopRightRadius: borderRadius + 'px',
+          borderWidth: titleBorderWidth ? titleBorderWidth[0] + 'px ' + titleBorderWidth[1] + 'px ' + titleBorderWidth[2] + 'px ' + titleBorderWidth[3] + 'px' : '',
+          borderRadius: titleBorderRadius ? titleBorderRadius[0] + 'px ' + titleBorderRadius[1] + 'px ' + titleBorderRadius[2] + 'px ' + titleBorderRadius[3] + 'px' : '',
+          padding: titlePadding ? titlePadding[0] + 'px ' + titlePadding[1] + 'px ' + titlePadding[2] + 'px ' + titlePadding[3] + 'px' : '',
+          borderColor: titleBorder,
+          marginRight: 'tabs' === layout && widthType === 'percent' ? gutter[0] + 'px' : undefined
+        },
+        onClick: () => setAttributes({
+          currentTab: 1 + index
+        }),
+        onKeyPress: () => setAttributes({
+          currentTab: 1 + index
+        }),
+        tabIndex: "0",
+        role: "button"
+      }, titles[index] && titles[index].icon && 'right' !== titles[index].iconSide && React.createElement(IconRender, {
+        className: `kt-tab-svg-icon kt-tab-svg-icon-${titles[index].icon} kt-title-svg-side-${titles[index].iconSide}`,
+        name: titles[index].icon,
+        size: !iSize ? '14' : iSize,
+        htmltag: "span"
+      }), (undefined === enableSubtitle || !enableSubtitle) && React.createElement(RichText, {
+        tagName: "div",
+        placeholder: __('Tab Title'),
+        value: titles[index] && titles[index].text ? titles[index].text : '',
+        unstableOnFocus: () => setAttributes({
+          currentTab: 1 + index
+        }),
+        onChange: value => {
+          this.saveArrayUpdate({
+            text: value
+          }, index);
+        },
+        formattingControls: ['bold', 'italic', 'strikethrough'],
+        allowedFormats: ['core/bold', 'core/italic', 'core/strikethrough'],
+        className: 'kt-title-text',
+        style: {
+          lineHeight: lineHeight + lineType
+        },
+        keepPlaceholderOnFocus: true
+      }), enableSubtitle && React.createElement("div", {
+        className: "kb-tab-titles-wrap"
+      }, React.createElement(RichText, {
+        tagName: "div",
+        placeholder: __('Tab Title'),
+        value: titles[index] && titles[index].text ? titles[index].text : '',
+        unstableOnFocus: () => setAttributes({
+          currentTab: 1 + index
+        }),
+        onChange: value => {
+          this.saveArrayUpdate({
+            text: value
+          }, index);
+        },
+        formattingControls: ['bold', 'italic', 'strikethrough'],
+        allowedFormats: ['core/bold', 'core/italic', 'core/strikethrough'],
+        className: 'kt-title-text',
+        style: {
+          lineHeight: lineHeight + lineType
+        },
+        keepPlaceholderOnFocus: true
+      }), React.createElement(RichText, {
+        tagName: "div",
+        placeholder: __('Tab subtitle'),
+        value: undefined !== titles[index] && undefined !== titles[index].subText ? titles[index].subText : '',
+        unstableOnFocus: () => setAttributes({
+          currentTab: 1 + index
+        }),
+        onChange: value => {
+          this.saveArrayUpdate({
+            subText: value
+          }, index);
+        },
+        formattingControls: ['bold', 'italic', 'strikethrough'],
+        allowedFormats: ['core/bold', 'core/italic', 'core/strikethrough'],
+        className: 'kt-title-sub-text',
+        style: {
+          fontWeight: subFont[0].weight,
+          fontStyle: subFont[0].style,
+          fontSize: subFont[0].size[0] + subFont[0].sizeType,
+          lineHeight: subFont[0].lineHeight && subFont[0].lineHeight[0] ? subFont[0].lineHeight[0] + subFont[0].lineType : undefined,
+          letterSpacing: subFont[0].letterSpacing + 'px',
+          fontFamily: subFont[0].family ? subFont[0].family : '',
+          padding: subFont[0].padding ? subFont[0].padding[0] + 'px ' + subFont[0].padding[1] + 'px ' + subFont[0].padding[2] + 'px ' + subFont[0].padding[3] + 'px' : '',
+          margin: subFont[0].margin ? subFont[0].margin[0] + 'px ' + subFont[0].margin[1] + 'px ' + subFont[0].margin[2] + 'px ' + subFont[0].margin[3] + 'px' : ''
+        },
+        keepPlaceholderOnFocus: true
+      })), titles[index] && titles[index].icon && 'right' === titles[index].iconSide && React.createElement(IconRender, {
+        className: `kt-tab-svg-icon kt-tab-svg-icon-${titles[index].icon} kt-title-svg-side-${titles[index].iconSide}`,
+        name: titles[index].icon,
+        size: !iSize ? '14' : iSize,
+        htmltag: "span"
+      })), React.createElement("div", {
+        className: "inclind-blocks-tab-item__control-menu"
+      }, index !== 0 && React.createElement(IconButton, {
+        icon: 'vtabs' === layout ? 'arrow-up' : 'arrow-left',
+        onClick: index === 0 ? undefined : this.onMoveBack(index),
+        className: "inclind-blocks-tab-item__move-back",
+        label: 'vtabs' === layout ? __('Move Item Up') : __('Move Item Back'),
+        "aria-disabled": index === 0,
+        disabled: index === 0
+      }), index + 1 !== tabCount && React.createElement(IconButton, {
+        icon: 'vtabs' === layout ? 'arrow-down' : 'arrow-right',
+        onClick: index + 1 === tabCount ? undefined : this.onMoveForward(index),
+        className: "inclind-blocks-tab-item__move-forward",
+        label: 'vtabs' === layout ? __('Move Item Down') : __('Move Item Forward'),
+        "aria-disabled": index + 1 === tabCount,
+        disabled: index + 1 === tabCount
+      }), tabCount > 1 && React.createElement(IconButton, {
+        icon: "no-alt",
+        onClick: () => {
+          const removeClientId = this.props.tabsBlock.innerBlocks[index].clientId;
+          const currentItems = (0, _filter.default)(this.props.attributes.titles, (item, i) => index !== i);
+          const newCount = tabCount - 1;
+          let newStartTab;
+
+          if (startTab === index + 1) {
+            newStartTab = '';
+          } else if (startTab > index + 1) {
+            newStartTab = startTab - 1;
+          } else {
+            newStartTab = startTab;
+          }
+
+          setAttributes({
+            titles: currentItems,
+            tabCount: newCount,
+            currentTab: index === 0 ? 1 : index,
+            startTab: newStartTab
+          });
+          this.props.removeTab(removeClientId);
+          this.props.resetOrder();
+        },
+        className: "inclind-blocks-tab-item__remove",
+        label: __('Remove Item'),
+        disabled: !currentTab === index + 1
+      }))));
+    };
+
+    const renderPreviewArray = React.createElement(Fragment, null, (0, _times.default)(tabCount, n => renderTitles(n)));
+
+    const renderAnchorSettings = index => {
+      return React.createElement(PanelBody, {
+        title: __('Tab') + ' ' + (index + 1) + ' ' + __('Anchor'),
+        initialOpen: false
+      }, React.createElement(TextControl, {
+        label: __('HTML Anchor'),
+        help: __('Anchors lets you link directly to a tab.'),
+        value: titles[index] && titles[index].anchor ? titles[index].anchor : '',
+        onChange: nextValue => {
+          nextValue = nextValue.replace(ANCHOR_REGEX, '-');
+          this.saveArrayUpdate({
+            anchor: nextValue
+          }, index);
+        }
+      }));
+    };
+
+    const renderCSS = React.createElement("style", null, `.kt-tabs-id${uniqueID} .kt-title-item:hover .kt-tab-title {
+					color: ${titleColorHover} !important;
+					border-color: ${titleBorderHover} !important;
+					background-color: ${titleBgHover} !important;
+				}
+				.kt-tabs-id${uniqueID} .kt-title-item.kt-tab-title-active .kt-tab-title, .kt-tabs-id${uniqueID} .kt-title-item.kt-tab-title-active:hover .kt-tab-title {
+					color: ${titleColorActive} !important;
+					border-color: ${titleBorderActive} !important;
+					background-color: ${titleBgActive} !important;
+				}`);
+    return React.createElement(Fragment, null, renderCSS, React.createElement(BlockControls, null, React.createElement(BlockAlignmentToolbar, {
+      value: blockAlignment,
+      controls: ['center', 'wide', 'full'],
+      onChange: value => setAttributes({
+        blockAlignment: value
+      })
+    }), React.createElement(AlignmentToolbar, {
+      value: tabAlignment,
+      onChange: nextAlign => {
+        setAttributes({
+          tabAlignment: nextAlign
+        });
+      }
+    })), this.showSettings('allSettings') && React.createElement(InspectorControls, null, React.createElement("div", null, deskControls), React.createElement(PanelBody, {
+      title: __('Tab Subtitle Settings'),
+      initialOpen: false
+    }, React.createElement(ToggleControl, {
+      label: __('Show Subtitles?'),
+      checked: undefined !== enableSubtitle ? enableSubtitle : false,
+      onChange: value => {
+        setAttributes({
+          enableSubtitle: value
+        });
+      }
+    })), ","), React.createElement("div", {
+      className: classes
+    }, !this.state.showPreset && React.createElement("div", {
+      className: "kt-tabs-wrap",
+      style: {
+        maxWidth: maxWidth + 'px'
+      }
+    }, React.createElement("div", {
+      className: "kb-add-new-tab-contain"
+    }, React.createElement(Button, {
+      className: "kt-tab-add",
+      isPrimary: true,
+      onClick: () => {
+        const newBlock = createBlock('inclind-blocks/inclind-tab', {
+          id: tabCount + 1,
+          parentID: acc_unique_id
+        });
+        setAttributes({
+          tabCount: tabCount + 1
+        });
+        this.props.insertTab(newBlock);
+        const newtabs = titles; // TODO: Should use an argument in the sprintf
+        // function.
+
+        newtabs.push({
+          text: sprintf('Tab ' + (tabCount + 1).toString()),
+          icon: titles[0].icon,
+          iconSide: titles[0].iconSide,
+          onlyIcon: titles[0].onlyIcon,
+          subText: ''
+        });
+        setAttributes({
+          titles: newtabs
+        });
+        this.saveArrayUpdate({
+          iconSide: titles[0].iconSide
+        }, 0);
+      }
+    }, React.createElement(Dashicon, {
+      icon: "plus"
+    }), __('Add Tab'))), React.createElement("ul", {
+      className: `kt-tabs-title-list${'tabs' === layout && widthType === 'percent' ? ' kb-tabs-list-columns kb-tab-title-columns-' + tabWidth[0] : ''}`
+    }, renderPreviewArray), React.createElement("div", {
+      className: "kt-tabs-content-wrap",
+      style: {
+        padding: innerPadding ? innerPadding[0] + 'px ' + innerPadding[1] + 'px ' + innerPadding[2] + 'px ' + innerPadding[3] + 'px' : '',
+        borderWidth: contentBorder ? contentBorder[0] + 'px ' + contentBorder[1] + 'px ' + contentBorder[2] + 'px ' + contentBorder[3] + 'px' : '',
+        minHeight: minHeight + 'px',
+        backgroundColor: contentBgColor,
+        borderColor: contentBorderColor
+      }
+    }, React.createElement(InnerBlocks, {
+      template: getPanesTemplate(tabCount, acc_unique_id),
+      templateLock: false,
+      allowedBlocks: ALLOWED_BLOCKS
+    })))));
+  }
+
+}
+
+var _default = compose([withSelect((select, ownProps) => {
+  const {
+    clientId
+  } = ownProps;
+  const {
+    getBlock,
+    getBlockOrder
+  } = select('core/block-editor');
+  const block = getBlock(clientId);
+  return {
+    tabsBlock: block,
+    realTabsCount: block.innerBlocks.length,
+    tabsInner: getBlockOrder(clientId)
+  };
+}), withDispatch((dispatch, {
+  clientId
+}, {
+  select
+}) => {
+  const {
+    getBlock
+  } = select('core/block-editor');
+  const {
+    moveBlockToPosition,
+    removeBlock,
+    updateBlockAttributes,
+    insertBlock
+  } = dispatch('core/block-editor');
+  const block = getBlock(clientId);
+  return {
+    resetOrder() {
+      (0, _times.default)(block.innerBlocks.length, n => {
+        updateBlockAttributes(block.innerBlocks[n].clientId, {
+          id: n + 1
+        });
+      });
+    },
+
+    moveTab(tabId, newIndex) {
+      moveBlockToPosition(tabId, clientId, clientId, parseInt(newIndex));
+    },
+
+    insertTab(newBlock) {
+      insertBlock(newBlock, parseInt(block.innerBlocks.length), clientId);
+    },
+
+    removeTab(tabId) {
+      removeBlock(tabId);
+    }
+
+  };
+})])(InclindTabs);
+
+exports.default = _default;
+
+},{"../../icons":54,"classnames":60,"lodash/filter":167,"lodash/map":182,"lodash/times":187,"memize":192}],50:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _classnames = _interopRequireDefault(require("classnames"));
+
+var _times = _interopRequireDefault(require("lodash/times"));
+
+var _genicon = _interopRequireDefault(require("../../genicon"));
+
+var _svgicons = _interopRequireDefault(require("../../svgicons"));
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    default: obj
+  };
+}
+/**
+ * @file
+ * BLOCK: Inclind Tabs.
+ */
+// Internationalization
+
+
+const __ = Drupal.t; // Internal block libraries.
+
+const {
+  sprintf
+} = wp.i18n;
+const {
+  Component,
+  Fragment
+} = wp.element;
+const {
+  InnerBlocks,
+  RichText
+} = wp.blockEditor;
+
+class InclindTabsSave extends Component {
+  /**
+   * Strip alpha-numeric characters from a string.
+   *
+   * @param string
+   *   The string to be stripped.
+   *
+   * @return {*}
+   *   The transformed string.
+   */
+  stripStringRender(string) {
+    return string.toLowerCase().replace(/[^0-9a-z-]/g, '');
+  }
+  /**
+   * Render Callback for the save process.
+   *
+   * @return {*}
+   */
+
+
+  render() {
+    const {
+      attributes: {
+        tabCount,
+        blockAlignment,
+        currentTab,
+        mobileLayout,
+        layout,
+        tabletLayout,
+        uniqueID,
+        titles,
+        iSize,
+        maxWidth,
+        tabAlignment,
+        startTab,
+        enableSubtitle,
+        widthType,
+        tabWidth
+      }
+    } = this.props;
+    const layoutClass = !layout ? 'tabs' : layout;
+    const tabLayoutClass = !tabletLayout ? 'inherit' : tabletLayout;
+    const mobileLayoutClass = !mobileLayout ? 'inherit' : mobileLayout;
+    const accordionClass = mobileLayout && 'accordion' === mobileLayout || tabletLayout && 'accordion' === tabletLayout ? 'kt-create-accordion' : '';
+    const classId = !uniqueID ? 'notset' : uniqueID;
+    const classes = (0, _classnames.default)(`align${blockAlignment}`);
+    const activeTab = startTab ? startTab : currentTab;
+    const innerClasses = (0, _classnames.default)(`tabs-wrap tabs-id${classId} layout-${layoutClass} alignment-${tabAlignment} ${accordionClass}`);
+
+    const renderTitles = index => {
+      // const backupAnchor = `tabs-${ classId }-tab-${ ( titles[ index ] &&
+      // titles[ index ].text ? this.stripStringRender( titles[ index
+      // ].text.toString() ) : this.stripStringRender( __( 'Tab' ) + ( 1 +
+      // index ) ) ) }`; const ref = `${ ( titles[ index ] && titles[ index
+      // ].anchor ? titles[ index ].anchor : backupAnchor ) }`;
+      const backupAnchor = `tabs${classId}-tab-${1 + index}`;
+      const ref = `tabs${classId}-tabcontent-${1 + index}`;
+      const sel_tab = `${index == 0 ? 'true' : 'false'}`;
+      const sel_tab_class = `${index == 0 ? 'active' : ''}`;
+      return React.createElement(Fragment, null, React.createElement("li", {
+        className: "nav-item"
+      }, React.createElement("a", {
+        className: `nav-link ${sel_tab_class}`,
+        id: backupAnchor,
+        "data-toggle": "tab",
+        href: `#${ref}`,
+        role: "tab",
+        "aria-controls": `${ref}`,
+        "aria-selected": `${sel_tab}`
+      }, titles[index] && titles[index].icon && 'right' !== titles[index].iconSide && React.createElement(_genicon.default, {
+        className: `kt-tab-svg-icon kt-tab-svg-icon-${titles[index].icon} kt-title-svg-side-${titles[index].iconSide}`,
+        name: titles[index].icon,
+        size: !iSize ? '14' : iSize,
+        icon: 'fa' === titles[index].icon.substring(0, 2) ? FaIco[titles[index].icon] : _svgicons.default[titles[index].icon],
+        htmltag: "span"
+      }), (!enableSubtitle || undefined !== titles[index] && undefined === titles[index].subText || undefined !== titles[index] && undefined !== titles[index].subText && '' === titles[index].subText) && React.createElement(RichText.Content, {
+        tagName: "span",
+        value: titles[index] && titles[index].text ? titles[index].text : sprintf(__('Tab %d'), 1 + index),
+        className: 'kt-title-text'
+      }), enableSubtitle && titles[index] && undefined !== titles[index].subText && '' !== titles[index].subText && React.createElement("div", {
+        className: "kb-tab-titles-wrap"
+      }, React.createElement(RichText.Content, {
+        tagName: "span",
+        value: titles[index] && titles[index].text ? titles[index].text : sprintf(__('Tab %d'), 1 + index),
+        className: 'kt-title-text'
+      }), React.createElement(RichText.Content, {
+        tagName: "span",
+        value: titles[index].subText,
+        className: 'kt-title-sub-text'
+      })), titles[index] && titles[index].icon && 'right' === titles[index].iconSide && React.createElement(_genicon.default, {
+        className: `kt-tab-svg-icon kt-tab-svg-icon-${titles[index].icon} kt-title-svg-side-${titles[index].iconSide}`,
+        name: titles[index].icon,
+        size: !iSize ? '14' : iSize,
+        icon: 'fa' === titles[index].icon.substring(0, 2) ? FaIco[titles[index].icon] : _svgicons.default[titles[index].icon],
+        htmltag: "span"
+      }))));
+    };
+
+    return React.createElement("div", {
+      className: classes
+    }, 'vtabs' === layout && React.createElement("div", {
+      className: innerClasses,
+      style: {
+        maxWidth: maxWidth ? maxWidth + 'px' : 'none'
+      }
+    }, React.createElement("div", {
+      class: "row"
+    }, React.createElement("div", {
+      className: "col-sm-12 col-md-3"
+    }, React.createElement("ul", {
+      className: "nav nav-justified nav-tabs",
+      id: `tabs-list-${classId}`,
+      role: "tablist",
+      "aria-orientation": "vertical"
+    }, (0, _times.default)(tabCount, n => renderTitles(n)))), React.createElement("div", {
+      className: "col"
+    }, React.createElement("div", {
+      className: "tab-content",
+      id: `tabs-content-${classId}`
+    }, React.createElement(InnerBlocks.Content, null))))), 'vtabs' !== layout && React.createElement("div", {
+      className: innerClasses,
+      style: {
+        maxWidth: maxWidth ? maxWidth + 'px' : 'none'
+      }
+    }, React.createElement("ul", {
+      className: "nav nav-justified nav-tabs",
+      id: `tabs-list-${classId}`,
+      role: "tablist"
+    }, (0, _times.default)(tabCount, n => renderTitles(n))), React.createElement("div", {
+      className: "tab-content",
+      id: `tabs-content-${classId}`
+    }, React.createElement(InnerBlocks.Content, null))));
+  }
+
+}
+
+var _default = InclindTabsSave;
+exports.default = _default;
+
+},{"../../genicon":52,"../../svgicons":56,"classnames":60,"lodash/times":187}],51:[function(require,module,exports){
 "use strict"; // Add a style for the icon grid.
 
 wp.blocks.registerBlockStyle("core/columns", {
@@ -3892,7 +10004,7 @@ var allowColumnStyle = wp.compose.createHigherOrderComponent(function (BlockEdit
 }, 'allowColumnStyle');
 wp.hooks.addFilter('editor.BlockEdit', 'my/gutenberg', allowColumnStyle);
 
-},{}],36:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4048,7 +10160,7 @@ GenIcon.propTypes = {
 var _default = GenIcon;
 exports.default = _default;
 
-},{"./svgicons":40,"prop-types":179}],37:[function(require,module,exports){
+},{"./svgicons":56,"prop-types":198}],53:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4074,7 +10186,7 @@ function hexToRGBA(hex, alpha) {
   return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
 }
 
-},{}],38:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6827,20 +12939,16 @@ icons.formBlock = React.createElement("svg", {
 var _default = icons;
 exports.default = _default;
 
-},{}],39:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 "use strict";
 
 require("./blocks/accordion/index.js");
 
 require("./blocks/accordion-item/index.js");
 
-require("./blocks/advanced-btn/index.js");
-
 require("./blocks/card/index.js");
 
 require("./blocks/infobox/index.js");
-
-require("./blocks/section-wrap/index.js");
 
 require("./blocks/call-to-action/index.js");
 
@@ -6852,9 +12960,35 @@ require("./blocks/icon-link/index.js");
 
 require("./blocks/infographic/index.js");
 
+require("./blocks/accordion-bootstrap/index.js");
+
+require("./blocks/pane/index.js");
+
+require("./blocks/advanced-btn/index.js");
+
+require("./blocks/jumbotron/index.js");
+
+require("./blocks/link-cards/index.js");
+
+require("./blocks/section-wrap/index.js");
+
+require("./blocks/infobox-bootstrap/index.js");
+
+require("./blocks/tab/index.js");
+
+require("./blocks/tabs/block.js");
+
 require("./config/styles");
 
-},{"./blocks/accordion-item/index.js":4,"./blocks/accordion/index.js":6,"./blocks/advanced-btn/index.js":8,"./blocks/call-to-action/index.js":11,"./blocks/card/index.js":15,"./blocks/icon-grid-container/index.js":17,"./blocks/icon-grid-item/index.js":21,"./blocks/icon-link/index.js":25,"./blocks/infobox/index.js":29,"./blocks/infographic/index.js":32,"./blocks/section-wrap/index.js":34,"./config/styles":35}],40:[function(require,module,exports){
+var _svgicons = _interopRequireDefault(require("./svgicons"));
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    default: obj
+  };
+}
+
+},{"./blocks/accordion-bootstrap/index.js":2,"./blocks/accordion-item/index.js":6,"./blocks/accordion/index.js":8,"./blocks/advanced-btn/index.js":10,"./blocks/call-to-action/index.js":13,"./blocks/card/index.js":17,"./blocks/icon-grid-container/index.js":19,"./blocks/icon-grid-item/index.js":23,"./blocks/icon-link/index.js":27,"./blocks/infobox-bootstrap/index.js":29,"./blocks/infobox/index.js":33,"./blocks/infographic/index.js":36,"./blocks/jumbotron/index.js":38,"./blocks/link-cards/index.js":40,"./blocks/pane/index.js":42,"./blocks/section-wrap/index.js":44,"./blocks/tab/index.js":46,"./blocks/tabs/block.js":48,"./config/styles":51,"./svgicons":56}],56:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7767,7 +13901,7 @@ Ico['si_warning'] = React.createElement("svg", {
 var _default = Ico;
 exports.default = _default;
 
-},{"./icons":38}],41:[function(require,module,exports){
+},{"./icons":54}],57:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7780,7 +13914,7 @@ const IcoNames = {
 var _default = IcoNames;
 exports.default = _default;
 
-},{}],42:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : {
     "default": obj
@@ -7788,7 +13922,7 @@ function _interopRequireDefault(obj) {
 }
 
 module.exports = _interopRequireDefault;
-},{}],43:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 /*!
  * 
  * React FontIconPicker
@@ -7808,7 +13942,7 @@ module.exports = _interopRequireDefault;
  */
 !function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t(require("prop-types"),require("react"),require("classnames"),require("react-dom"),require("react-transition-group")):"function"==typeof define&&define.amd?define(["prop-types","react","classnames","react-dom","react-transition-group"],t):"object"==typeof exports?exports.FontIconPicker=t(require("prop-types"),require("react"),require("classnames"),require("react-dom"),require("react-transition-group")):e.FontIconPicker=t(e.PropTypes,e.React,e.classNames,e.ReactDOM,e.ReactTransitionGroup)}(window,function(e,t,r,n,a){return function(e){var t={};function r(n){if(t[n])return t[n].exports;var a=t[n]={i:n,l:!1,exports:{}};return e[n].call(a.exports,a,a.exports,r),a.l=!0,a.exports}return r.m=e,r.c=t,r.d=function(e,t,n){r.o(e,t)||Object.defineProperty(e,t,{configurable:!1,enumerable:!0,get:n})},r.r=function(e){Object.defineProperty(e,"__esModule",{value:!0})},r.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return r.d(t,"a",t),t},r.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},r.p="",r(r.s=15)}([function(t,r){t.exports=e},function(e,r){e.exports=t},function(e,t,r){"use strict";function n(e){return(n="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e})(e)}function a(e,t,r){return t in e?Object.defineProperty(e,t,{value:r,enumerable:!0,configurable:!0,writable:!0}):e[t]=r,e}function o(e){return function(e){if(Array.isArray(e)){for(var t=0,r=new Array(e.length);t<e.length;t++)r[t]=e[t];return r}}(e)||function(e){if(Symbol.iterator in Object(e)||"[object Arguments]"===Object.prototype.toString.call(e))return Array.from(e)}(e)||function(){throw new TypeError("Invalid attempt to spread non-iterable instance")}()}Object.defineProperty(t,"__esModule",{value:!0}),t.flattenPossiblyCategorizedSource=function(e){var t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:null;if(Array.isArray(e))return o(e);if(null!==t)return void 0!==e[t]?o(e[t]):[];var r=[],n=function(e){for(var t=1;t<arguments.length;t++){var r=null!=arguments[t]?arguments[t]:{},n=Object.keys(r);"function"==typeof Object.getOwnPropertySymbols&&(n=n.concat(Object.getOwnPropertySymbols(r).filter(function(e){return Object.getOwnPropertyDescriptor(r,e).enumerable}))),n.forEach(function(t){a(e,t,r[t])})}return e}({},e);return Object.keys(n).forEach(function(e){r=o(r).concat(o(n[e]))}),r},t.getPossibleCategories=function(e){return Array.isArray(e)?null:Object.keys(e)},t.convertToHex=function(e){return String.fromCodePoint(parseInt(e,10))},t.isArrayEqual=function(e,t){if(!Array.isArray(e)||!Array.isArray(t))return!1;var r=o(e);r.sort();var n=o(t);return n.sort(),JSON.stringify(r)===JSON.stringify(n)},t.getOffset=function(e){var t=e.getBoundingClientRect(),r=window.pageXOffset||document.documentElement.scrollLeft,n=window.pageYOffset||document.documentElement.scrollTop;return{top:t.top+n,left:t.left+r}},t.getSourceType=function(e){return null===e?"null":"object"!==n(e)||Array.isArray(e)?Array.isArray(e)?"array":n(e):"object"},t.InvalidSourceException=function(e,t){this.givenType=e,this.requiredType=t,this.message="Expected of type: ".concat(this.requiredType,", found: ").concat(this.givenType),this.toString=function(){return"Invalid Source Exception: ".concat(this.message)}},t.fuzzySearch=function(e,t){e=e.toLowerCase();var r=(t=t.toLowerCase()).length,n=e.length;if(n>r)return!1;if(n===r)return e===t;e:for(var a=0,o=0;a<n;a++){for(var l=e.codePointAt(a);o<r;)if(t.codePointAt(o++)===l)continue e;return!1}return!0},t.debounce=void 0,t.debounce=function(e,t){var r;return function(){var n=this,a=arguments;clearTimeout(r),r=setTimeout(function(){return e.apply(n,a)},t)}}},function(e,t){e.exports=r},,,function(e,t){e.exports=n},function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.default=void 0;var n=u(r(1)),a=r(6),o=u(r(0)),l=u(r(3)),i=r(2);function u(e){return e&&e.__esModule?e:{default:e}}function c(e){return(c="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e})(e)}function s(e,t){for(var r=0;r<t.length;r++){var n=t[r];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(e,n.key,n)}}function f(e,t,r){return t&&s(e.prototype,t),r&&s(e,r),e}function d(e){if(void 0===e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return e}var p=function(e){function t(e){var r,n;return function(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}(this,t),this,n=(t.__proto__||Object.getPrototypeOf(t)).call(this,e),r=!n||"object"!==c(n)&&"function"!=typeof n?d(this):n,Object.defineProperty(d(r),"syncPortalPosition",{configurable:!0,enumerable:!0,writable:!0,value:function(){r.resetPortalPosition(),r.fixWindowOverflow()}}),Object.defineProperty(d(r),"fixWindowOverflow",{configurable:!0,enumerable:!0,writable:!0,value:function(){var e=r.props.domRef.current.offsetWidth,t=r.props.domRef.current.offsetHeight,n=window,a=n.innerWidth,o=n.pageYOffset,l=document.documentElement.clientHeight,u=(0,i.getOffset)(r.props.domRef.current),c=u.left,s=u.top,f="self"===r.state.appendRoot?r.props.domRef.current:r.state.appendRoot,d=(0,i.getOffset)(f),p=r.props.btnRef.current,h=r.props.domRef.current,y=(0,i.getOffset)(p),b=getComputedStyle(p),g=(parseInt(b.borderTop,10)||0)+(parseInt(b.borderBottom,10)||0);if(c+e>a-20){var m=y.left+r.props.btnRef.current.offsetWidth-(e+d.left);m+d.left<0&&(m=10-d.left),h.style.left="".concat(m,"px")}t+s-o>l&&y.top-t>0&&("self"===r.state.appendRoot?h.style.top="-".concat(t-g,"px"):h.style.top="".concat(y.top+g-t,"px"))}}),r.state={},r.debouncedSyncPortalPosition=(0,i.debounce)(r.syncPortalPosition,250),r}return function(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function");e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}}),t&&(Object.setPrototypeOf?Object.setPrototypeOf(e,t):e.__proto__=t)}(t,n.default.PureComponent),f(t,null,[{key:"getDerivedStateFromProps",value:function(e){var r=t.calculateAppendAndClass(e.appendRoot);return{appendRoot:r.appendRoot,portalClasses:r.portalClasses}}},{key:"calculateAppendAndClass",value:function(e){var t="self",r=(0,l.default)({"rfipdropdown--portal":!1!==e});return!1!==e&&(t=document.querySelector(e)),{portalClasses:r,appendRoot:t}}}]),f(t,[{key:"componentDidMount",value:function(){window.addEventListener("resize",this.debouncedSyncPortalPosition),window.addEventListener("scroll",this.debouncedSyncPortalPosition),this.syncPortalPosition()}},{key:"componentDidUpdate",value:function(){this.syncPortalPosition()}},{key:"componentWillUnmount",value:function(){window.removeEventListener("resize",this.debouncedSyncPortalPosition),window.removeEventListener("scroll",this.debouncedSyncPortalPosition)}},{key:"positionPortal",value:function(){var e=this.props.domRef.current.style.display;this.props.domRef.current.style.display="none";var t=this.props.btnRef.current,r=(0,i.getOffset)(t),n=(0,i.getOffset)(this.state.appendRoot),a=t.offsetHeight;this.props.domRef.current.style.left="".concat(r.left-n.left,"px"),this.props.domRef.current.style.top="".concat(r.top+a,"px"),this.props.domRef.current.style.display=e}},{key:"resetPortalPosition",value:function(){var e=this.props.domRef.current;"self"===this.state.appendRoot?e.style.top="":this.positionPortal()}},{key:"render",value:function(){var e=(0,l.default)(this.props.className,this.state.portalClasses),t=n.default.createElement("div",{className:e,ref:this.props.domRef},this.props.children);return"self"===this.state.appendRoot?t:(0,a.createPortal)(t,this.state.appendRoot)}}]),t}();Object.defineProperty(p,"propTypes",{configurable:!0,enumerable:!0,writable:!0,value:{appendRoot:o.default.oneOfType([o.default.bool,o.default.string]),children:o.default.node.isRequired,domRef:o.default.object.isRequired,btnRef:o.default.object.isRequired,className:o.default.string.isRequired}}),Object.defineProperty(p,"defaultProps",{configurable:!0,enumerable:!0,writable:!0,value:{appendRoot:!1}});var h=p;t.default=h},function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.default=void 0;var n=i(r(1)),a=i(r(0)),o=i(r(3)),l=r(2);function i(e){return e&&e.__esModule?e:{default:e}}function u(e){return(u="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e})(e)}function c(e){return function(e){if(Array.isArray(e)){for(var t=0,r=new Array(e.length);t<e.length;t++)r[t]=e[t];return r}}(e)||function(e){if(Symbol.iterator in Object(e)||"[object Arguments]"===Object.prototype.toString.call(e))return Array.from(e)}(e)||function(){throw new TypeError("Invalid attempt to spread non-iterable instance")}()}function s(e,t){for(var r=0;r<t.length;r++){var n=t[r];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(e,n.key,n)}}function f(e,t,r){return t&&s(e.prototype,t),r&&s(e,r),e}function d(e){if(void 0===e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return e}var p=function(e){function t(e){var r,n;return function(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}(this,t),this,n=(t.__proto__||Object.getPrototypeOf(t)).call(this,e),r=!n||"object"!==u(n)&&"function"!=typeof n?d(this):n,Object.defineProperty(d(r),"handleChangePage",{configurable:!0,enumerable:!0,writable:!0,value:function(e){var t,n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:null,a=r.props.currentPage,o=r.state.totalPage;null!==n?"next"===n?a+=1:a-=1:a=parseInt(e.target.value,10)-1,a<0&&(a=0),a>o-1&&(a=o-1),t=a+1,null===n&&Number.isNaN(a)&&(a=0,t=""),r.setState({viewPage:t}),r.props.handleChangePage(a)}}),Object.defineProperty(d(r),"handlePageKeyBoard",{configurable:!0,enumerable:!0,writable:!0,value:function(e,t){13!==e.keyCode&&32!==e.keyCode||r.handleChangePage({},t)}}),Object.defineProperty(d(r),"handleChangeValue",{configurable:!0,enumerable:!0,writable:!0,value:function(e){r.props.handleChangeValue(e)}}),Object.defineProperty(d(r),"handleValueKeyboard",{configurable:!0,enumerable:!0,writable:!0,value:function(e,t){13!==e.keyCode&&32!==e.keyCode||r.handleChangeValue(t)}}),r.state={viewPage:r.props.currentPage+1},r}return function(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function");e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}}),t&&(Object.setPrototypeOf?Object.setPrototypeOf(e,t):e.__proto__=t)}(t,n.default.PureComponent),f(t,null,[{key:"getDerivedStateFromProps",value:function(e,r){var n=t.getCategoryFilteredState(e.currentCategory,e.categories,e.icons),a=t.getCategoryFilteredState(e.currentCategory,e.categories,null===e.search?e.icons:e.search),o=t.getActiveIcons(n,a,e.currentSearch),l=o.activeIcons,i=o.activeTitles,u=e.currentPage,c=e.iconsPerPage,s={iconView:t.getCurrentViewIcons(l,c,u),titleView:t.getCurrentViewIcons(i,c,u),totalPage:Math.ceil(l.length/c)};return""!==r.viewPage&&(s.viewPage=e.currentPage+1),s}},{key:"getActiveIcons",value:function(e,t,r){var n=c(e),a=c(t);if(""===r||null===r)return{activeIcons:n,activeTitles:a};var o=[],i=[];return n.forEach(function(e,n){(0,l.fuzzySearch)(r,t[n])&&(o.push(e),i.push(t[n]))}),{activeIcons:o,activeTitles:i}}},{key:"getCategoryFilteredState",value:function(e,t,r){var n=null,a=(0,l.getSourceType)(r);if(Array.isArray(t)){if("object"!==a)throw new l.InvalidSourceException(a,"object")}else if("array"!==a)throw new l.InvalidSourceException(a,"array");return 0!==e&&Array.isArray(t)&&(n=t[e]||null),(0,l.flattenPossiblyCategorizedSource)(r,n)}},{key:"getCurrentViewIcons",value:function(e,t,r){var n=r*t,a=(r+1)*t;return e.slice(n,a)}}]),f(t,[{key:"renderPager",value:function(){var e=this;if(this.state.totalPage<1)return null;var t=this.props.currentPage>0?n.default.createElement("span",{className:"rfipicons__left",role:"button",tabIndex:0,onKeyDown:function(t){return e.handlePageKeyBoard(t,"prev")},onClick:function(t){return e.handleChangePage(t,"prev")}},n.default.createElement("span",{role:"presentation",className:"rfipicons__label","aria-label":"Left"},n.default.createElement("i",{className:"fipicon-angle-left"}))):null,r=this.props.currentPage<this.state.totalPage-1?n.default.createElement("span",{className:"rfipicons__right",role:"button",tabIndex:0,onKeyDown:function(t){return e.handlePageKeyBoard(t,"next")},onClick:function(t){return e.handleChangePage(t,"next")}},n.default.createElement("span",{role:"presentation",className:"rfipicons__label","aria-label":"Right"},n.default.createElement("i",{className:"fipicon-angle-right"}))):null;return n.default.createElement("div",{className:"rfipicons__pager"},n.default.createElement("div",{className:"rfipicons__num"},n.default.createElement("input",{value:this.state.viewPage,onChange:this.handleChangePage,className:"rfipicons__cp",type:"tel",min:1}),n.default.createElement("span",{className:"rfipicons__sp"},"/"),n.default.createElement("span",{className:"rfipicons__tp"},this.state.totalPage)),n.default.createElement("div",{className:"rfipicons__arrow"},t,r))}},{key:"renderIconView",value:function(){var e=this;return this.state.totalPage>0?this.state.iconView.map(function(t,r){var a=(0,o.default)("rfipicons__icon",{"rfipicons__icon--selected":e.props.value===t||Array.isArray(e.props.value)&&e.props.value.includes(t)});return n.default.createElement("span",{className:a,key:t,title:e.state.titleView[r]},n.default.createElement("span",{className:"rfipicons__ibox",tabIndex:0,role:"button",onClick:function(){return e.handleChangeValue(t)},onKeyDown:function(r){return e.handleValueKeyboard(r,t)}},e.props.renderIcon(t)))}):n.default.createElement("span",{className:"rfipicons__icon--error"},n.default.createElement("span",{className:"rfipicons__ibox--error"},this.props.noIconPlaceholder))}},{key:"render",value:function(){return n.default.createElement("div",{className:"rfipicons"},this.renderPager(),n.default.createElement("div",{className:"rfipicons__selector"},this.renderIconView()))}}]),t}();Object.defineProperty(p,"propTypes",{configurable:!0,enumerable:!0,writable:!0,value:{categories:a.default.arrayOf(a.default.string),currentCategory:a.default.number,isMulti:a.default.bool.isRequired,icons:a.default.oneOfType([a.default.arrayOf(a.default.string),a.default.arrayOf(a.default.number),a.default.objectOf(a.default.oneOfType([a.default.arrayOf(a.default.number),a.default.arrayOf(a.default.string)]))]).isRequired,search:a.default.oneOfType([a.default.objectOf(a.default.arrayOf(a.default.string)),a.default.arrayOf(a.default.string)]),value:a.default.oneOfType([a.default.number,a.default.string,a.default.arrayOf(a.default.oneOfType([a.default.number,a.default.string]))]).isRequired,currentSearch:a.default.string.isRequired,handleChangeValue:a.default.func.isRequired,currentPage:a.default.number.isRequired,iconsPerPage:a.default.number.isRequired,handleChangePage:a.default.func.isRequired,renderIcon:a.default.func.isRequired,noIconPlaceholder:a.default.string.isRequired}}),Object.defineProperty(p,"defaultProps",{configurable:!0,enumerable:!0,writable:!0,value:{categories:null,currentCategory:null,search:null}});var h=p;t.default=h},function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.default=void 0;var n=o(r(1)),a=o(r(0));function o(e){return e&&e.__esModule?e:{default:e}}var l=function(e){return n.default.createElement("div",{className:"rfipsearch"},n.default.createElement("input",{type:"text",className:"rfipsearch__input",value:e.value,onChange:e.handleSearch,placeholder:e.placeholder}))};l.propTypes={handleSearch:a.default.func.isRequired,value:a.default.string.isRequired,placeholder:a.default.string.isRequired};var i=l;t.default=i},function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.default=void 0;var n=o(r(1)),a=o(r(0));function o(e){return e&&e.__esModule?e:{default:e}}function l(e){return(l="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e})(e)}function i(e,t){for(var r=0;r<t.length;r++){var n=t[r];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(e,n.key,n)}}var u=function(e){function t(){return function(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}(this,t),function(e,t){return!t||"object"!==l(t)&&"function"!=typeof t?function(e){if(void 0===e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return e}(e):t}(this,(t.__proto__||Object.getPrototypeOf(t)).apply(this,arguments))}var r,a;return function(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function");e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}}),t&&(Object.setPrototypeOf?Object.setPrototypeOf(e,t):e.__proto__=t)}(t,n.default.PureComponent),r=t,(a=[{key:"render",value:function(){return n.default.createElement("div",{className:"rfipcategory"},n.default.createElement("select",{className:"rfipcategory__select",onChange:this.props.handleCategory,value:this.props.value},this.props.categories.map(function(e,t){return n.default.createElement("option",{className:"rfipcategory__select__option",key:e,value:t},e)})),n.default.createElement("i",{className:"fipicon-angle-down",role:"presentation","aria-label":"Open"}))}}])&&i(r.prototype,a),t}();Object.defineProperty(u,"propTypes",{configurable:!0,enumerable:!0,writable:!0,value:{handleCategory:a.default.func.isRequired,value:a.default.number.isRequired,categories:a.default.arrayOf(a.default.string).isRequired}});var c=u;t.default=c},function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.default=void 0;var n=c(r(1)),a=c(r(0)),o=c(r(10)),l=c(r(9)),i=c(r(8)),u=r(2);function c(e){return e&&e.__esModule?e:{default:e}}function s(e){return(s="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e})(e)}function f(e,t){for(var r=0;r<t.length;r++){var n=t[r];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(e,n.key,n)}}function d(e,t,r){return t&&f(e.prototype,t),r&&f(e,r),e}function p(e){if(void 0===e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return e}var h=function(e){function t(e){var r,n;return function(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}(this,t),this,n=(t.__proto__||Object.getPrototypeOf(t)).call(this,e),r=!n||"object"!==s(n)&&"function"!=typeof n?p(this):n,Object.defineProperty(p(r),"handleCategory",{configurable:!0,enumerable:!0,writable:!0,value:function(e){var t=parseInt(e.target.value,10);Number.isNaN(t)&&(t=0),r.props.handleChangeCategory(t),r.props.handleChangePage(0)}}),Object.defineProperty(p(r),"handleSearch",{configurable:!0,enumerable:!0,writable:!0,value:function(e){var t=e.target.value;r.props.handleChangeSearch(t)}}),r.state={},r}return function(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function");e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}}),t&&(Object.setPrototypeOf?Object.setPrototypeOf(e,t):e.__proto__=t)}(t,n.default.PureComponent),d(t,null,[{key:"getDerivedStateFromProps",value:function(e){var t=(0,u.getPossibleCategories)(e.icons);return null!==t&&(t=[e.allCatPlaceholder].concat(function(e){return function(e){if(Array.isArray(e)){for(var t=0,r=new Array(e.length);t<e.length;t++)r[t]=e[t];return r}}(e)||function(e){if(Symbol.iterator in Object(e)||"[object Arguments]"===Object.prototype.toString.call(e))return Array.from(e)}(e)||function(){throw new TypeError("Invalid attempt to spread non-iterable instance")}()}(t))),{categories:t,searchString:e.currentSearch}}}]),d(t,[{key:"render",value:function(){return n.default.createElement("div",{className:"rfipdropdown__selector"},this.props.showSearch?n.default.createElement(l.default,{handleSearch:this.handleSearch,value:this.state.searchString,placeholder:this.props.searchPlaceholder}):null,this.props.showCategory&&this.state.categories&&this.state.categories.length?n.default.createElement(o.default,{handleCategory:this.handleCategory,value:this.props.currentCategory,categories:this.state.categories}):null,n.default.createElement(i.default,{categories:this.state.categories,currentCategory:this.props.currentCategory,isMulti:this.props.isMulti,icons:this.props.icons,search:this.props.search,value:this.props.value,currentSearch:this.props.currentSearch,handleChangeValue:this.props.handleChangeValue,currentPage:this.props.currentPage,iconsPerPage:this.props.iconsPerPage,handleChangePage:this.props.handleChangePage,renderIcon:this.props.renderIcon,noIconPlaceholder:this.props.noIconPlaceholder}))}}]),t}();Object.defineProperty(h,"propTypes",{configurable:!0,enumerable:!0,writable:!0,value:{isMulti:a.default.bool.isRequired,value:a.default.oneOfType([a.default.number,a.default.string,a.default.arrayOf(a.default.any)]).isRequired,currentCategory:a.default.number.isRequired,currentPage:a.default.number.isRequired,currentSearch:a.default.string.isRequired,icons:a.default.oneOfType([a.default.arrayOf(a.default.number),a.default.arrayOf(a.default.string),a.default.objectOf(a.default.oneOfType([a.default.arrayOf(a.default.number),a.default.arrayOf(a.default.string)]))]).isRequired,search:a.default.oneOfType([a.default.object,a.default.arrayOf(a.default.string)]),showCategory:a.default.bool.isRequired,showSearch:a.default.bool.isRequired,iconsPerPage:a.default.number.isRequired,allCatPlaceholder:a.default.string.isRequired,searchPlaceholder:a.default.string.isRequired,noIconPlaceholder:a.default.string.isRequired,renderIcon:a.default.func.isRequired,handleChangeValue:a.default.func.isRequired,handleChangeCategory:a.default.func.isRequired,handleChangePage:a.default.func.isRequired,handleChangeSearch:a.default.func.isRequired}}),Object.defineProperty(h,"defaultProps",{configurable:!0,enumerable:!0,writable:!0,value:{search:null}});var y=h;t.default=y},function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.default=void 0;var n=l(r(1)),a=l(r(0)),o=l(r(3));function l(e){return e&&e.__esModule?e:{default:e}}function i(e){return(i="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e})(e)}function u(){return(u=Object.assign||function(e){for(var t=1;t<arguments.length;t++){var r=arguments[t];for(var n in r)Object.prototype.hasOwnProperty.call(r,n)&&(e[n]=r[n])}return e}).apply(this,arguments)}function c(e,t){for(var r=0;r<t.length;r++){var n=t[r];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(e,n.key,n)}}function s(e,t){return!t||"object"!==i(t)&&"function"!=typeof t?f(e):t}function f(e){if(void 0===e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return e}var d=function(e){function t(){var e,r,a;!function(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}(this,t);for(var o=arguments.length,l=new Array(o),i=0;i<o;i++)l[i]=arguments[i];return s(a,(r=a=s(this,(e=t.__proto__||Object.getPrototypeOf(t)).call.apply(e,[this].concat(l))),Object.defineProperty(f(a),"handleClick",{configurable:!0,enumerable:!0,writable:!0,value:function(){a.props.onClick()}}),Object.defineProperty(f(a),"handleKeyDown",{configurable:!0,enumerable:!0,writable:!0,value:function(e){32!==e.keyCode&&13!==e.keyCode||a.props.onClick()}}),Object.defineProperty(f(a),"handleDelete",{configurable:!0,enumerable:!0,writable:!0,value:function(e,t){e.stopPropagation(),a.props.handleDeleteValue(t)}}),Object.defineProperty(f(a),"handleDeleteKeyboard",{configurable:!0,enumerable:!0,writable:!0,value:function(e,t){32!==e.keyCode&&13!==e.keyCode||a.props.handleDeleteValue(t)}}),Object.defineProperty(f(a),"renderEmptyIcon",{configurable:!0,enumerable:!0,writable:!0,value:function(){return n.default.createElement("span",{className:"rfipbtn__icon--empty"},a.props.noSelectedPlaceholder)}}),r))}var r,a;return function(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function");e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}}),t&&(Object.setPrototypeOf?Object.setPrototypeOf(e,t):e.__proto__=t)}(t,n.default.PureComponent),r=t,(a=[{key:"renderIcon",value:function(e){var t=this;return""===e||null===e||void 0===e?this.renderEmptyIcon():n.default.createElement("span",{className:"rfipbtn__icon",key:e},n.default.createElement("span",{className:"rfipbtn__elm"},this.props.renderIcon(e)),n.default.createElement("span",{className:"rfipbtn__del",onClick:function(r){return t.handleDelete(r,e)},onKeyDown:function(r){return t.handleDeleteKeyboard(r,e)},tabIndex:0,role:"button"},"×"))}},{key:"renderCurrentIcons",value:function(){var e=this;return this.props.isMulti?this.props.value.length?this.props.value.map(function(t){return e.renderIcon(t)}):this.renderEmptyIcon():this.renderIcon(this.props.value)}},{key:"render",value:function(){var e={onClick:this.handleClick,onKeyDown:this.handleKeyDown,onFocus:this.handleFocus,onBlur:this.handleBlur,tabIndex:0},t=(0,o.default)("rfipbtn__button","rfipbtn__button--".concat(this.props.isOpen?"open":"close")),r=(0,o.default)(this.props.className);return n.default.createElement("div",u({className:r,ref:this.props.domRef},e),n.default.createElement("div",{className:"rfipbtn__current"},this.renderCurrentIcons()),n.default.createElement("div",{className:t},n.default.createElement("i",{className:"fipicon-angle-down",role:"presentation","aria-label":"Open"})))}}])&&c(r.prototype,a),t}();Object.defineProperty(d,"propTypes",{configurable:!0,enumerable:!0,writable:!0,value:{className:a.default.string.isRequired,isOpen:a.default.bool.isRequired,onClick:a.default.func.isRequired,domRef:a.default.object.isRequired,isMulti:a.default.bool.isRequired,value:a.default.oneOfType([a.default.number,a.default.string,a.default.arrayOf(a.default.oneOfType([a.default.number,a.default.string]))]).isRequired,renderIcon:a.default.func.isRequired,handleDeleteValue:a.default.func.isRequired,noSelectedPlaceholder:a.default.string.isRequired}});var p=d;t.default=p},function(e,t){e.exports=a},function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.default=void 0;var n=f(r(1)),a=f(r(0)),o=f(r(3)),l=r(13),i=f(r(12)),u=f(r(11)),c=f(r(7)),s=r(2);function f(e){return e&&e.__esModule?e:{default:e}}function d(e){return(d="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e})(e)}function p(e){return function(e){if(Array.isArray(e)){for(var t=0,r=new Array(e.length);t<e.length;t++)r[t]=e[t];return r}}(e)||function(e){if(Symbol.iterator in Object(e)||"[object Arguments]"===Object.prototype.toString.call(e))return Array.from(e)}(e)||function(){throw new TypeError("Invalid attempt to spread non-iterable instance")}()}function h(e,t,r){return t in e?Object.defineProperty(e,t,{value:r,enumerable:!0,configurable:!0,writable:!0}):e[t]=r,e}function y(e,t){for(var r=0;r<t.length;r++){var n=t[r];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(e,n.key,n)}}function b(e,t,r){return t&&y(e.prototype,t),r&&y(e,r),e}function g(e){if(void 0===e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return e}var m=[],v="",P=function(e){function t(e){var r,a;return function(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}(this,t),this,a=(t.__proto__||Object.getPrototypeOf(t)).call(this,e),r=!a||"object"!==d(a)&&"function"!=typeof a?g(this):a,Object.defineProperty(g(r),"handleOuterClick",{configurable:!0,enumerable:!0,writable:!0,value:function(e){var t=e.target;r.isClickWithin(t)||r.closeDropdown()}}),Object.defineProperty(g(r),"handleEscapeKeyboard",{configurable:!0,enumerable:!0,writable:!0,value:function(e){27===e.keyCode&&r.closeDropdown()}}),Object.defineProperty(g(r),"isClickWithin",{configurable:!0,enumerable:!0,writable:!0,value:function(e){return r.fipButtonRef.current.contains(e)||r.fipDropDownRef.current&&r.fipDropDownRef.current.contains(e)}}),Object.defineProperty(g(r),"handleToggle",{configurable:!0,enumerable:!0,writable:!0,value:function(){r.setState(function(e){return r.handleDropDown(!e.isOpen,!1)})}}),Object.defineProperty(g(r),"closeDropdown",{configurable:!0,enumerable:!0,writable:!0,value:function(){r.handleDropDown(!1)}}),Object.defineProperty(g(r),"handleDropDown",{configurable:!0,enumerable:!0,writable:!0,value:function(e){var n=!(arguments.length>1&&void 0!==arguments[1])||arguments[1],a={isOpen:e};return a.elemClass=t.getDerivedClassName("rfip",r.props.theme,r.props.isMulti,e),a.btnClass=t.getDerivedClassName("rfipbtn",r.props.theme,r.props.isMulti,e),a.ddClass=t.getDerivedClassName("rfipdropdown",r.props.theme,r.props.isMulti,e),n&&r.setState(a),a}}),Object.defineProperty(g(r),"handleChangeValue",{configurable:!0,enumerable:!0,writable:!0,value:function(e){var t;r.props.isMulti?(t=p(r.state.value)).includes(e)?(t=t.filter(function(t){return t!==e})).length||(t=m):t.push(e):t=e===r.state.value?v:e,r.setState({value:t,isOpen:!r.props.closeOnSelect}),r.props.onChange(t)}}),Object.defineProperty(g(r),"handleDeleteValue",{configurable:!0,enumerable:!0,writable:!0,value:function(e){var n;n=r.props.isMulti?r.state.value.filter(function(t){return t!==e}):t.getDerivedValue(n,r.props.isMulti),r.setState({value:n}),r.props.onChange(n)}}),Object.defineProperty(g(r),"handleChangePage",{configurable:!0,enumerable:!0,writable:!0,value:function(e){r.setState({currentPage:e})}}),Object.defineProperty(g(r),"handleChangeCategory",{configurable:!0,enumerable:!0,writable:!0,value:function(e){r.setState({currentCategory:e,currentPage:0})}}),Object.defineProperty(g(r),"handleChangeSearch",{configurable:!0,enumerable:!0,writable:!0,value:function(e){r.setState({currentSearch:e,currentPage:0})}}),Object.defineProperty(g(r),"resetPortalStyle",{configurable:!0,enumerable:!0,writable:!0,value:function(e){["maxHeight","paddingTop","paddingBottom"].forEach(function(t){e.style[t]=null})}}),Object.defineProperty(g(r),"handlePortalEnter",{configurable:!0,enumerable:!0,writable:!0,value:function(e){var t=e.childNodes[0];r.resetPortalStyle(t);var n=getComputedStyle(t);r.fipPortalComputedStyle={height:n.height,paddingTop:n.paddingTop,paddingBottom:n.paddingBottom},["maxHeight","paddingTop","paddingBottom"].forEach(function(e){t.style[e]="0px"})}}),Object.defineProperty(g(r),"handlePortalEntering",{configurable:!0,enumerable:!0,writable:!0,value:function(e){var t=e.childNodes[0];t.style.maxHeight=r.fipPortalComputedStyle.height,t.style.paddingTop=r.fipPortalComputedStyle.paddingTop,t.style.paddingBottom=r.fipPortalComputedStyle.paddingBottom}}),Object.defineProperty(g(r),"handlePortalEntered",{configurable:!0,enumerable:!0,writable:!0,value:function(e){var t=e.childNodes[0];r.resetPortalStyle(t),r.props.showSearch&&void 0===window.orientation&&-1===navigator.userAgent.indexOf("IEMobile")&&t.querySelector(".rfipsearch__input").focus()}}),Object.defineProperty(g(r),"handlePortalExit",{configurable:!0,enumerable:!0,writable:!0,value:function(e){var t=e.childNodes[0];r.resetPortalStyle(t);var n=getComputedStyle(t).height;t.style.maxHeight=n}}),Object.defineProperty(g(r),"handlePortalExiting",{configurable:!0,enumerable:!0,writable:!0,value:function(e){var t=e.childNodes[0];t.style.maxHeight="0px",t.style.paddingTop="0px",t.style.paddingBottom="0px"}}),Object.defineProperty(g(r),"renderIcon",{configurable:!0,enumerable:!0,writable:!0,value:function(e){if("function"==typeof r.props.renderFunc)return r.props.renderFunc(e);if("class"===r.props.renderUsing)return n.default.createElement("i",{className:e});var t=h({},r.props.renderUsing,r.props.convertHex?(0,s.convertToHex)(e):e);return n.default.createElement("i",t)}}),r.fipButtonRef=n.default.createRef(),r.fipDropDownRef=n.default.createRef(),r.state={currentCategory:0,currentPage:0,isOpen:!1,currentSearch:""},r.fipPortalComputedStyle=null,r}return function(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function");e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}}),t&&(Object.setPrototypeOf?Object.setPrototypeOf(e,t):e.__proto__=t)}(t,n.default.PureComponent),b(t,null,[{key:"getDerivedStateFromProps",value:function(e,r){var n={};return n.elemClass=t.getDerivedClassName("rfip",e.theme,e.isMulti,r.isOpen),n.btnClass=t.getDerivedClassName("rfipbtn",e.theme,e.isMulti,r.isOpen),n.ddClass=t.getDerivedClassName("rfipdropdown",e.theme,e.isMulti,r.isOpen),n.value=t.getDerivedValue(e.value,e.isMulti),e.showCategory||(n.currentCategory=0,n.currentPage=0),e.showSearch||(n.currentSearch="",n.currentPage=0),n}},{key:"getDerivedClassName",value:function(e,t,r,n){return(0,o.default)(e,"".concat(e,"--").concat(t),h({},"".concat(e,"--multi"),r),"".concat(e,"--").concat(n?"open":"close"))}},{key:"getDerivedValue",value:function(e,t){var r=e;return t?r=Array.isArray(e)?p(e):m:"number"!=typeof e&&"string"!=typeof e&&(r=v),r}}]),b(t,[{key:"componentDidMount",value:function(){var e=this;["click"].forEach(function(t){document.addEventListener(t,e.handleOuterClick,!1)}),document.addEventListener("keydown",this.handleEscapeKeyboard,!1),this.props.onChange(this.state.value)}},{key:"componentWillUnmount",value:function(){var e=this;["click"].forEach(function(t){document.removeEventListener(t,e.handleOuterClick,!1)}),document.removeEventListener("keydown",this.handleEscapeKeyboard,!1)}},{key:"render",value:function(){var e={currentCategory:this.state.currentCategory,currentPage:this.state.currentPage,currentSearch:this.state.currentSearch,value:this.state.value,isMulti:this.props.isMulti,icons:this.props.icons,search:this.props.search,showCategory:this.props.showCategory,showSearch:this.props.showSearch,iconsPerPage:this.props.iconsPerPage,allCatPlaceholder:this.props.allCatPlaceholder,searchPlaceholder:this.props.searchPlaceholder,noIconPlaceholder:this.props.noIconPlaceholder,renderIcon:this.renderIcon,handleChangeValue:this.handleChangeValue,handleChangeCategory:this.handleChangeCategory,handleChangePage:this.handleChangePage,handleChangeSearch:this.handleChangeSearch};return n.default.createElement("div",{className:this.state.elemClass,ref:this.fipRef},n.default.createElement(i.default,{className:this.state.btnClass,isOpen:this.state.isOpen,onClick:this.handleToggle,domRef:this.fipButtonRef,isMulti:this.props.isMulti,value:this.state.value,renderIcon:this.renderIcon,handleDeleteValue:this.handleDeleteValue,noSelectedPlaceholder:this.props.noSelectedPlaceholder}),n.default.createElement(l.CSSTransition,{classNames:"fipappear",timeout:300,in:this.state.isOpen,unmountOnExit:!0,onEnter:this.handlePortalEnter,onEntering:this.handlePortalEntering,onEntered:this.handlePortalEntered,onExit:this.handlePortalExit,onExiting:this.handlePortalExiting},n.default.createElement(c.default,{appendRoot:this.props.appendTo,domRef:this.fipDropDownRef,btnRef:this.fipButtonRef,className:this.state.ddClass},n.default.createElement(u.default,e))))}}]),t}();Object.defineProperty(P,"propTypes",{configurable:!0,enumerable:!0,writable:!0,value:{icons:a.default.oneOfType([a.default.arrayOf(a.default.string),a.default.arrayOf(a.default.number),a.default.objectOf(a.default.oneOfType([a.default.arrayOf(a.default.number),a.default.arrayOf(a.default.string)]))]).isRequired,search:a.default.oneOfType([a.default.objectOf(a.default.arrayOf(a.default.string)),a.default.arrayOf(a.default.string)]),iconsPerPage:a.default.number,theme:a.default.string,onChange:a.default.func.isRequired,showCategory:a.default.bool,showSearch:a.default.bool,value:a.default.oneOfType([a.default.arrayOf(a.default.string),a.default.arrayOf(a.default.number),a.default.number,a.default.string]),isMulti:a.default.bool,renderUsing:a.default.string,convertHex:a.default.bool,renderFunc:a.default.func,appendTo:a.default.oneOfType([a.default.bool,a.default.string]),allCatPlaceholder:a.default.string,searchPlaceholder:a.default.string,noIconPlaceholder:a.default.string,noSelectedPlaceholder:a.default.string,closeOnSelect:a.default.bool}}),Object.defineProperty(P,"defaultProps",{configurable:!0,enumerable:!0,writable:!0,value:{search:null,iconsPerPage:20,theme:"default",showCategory:!0,showSearch:!0,value:null,isMulti:!1,renderUsing:"class",convertHex:!0,renderFunc:null,appendTo:!1,allCatPlaceholder:"Show from all",searchPlaceholder:"Search Icons",noIconPlaceholder:"No icons found",noSelectedPlaceholder:"Select icon",closeOnSelect:!1}}),Object.defineProperty(P,"displayName",{configurable:!0,enumerable:!0,writable:!0,value:"FontIconPicker"});var O=P;t.default=O},function(e,t,r){"use strict";var n;Object.defineProperty(t,"__esModule",{value:!0}),t.default=void 0;var a=((n=r(14))&&n.__esModule?n:{default:n}).default;t.default=a}]).default});
 
-},{"classnames":44,"prop-types":179,"react":197,"react-dom":183,"react-transition-group":192}],44:[function(require,module,exports){
+},{"classnames":60,"prop-types":198,"react":216,"react-dom":202,"react-transition-group":211}],60:[function(require,module,exports){
 /*!
   Copyright (c) 2017 Jed Watson.
   Licensed under the MIT License (MIT), see
@@ -7862,7 +13996,7 @@ module.exports = _interopRequireDefault;
 	}
 }());
 
-},{}],45:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 "use strict";
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
@@ -7877,7 +14011,7 @@ function addClass(element, className) {
 }
 
 module.exports = exports["default"];
-},{"./hasClass":46,"@babel/runtime/helpers/interopRequireDefault":42}],46:[function(require,module,exports){
+},{"./hasClass":62,"@babel/runtime/helpers/interopRequireDefault":58}],62:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -7888,7 +14022,7 @@ function hasClass(element, className) {
 }
 
 module.exports = exports["default"];
-},{}],47:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 'use strict';
 
 function replaceClassName(origClass, classToRemove) {
@@ -7898,7 +14032,7 @@ function replaceClassName(origClass, classToRemove) {
 module.exports = function removeClass(element, className) {
   if (element.classList) element.classList.remove(className);else if (typeof element.className === 'string') element.className = replaceClassName(element.className, className);else element.setAttribute('class', replaceClassName(element.className && element.className.baseVal || '', className));
 };
-},{}],48:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 var getNative = require('./_getNative'),
     root = require('./_root');
 
@@ -7907,7 +14041,7 @@ var DataView = getNative(root, 'DataView');
 
 module.exports = DataView;
 
-},{"./_getNative":102,"./_root":137}],49:[function(require,module,exports){
+},{"./_getNative":119,"./_root":154}],65:[function(require,module,exports){
 var hashClear = require('./_hashClear'),
     hashDelete = require('./_hashDelete'),
     hashGet = require('./_hashGet'),
@@ -7941,7 +14075,7 @@ Hash.prototype.set = hashSet;
 
 module.exports = Hash;
 
-},{"./_hashClear":108,"./_hashDelete":109,"./_hashGet":110,"./_hashHas":111,"./_hashSet":112}],50:[function(require,module,exports){
+},{"./_hashClear":125,"./_hashDelete":126,"./_hashGet":127,"./_hashHas":128,"./_hashSet":129}],66:[function(require,module,exports){
 var listCacheClear = require('./_listCacheClear'),
     listCacheDelete = require('./_listCacheDelete'),
     listCacheGet = require('./_listCacheGet'),
@@ -7975,7 +14109,7 @@ ListCache.prototype.set = listCacheSet;
 
 module.exports = ListCache;
 
-},{"./_listCacheClear":119,"./_listCacheDelete":120,"./_listCacheGet":121,"./_listCacheHas":122,"./_listCacheSet":123}],51:[function(require,module,exports){
+},{"./_listCacheClear":136,"./_listCacheDelete":137,"./_listCacheGet":138,"./_listCacheHas":139,"./_listCacheSet":140}],67:[function(require,module,exports){
 var getNative = require('./_getNative'),
     root = require('./_root');
 
@@ -7984,7 +14118,7 @@ var Map = getNative(root, 'Map');
 
 module.exports = Map;
 
-},{"./_getNative":102,"./_root":137}],52:[function(require,module,exports){
+},{"./_getNative":119,"./_root":154}],68:[function(require,module,exports){
 var mapCacheClear = require('./_mapCacheClear'),
     mapCacheDelete = require('./_mapCacheDelete'),
     mapCacheGet = require('./_mapCacheGet'),
@@ -8018,7 +14152,7 @@ MapCache.prototype.set = mapCacheSet;
 
 module.exports = MapCache;
 
-},{"./_mapCacheClear":124,"./_mapCacheDelete":125,"./_mapCacheGet":126,"./_mapCacheHas":127,"./_mapCacheSet":128}],53:[function(require,module,exports){
+},{"./_mapCacheClear":141,"./_mapCacheDelete":142,"./_mapCacheGet":143,"./_mapCacheHas":144,"./_mapCacheSet":145}],69:[function(require,module,exports){
 var getNative = require('./_getNative'),
     root = require('./_root');
 
@@ -8027,7 +14161,7 @@ var Promise = getNative(root, 'Promise');
 
 module.exports = Promise;
 
-},{"./_getNative":102,"./_root":137}],54:[function(require,module,exports){
+},{"./_getNative":119,"./_root":154}],70:[function(require,module,exports){
 var getNative = require('./_getNative'),
     root = require('./_root');
 
@@ -8036,7 +14170,7 @@ var Set = getNative(root, 'Set');
 
 module.exports = Set;
 
-},{"./_getNative":102,"./_root":137}],55:[function(require,module,exports){
+},{"./_getNative":119,"./_root":154}],71:[function(require,module,exports){
 var MapCache = require('./_MapCache'),
     setCacheAdd = require('./_setCacheAdd'),
     setCacheHas = require('./_setCacheHas');
@@ -8065,7 +14199,7 @@ SetCache.prototype.has = setCacheHas;
 
 module.exports = SetCache;
 
-},{"./_MapCache":52,"./_setCacheAdd":138,"./_setCacheHas":139}],56:[function(require,module,exports){
+},{"./_MapCache":68,"./_setCacheAdd":155,"./_setCacheHas":156}],72:[function(require,module,exports){
 var ListCache = require('./_ListCache'),
     stackClear = require('./_stackClear'),
     stackDelete = require('./_stackDelete'),
@@ -8094,7 +14228,7 @@ Stack.prototype.set = stackSet;
 
 module.exports = Stack;
 
-},{"./_ListCache":50,"./_stackClear":141,"./_stackDelete":142,"./_stackGet":143,"./_stackHas":144,"./_stackSet":145}],57:[function(require,module,exports){
+},{"./_ListCache":66,"./_stackClear":158,"./_stackDelete":159,"./_stackGet":160,"./_stackHas":161,"./_stackSet":162}],73:[function(require,module,exports){
 var root = require('./_root');
 
 /** Built-in value references. */
@@ -8102,7 +14236,7 @@ var Symbol = root.Symbol;
 
 module.exports = Symbol;
 
-},{"./_root":137}],58:[function(require,module,exports){
+},{"./_root":154}],74:[function(require,module,exports){
 var root = require('./_root');
 
 /** Built-in value references. */
@@ -8110,7 +14244,7 @@ var Uint8Array = root.Uint8Array;
 
 module.exports = Uint8Array;
 
-},{"./_root":137}],59:[function(require,module,exports){
+},{"./_root":154}],75:[function(require,module,exports){
 var getNative = require('./_getNative'),
     root = require('./_root');
 
@@ -8119,7 +14253,7 @@ var WeakMap = getNative(root, 'WeakMap');
 
 module.exports = WeakMap;
 
-},{"./_getNative":102,"./_root":137}],60:[function(require,module,exports){
+},{"./_getNative":119,"./_root":154}],76:[function(require,module,exports){
 /**
  * A specialized version of `_.filter` for arrays without support for
  * iteratee shorthands.
@@ -8146,7 +14280,7 @@ function arrayFilter(array, predicate) {
 
 module.exports = arrayFilter;
 
-},{}],61:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 var baseTimes = require('./_baseTimes'),
     isArguments = require('./isArguments'),
     isArray = require('./isArray'),
@@ -8197,7 +14331,7 @@ function arrayLikeKeys(value, inherited) {
 
 module.exports = arrayLikeKeys;
 
-},{"./_baseTimes":86,"./_isIndex":113,"./isArguments":153,"./isArray":154,"./isBuffer":156,"./isTypedArray":162}],62:[function(require,module,exports){
+},{"./_baseTimes":103,"./_isIndex":130,"./isArguments":171,"./isArray":172,"./isBuffer":174,"./isTypedArray":180}],78:[function(require,module,exports){
 /**
  * A specialized version of `_.map` for arrays without support for iteratee
  * shorthands.
@@ -8220,7 +14354,7 @@ function arrayMap(array, iteratee) {
 
 module.exports = arrayMap;
 
-},{}],63:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 /**
  * Appends the elements of `values` to `array`.
  *
@@ -8242,7 +14376,7 @@ function arrayPush(array, values) {
 
 module.exports = arrayPush;
 
-},{}],64:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 /**
  * A specialized version of `_.some` for arrays without support for iteratee
  * shorthands.
@@ -8267,7 +14401,7 @@ function arraySome(array, predicate) {
 
 module.exports = arraySome;
 
-},{}],65:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 var eq = require('./eq');
 
 /**
@@ -8290,7 +14424,7 @@ function assocIndexOf(array, key) {
 
 module.exports = assocIndexOf;
 
-},{"./eq":149}],66:[function(require,module,exports){
+},{"./eq":166}],82:[function(require,module,exports){
 var baseForOwn = require('./_baseForOwn'),
     createBaseEach = require('./_createBaseEach');
 
@@ -8306,7 +14440,30 @@ var baseEach = createBaseEach(baseForOwn);
 
 module.exports = baseEach;
 
-},{"./_baseForOwn":68,"./_createBaseEach":93}],67:[function(require,module,exports){
+},{"./_baseForOwn":85,"./_createBaseEach":110}],83:[function(require,module,exports){
+var baseEach = require('./_baseEach');
+
+/**
+ * The base implementation of `_.filter` without support for iteratee shorthands.
+ *
+ * @private
+ * @param {Array|Object} collection The collection to iterate over.
+ * @param {Function} predicate The function invoked per iteration.
+ * @returns {Array} Returns the new filtered array.
+ */
+function baseFilter(collection, predicate) {
+  var result = [];
+  baseEach(collection, function(value, index, collection) {
+    if (predicate(value, index, collection)) {
+      result.push(value);
+    }
+  });
+  return result;
+}
+
+module.exports = baseFilter;
+
+},{"./_baseEach":82}],84:[function(require,module,exports){
 var createBaseFor = require('./_createBaseFor');
 
 /**
@@ -8324,7 +14481,7 @@ var baseFor = createBaseFor();
 
 module.exports = baseFor;
 
-},{"./_createBaseFor":94}],68:[function(require,module,exports){
+},{"./_createBaseFor":111}],85:[function(require,module,exports){
 var baseFor = require('./_baseFor'),
     keys = require('./keys');
 
@@ -8342,7 +14499,7 @@ function baseForOwn(object, iteratee) {
 
 module.exports = baseForOwn;
 
-},{"./_baseFor":67,"./keys":163}],69:[function(require,module,exports){
+},{"./_baseFor":84,"./keys":181}],86:[function(require,module,exports){
 var castPath = require('./_castPath'),
     toKey = require('./_toKey');
 
@@ -8368,7 +14525,7 @@ function baseGet(object, path) {
 
 module.exports = baseGet;
 
-},{"./_castPath":91,"./_toKey":147}],70:[function(require,module,exports){
+},{"./_castPath":108,"./_toKey":164}],87:[function(require,module,exports){
 var arrayPush = require('./_arrayPush'),
     isArray = require('./isArray');
 
@@ -8390,7 +14547,7 @@ function baseGetAllKeys(object, keysFunc, symbolsFunc) {
 
 module.exports = baseGetAllKeys;
 
-},{"./_arrayPush":63,"./isArray":154}],71:[function(require,module,exports){
+},{"./_arrayPush":79,"./isArray":172}],88:[function(require,module,exports){
 var Symbol = require('./_Symbol'),
     getRawTag = require('./_getRawTag'),
     objectToString = require('./_objectToString');
@@ -8420,7 +14577,7 @@ function baseGetTag(value) {
 
 module.exports = baseGetTag;
 
-},{"./_Symbol":57,"./_getRawTag":103,"./_objectToString":135}],72:[function(require,module,exports){
+},{"./_Symbol":73,"./_getRawTag":120,"./_objectToString":152}],89:[function(require,module,exports){
 /**
  * The base implementation of `_.hasIn` without support for deep paths.
  *
@@ -8435,7 +14592,7 @@ function baseHasIn(object, key) {
 
 module.exports = baseHasIn;
 
-},{}],73:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 var baseGetTag = require('./_baseGetTag'),
     isObjectLike = require('./isObjectLike');
 
@@ -8455,7 +14612,7 @@ function baseIsArguments(value) {
 
 module.exports = baseIsArguments;
 
-},{"./_baseGetTag":71,"./isObjectLike":160}],74:[function(require,module,exports){
+},{"./_baseGetTag":88,"./isObjectLike":178}],91:[function(require,module,exports){
 var baseIsEqualDeep = require('./_baseIsEqualDeep'),
     isObjectLike = require('./isObjectLike');
 
@@ -8485,7 +14642,7 @@ function baseIsEqual(value, other, bitmask, customizer, stack) {
 
 module.exports = baseIsEqual;
 
-},{"./_baseIsEqualDeep":75,"./isObjectLike":160}],75:[function(require,module,exports){
+},{"./_baseIsEqualDeep":92,"./isObjectLike":178}],92:[function(require,module,exports){
 var Stack = require('./_Stack'),
     equalArrays = require('./_equalArrays'),
     equalByTag = require('./_equalByTag'),
@@ -8570,7 +14727,7 @@ function baseIsEqualDeep(object, other, bitmask, customizer, equalFunc, stack) {
 
 module.exports = baseIsEqualDeep;
 
-},{"./_Stack":56,"./_equalArrays":95,"./_equalByTag":96,"./_equalObjects":97,"./_getTag":105,"./isArray":154,"./isBuffer":156,"./isTypedArray":162}],76:[function(require,module,exports){
+},{"./_Stack":72,"./_equalArrays":112,"./_equalByTag":113,"./_equalObjects":114,"./_getTag":122,"./isArray":172,"./isBuffer":174,"./isTypedArray":180}],93:[function(require,module,exports){
 var Stack = require('./_Stack'),
     baseIsEqual = require('./_baseIsEqual');
 
@@ -8634,7 +14791,7 @@ function baseIsMatch(object, source, matchData, customizer) {
 
 module.exports = baseIsMatch;
 
-},{"./_Stack":56,"./_baseIsEqual":74}],77:[function(require,module,exports){
+},{"./_Stack":72,"./_baseIsEqual":91}],94:[function(require,module,exports){
 var isFunction = require('./isFunction'),
     isMasked = require('./_isMasked'),
     isObject = require('./isObject'),
@@ -8683,7 +14840,7 @@ function baseIsNative(value) {
 
 module.exports = baseIsNative;
 
-},{"./_isMasked":116,"./_toSource":148,"./isFunction":157,"./isObject":159}],78:[function(require,module,exports){
+},{"./_isMasked":133,"./_toSource":165,"./isFunction":175,"./isObject":177}],95:[function(require,module,exports){
 var baseGetTag = require('./_baseGetTag'),
     isLength = require('./isLength'),
     isObjectLike = require('./isObjectLike');
@@ -8745,7 +14902,7 @@ function baseIsTypedArray(value) {
 
 module.exports = baseIsTypedArray;
 
-},{"./_baseGetTag":71,"./isLength":158,"./isObjectLike":160}],79:[function(require,module,exports){
+},{"./_baseGetTag":88,"./isLength":176,"./isObjectLike":178}],96:[function(require,module,exports){
 var baseMatches = require('./_baseMatches'),
     baseMatchesProperty = require('./_baseMatchesProperty'),
     identity = require('./identity'),
@@ -8778,7 +14935,7 @@ function baseIteratee(value) {
 
 module.exports = baseIteratee;
 
-},{"./_baseMatches":82,"./_baseMatchesProperty":83,"./identity":152,"./isArray":154,"./property":166}],80:[function(require,module,exports){
+},{"./_baseMatches":99,"./_baseMatchesProperty":100,"./identity":170,"./isArray":172,"./property":184}],97:[function(require,module,exports){
 var isPrototype = require('./_isPrototype'),
     nativeKeys = require('./_nativeKeys');
 
@@ -8810,7 +14967,7 @@ function baseKeys(object) {
 
 module.exports = baseKeys;
 
-},{"./_isPrototype":117,"./_nativeKeys":133}],81:[function(require,module,exports){
+},{"./_isPrototype":134,"./_nativeKeys":150}],98:[function(require,module,exports){
 var baseEach = require('./_baseEach'),
     isArrayLike = require('./isArrayLike');
 
@@ -8834,7 +14991,7 @@ function baseMap(collection, iteratee) {
 
 module.exports = baseMap;
 
-},{"./_baseEach":66,"./isArrayLike":155}],82:[function(require,module,exports){
+},{"./_baseEach":82,"./isArrayLike":173}],99:[function(require,module,exports){
 var baseIsMatch = require('./_baseIsMatch'),
     getMatchData = require('./_getMatchData'),
     matchesStrictComparable = require('./_matchesStrictComparable');
@@ -8858,7 +15015,7 @@ function baseMatches(source) {
 
 module.exports = baseMatches;
 
-},{"./_baseIsMatch":76,"./_getMatchData":101,"./_matchesStrictComparable":130}],83:[function(require,module,exports){
+},{"./_baseIsMatch":93,"./_getMatchData":118,"./_matchesStrictComparable":147}],100:[function(require,module,exports){
 var baseIsEqual = require('./_baseIsEqual'),
     get = require('./get'),
     hasIn = require('./hasIn'),
@@ -8893,7 +15050,7 @@ function baseMatchesProperty(path, srcValue) {
 
 module.exports = baseMatchesProperty;
 
-},{"./_baseIsEqual":74,"./_isKey":114,"./_isStrictComparable":118,"./_matchesStrictComparable":130,"./_toKey":147,"./get":150,"./hasIn":151}],84:[function(require,module,exports){
+},{"./_baseIsEqual":91,"./_isKey":131,"./_isStrictComparable":135,"./_matchesStrictComparable":147,"./_toKey":164,"./get":168,"./hasIn":169}],101:[function(require,module,exports){
 /**
  * The base implementation of `_.property` without support for deep paths.
  *
@@ -8909,7 +15066,7 @@ function baseProperty(key) {
 
 module.exports = baseProperty;
 
-},{}],85:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
 var baseGet = require('./_baseGet');
 
 /**
@@ -8927,7 +15084,7 @@ function basePropertyDeep(path) {
 
 module.exports = basePropertyDeep;
 
-},{"./_baseGet":69}],86:[function(require,module,exports){
+},{"./_baseGet":86}],103:[function(require,module,exports){
 /**
  * The base implementation of `_.times` without support for iteratee shorthands
  * or max array length checks.
@@ -8949,7 +15106,7 @@ function baseTimes(n, iteratee) {
 
 module.exports = baseTimes;
 
-},{}],87:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 var Symbol = require('./_Symbol'),
     arrayMap = require('./_arrayMap'),
     isArray = require('./isArray'),
@@ -8988,7 +15145,7 @@ function baseToString(value) {
 
 module.exports = baseToString;
 
-},{"./_Symbol":57,"./_arrayMap":62,"./isArray":154,"./isSymbol":161}],88:[function(require,module,exports){
+},{"./_Symbol":73,"./_arrayMap":78,"./isArray":172,"./isSymbol":179}],105:[function(require,module,exports){
 /**
  * The base implementation of `_.unary` without support for storing metadata.
  *
@@ -9004,7 +15161,7 @@ function baseUnary(func) {
 
 module.exports = baseUnary;
 
-},{}],89:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 /**
  * Checks if a `cache` value for `key` exists.
  *
@@ -9019,7 +15176,7 @@ function cacheHas(cache, key) {
 
 module.exports = cacheHas;
 
-},{}],90:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 var identity = require('./identity');
 
 /**
@@ -9035,7 +15192,7 @@ function castFunction(value) {
 
 module.exports = castFunction;
 
-},{"./identity":152}],91:[function(require,module,exports){
+},{"./identity":170}],108:[function(require,module,exports){
 var isArray = require('./isArray'),
     isKey = require('./_isKey'),
     stringToPath = require('./_stringToPath'),
@@ -9058,7 +15215,7 @@ function castPath(value, object) {
 
 module.exports = castPath;
 
-},{"./_isKey":114,"./_stringToPath":146,"./isArray":154,"./toString":173}],92:[function(require,module,exports){
+},{"./_isKey":131,"./_stringToPath":163,"./isArray":172,"./toString":191}],109:[function(require,module,exports){
 var root = require('./_root');
 
 /** Used to detect overreaching core-js shims. */
@@ -9066,7 +15223,7 @@ var coreJsData = root['__core-js_shared__'];
 
 module.exports = coreJsData;
 
-},{"./_root":137}],93:[function(require,module,exports){
+},{"./_root":154}],110:[function(require,module,exports){
 var isArrayLike = require('./isArrayLike');
 
 /**
@@ -9100,7 +15257,7 @@ function createBaseEach(eachFunc, fromRight) {
 
 module.exports = createBaseEach;
 
-},{"./isArrayLike":155}],94:[function(require,module,exports){
+},{"./isArrayLike":173}],111:[function(require,module,exports){
 /**
  * Creates a base function for methods like `_.forIn` and `_.forOwn`.
  *
@@ -9127,7 +15284,7 @@ function createBaseFor(fromRight) {
 
 module.exports = createBaseFor;
 
-},{}],95:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 var SetCache = require('./_SetCache'),
     arraySome = require('./_arraySome'),
     cacheHas = require('./_cacheHas');
@@ -9212,7 +15369,7 @@ function equalArrays(array, other, bitmask, customizer, equalFunc, stack) {
 
 module.exports = equalArrays;
 
-},{"./_SetCache":55,"./_arraySome":64,"./_cacheHas":89}],96:[function(require,module,exports){
+},{"./_SetCache":71,"./_arraySome":80,"./_cacheHas":106}],113:[function(require,module,exports){
 var Symbol = require('./_Symbol'),
     Uint8Array = require('./_Uint8Array'),
     eq = require('./eq'),
@@ -9326,7 +15483,7 @@ function equalByTag(object, other, tag, bitmask, customizer, equalFunc, stack) {
 
 module.exports = equalByTag;
 
-},{"./_Symbol":57,"./_Uint8Array":58,"./_equalArrays":95,"./_mapToArray":129,"./_setToArray":140,"./eq":149}],97:[function(require,module,exports){
+},{"./_Symbol":73,"./_Uint8Array":74,"./_equalArrays":112,"./_mapToArray":146,"./_setToArray":157,"./eq":166}],114:[function(require,module,exports){
 var getAllKeys = require('./_getAllKeys');
 
 /** Used to compose bitmasks for value comparisons. */
@@ -9417,7 +15574,7 @@ function equalObjects(object, other, bitmask, customizer, equalFunc, stack) {
 
 module.exports = equalObjects;
 
-},{"./_getAllKeys":99}],98:[function(require,module,exports){
+},{"./_getAllKeys":116}],115:[function(require,module,exports){
 (function (global){
 /** Detect free variable `global` from Node.js. */
 var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
@@ -9425,7 +15582,7 @@ var freeGlobal = typeof global == 'object' && global && global.Object === Object
 module.exports = freeGlobal;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],99:[function(require,module,exports){
+},{}],116:[function(require,module,exports){
 var baseGetAllKeys = require('./_baseGetAllKeys'),
     getSymbols = require('./_getSymbols'),
     keys = require('./keys');
@@ -9443,7 +15600,7 @@ function getAllKeys(object) {
 
 module.exports = getAllKeys;
 
-},{"./_baseGetAllKeys":70,"./_getSymbols":104,"./keys":163}],100:[function(require,module,exports){
+},{"./_baseGetAllKeys":87,"./_getSymbols":121,"./keys":181}],117:[function(require,module,exports){
 var isKeyable = require('./_isKeyable');
 
 /**
@@ -9463,7 +15620,7 @@ function getMapData(map, key) {
 
 module.exports = getMapData;
 
-},{"./_isKeyable":115}],101:[function(require,module,exports){
+},{"./_isKeyable":132}],118:[function(require,module,exports){
 var isStrictComparable = require('./_isStrictComparable'),
     keys = require('./keys');
 
@@ -9489,7 +15646,7 @@ function getMatchData(object) {
 
 module.exports = getMatchData;
 
-},{"./_isStrictComparable":118,"./keys":163}],102:[function(require,module,exports){
+},{"./_isStrictComparable":135,"./keys":181}],119:[function(require,module,exports){
 var baseIsNative = require('./_baseIsNative'),
     getValue = require('./_getValue');
 
@@ -9508,7 +15665,7 @@ function getNative(object, key) {
 
 module.exports = getNative;
 
-},{"./_baseIsNative":77,"./_getValue":106}],103:[function(require,module,exports){
+},{"./_baseIsNative":94,"./_getValue":123}],120:[function(require,module,exports){
 var Symbol = require('./_Symbol');
 
 /** Used for built-in method references. */
@@ -9556,7 +15713,7 @@ function getRawTag(value) {
 
 module.exports = getRawTag;
 
-},{"./_Symbol":57}],104:[function(require,module,exports){
+},{"./_Symbol":73}],121:[function(require,module,exports){
 var arrayFilter = require('./_arrayFilter'),
     stubArray = require('./stubArray');
 
@@ -9588,7 +15745,7 @@ var getSymbols = !nativeGetSymbols ? stubArray : function(object) {
 
 module.exports = getSymbols;
 
-},{"./_arrayFilter":60,"./stubArray":167}],105:[function(require,module,exports){
+},{"./_arrayFilter":76,"./stubArray":185}],122:[function(require,module,exports){
 var DataView = require('./_DataView'),
     Map = require('./_Map'),
     Promise = require('./_Promise'),
@@ -9648,7 +15805,7 @@ if ((DataView && getTag(new DataView(new ArrayBuffer(1))) != dataViewTag) ||
 
 module.exports = getTag;
 
-},{"./_DataView":48,"./_Map":51,"./_Promise":53,"./_Set":54,"./_WeakMap":59,"./_baseGetTag":71,"./_toSource":148}],106:[function(require,module,exports){
+},{"./_DataView":64,"./_Map":67,"./_Promise":69,"./_Set":70,"./_WeakMap":75,"./_baseGetTag":88,"./_toSource":165}],123:[function(require,module,exports){
 /**
  * Gets the value at `key` of `object`.
  *
@@ -9663,7 +15820,7 @@ function getValue(object, key) {
 
 module.exports = getValue;
 
-},{}],107:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
 var castPath = require('./_castPath'),
     isArguments = require('./isArguments'),
     isArray = require('./isArray'),
@@ -9704,7 +15861,7 @@ function hasPath(object, path, hasFunc) {
 
 module.exports = hasPath;
 
-},{"./_castPath":91,"./_isIndex":113,"./_toKey":147,"./isArguments":153,"./isArray":154,"./isLength":158}],108:[function(require,module,exports){
+},{"./_castPath":108,"./_isIndex":130,"./_toKey":164,"./isArguments":171,"./isArray":172,"./isLength":176}],125:[function(require,module,exports){
 var nativeCreate = require('./_nativeCreate');
 
 /**
@@ -9721,7 +15878,7 @@ function hashClear() {
 
 module.exports = hashClear;
 
-},{"./_nativeCreate":132}],109:[function(require,module,exports){
+},{"./_nativeCreate":149}],126:[function(require,module,exports){
 /**
  * Removes `key` and its value from the hash.
  *
@@ -9740,7 +15897,7 @@ function hashDelete(key) {
 
 module.exports = hashDelete;
 
-},{}],110:[function(require,module,exports){
+},{}],127:[function(require,module,exports){
 var nativeCreate = require('./_nativeCreate');
 
 /** Used to stand-in for `undefined` hash values. */
@@ -9772,7 +15929,7 @@ function hashGet(key) {
 
 module.exports = hashGet;
 
-},{"./_nativeCreate":132}],111:[function(require,module,exports){
+},{"./_nativeCreate":149}],128:[function(require,module,exports){
 var nativeCreate = require('./_nativeCreate');
 
 /** Used for built-in method references. */
@@ -9797,7 +15954,7 @@ function hashHas(key) {
 
 module.exports = hashHas;
 
-},{"./_nativeCreate":132}],112:[function(require,module,exports){
+},{"./_nativeCreate":149}],129:[function(require,module,exports){
 var nativeCreate = require('./_nativeCreate');
 
 /** Used to stand-in for `undefined` hash values. */
@@ -9822,7 +15979,7 @@ function hashSet(key, value) {
 
 module.exports = hashSet;
 
-},{"./_nativeCreate":132}],113:[function(require,module,exports){
+},{"./_nativeCreate":149}],130:[function(require,module,exports){
 /** Used as references for various `Number` constants. */
 var MAX_SAFE_INTEGER = 9007199254740991;
 
@@ -9849,7 +16006,7 @@ function isIndex(value, length) {
 
 module.exports = isIndex;
 
-},{}],114:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 var isArray = require('./isArray'),
     isSymbol = require('./isSymbol');
 
@@ -9880,7 +16037,7 @@ function isKey(value, object) {
 
 module.exports = isKey;
 
-},{"./isArray":154,"./isSymbol":161}],115:[function(require,module,exports){
+},{"./isArray":172,"./isSymbol":179}],132:[function(require,module,exports){
 /**
  * Checks if `value` is suitable for use as unique object key.
  *
@@ -9897,7 +16054,7 @@ function isKeyable(value) {
 
 module.exports = isKeyable;
 
-},{}],116:[function(require,module,exports){
+},{}],133:[function(require,module,exports){
 var coreJsData = require('./_coreJsData');
 
 /** Used to detect methods masquerading as native. */
@@ -9919,7 +16076,7 @@ function isMasked(func) {
 
 module.exports = isMasked;
 
-},{"./_coreJsData":92}],117:[function(require,module,exports){
+},{"./_coreJsData":109}],134:[function(require,module,exports){
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
 
@@ -9939,7 +16096,7 @@ function isPrototype(value) {
 
 module.exports = isPrototype;
 
-},{}],118:[function(require,module,exports){
+},{}],135:[function(require,module,exports){
 var isObject = require('./isObject');
 
 /**
@@ -9956,7 +16113,7 @@ function isStrictComparable(value) {
 
 module.exports = isStrictComparable;
 
-},{"./isObject":159}],119:[function(require,module,exports){
+},{"./isObject":177}],136:[function(require,module,exports){
 /**
  * Removes all key-value entries from the list cache.
  *
@@ -9971,7 +16128,7 @@ function listCacheClear() {
 
 module.exports = listCacheClear;
 
-},{}],120:[function(require,module,exports){
+},{}],137:[function(require,module,exports){
 var assocIndexOf = require('./_assocIndexOf');
 
 /** Used for built-in method references. */
@@ -10008,7 +16165,7 @@ function listCacheDelete(key) {
 
 module.exports = listCacheDelete;
 
-},{"./_assocIndexOf":65}],121:[function(require,module,exports){
+},{"./_assocIndexOf":81}],138:[function(require,module,exports){
 var assocIndexOf = require('./_assocIndexOf');
 
 /**
@@ -10029,7 +16186,7 @@ function listCacheGet(key) {
 
 module.exports = listCacheGet;
 
-},{"./_assocIndexOf":65}],122:[function(require,module,exports){
+},{"./_assocIndexOf":81}],139:[function(require,module,exports){
 var assocIndexOf = require('./_assocIndexOf');
 
 /**
@@ -10047,7 +16204,7 @@ function listCacheHas(key) {
 
 module.exports = listCacheHas;
 
-},{"./_assocIndexOf":65}],123:[function(require,module,exports){
+},{"./_assocIndexOf":81}],140:[function(require,module,exports){
 var assocIndexOf = require('./_assocIndexOf');
 
 /**
@@ -10075,7 +16232,7 @@ function listCacheSet(key, value) {
 
 module.exports = listCacheSet;
 
-},{"./_assocIndexOf":65}],124:[function(require,module,exports){
+},{"./_assocIndexOf":81}],141:[function(require,module,exports){
 var Hash = require('./_Hash'),
     ListCache = require('./_ListCache'),
     Map = require('./_Map');
@@ -10098,7 +16255,7 @@ function mapCacheClear() {
 
 module.exports = mapCacheClear;
 
-},{"./_Hash":49,"./_ListCache":50,"./_Map":51}],125:[function(require,module,exports){
+},{"./_Hash":65,"./_ListCache":66,"./_Map":67}],142:[function(require,module,exports){
 var getMapData = require('./_getMapData');
 
 /**
@@ -10118,7 +16275,7 @@ function mapCacheDelete(key) {
 
 module.exports = mapCacheDelete;
 
-},{"./_getMapData":100}],126:[function(require,module,exports){
+},{"./_getMapData":117}],143:[function(require,module,exports){
 var getMapData = require('./_getMapData');
 
 /**
@@ -10136,7 +16293,7 @@ function mapCacheGet(key) {
 
 module.exports = mapCacheGet;
 
-},{"./_getMapData":100}],127:[function(require,module,exports){
+},{"./_getMapData":117}],144:[function(require,module,exports){
 var getMapData = require('./_getMapData');
 
 /**
@@ -10154,7 +16311,7 @@ function mapCacheHas(key) {
 
 module.exports = mapCacheHas;
 
-},{"./_getMapData":100}],128:[function(require,module,exports){
+},{"./_getMapData":117}],145:[function(require,module,exports){
 var getMapData = require('./_getMapData');
 
 /**
@@ -10178,7 +16335,7 @@ function mapCacheSet(key, value) {
 
 module.exports = mapCacheSet;
 
-},{"./_getMapData":100}],129:[function(require,module,exports){
+},{"./_getMapData":117}],146:[function(require,module,exports){
 /**
  * Converts `map` to its key-value pairs.
  *
@@ -10198,7 +16355,7 @@ function mapToArray(map) {
 
 module.exports = mapToArray;
 
-},{}],130:[function(require,module,exports){
+},{}],147:[function(require,module,exports){
 /**
  * A specialized version of `matchesProperty` for source values suitable
  * for strict equality comparisons, i.e. `===`.
@@ -10220,7 +16377,7 @@ function matchesStrictComparable(key, srcValue) {
 
 module.exports = matchesStrictComparable;
 
-},{}],131:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 var memoize = require('./memoize');
 
 /** Used as the maximum memoize cache size. */
@@ -10248,7 +16405,7 @@ function memoizeCapped(func) {
 
 module.exports = memoizeCapped;
 
-},{"./memoize":165}],132:[function(require,module,exports){
+},{"./memoize":183}],149:[function(require,module,exports){
 var getNative = require('./_getNative');
 
 /* Built-in method references that are verified to be native. */
@@ -10256,7 +16413,7 @@ var nativeCreate = getNative(Object, 'create');
 
 module.exports = nativeCreate;
 
-},{"./_getNative":102}],133:[function(require,module,exports){
+},{"./_getNative":119}],150:[function(require,module,exports){
 var overArg = require('./_overArg');
 
 /* Built-in method references for those with the same name as other `lodash` methods. */
@@ -10264,7 +16421,7 @@ var nativeKeys = overArg(Object.keys, Object);
 
 module.exports = nativeKeys;
 
-},{"./_overArg":136}],134:[function(require,module,exports){
+},{"./_overArg":153}],151:[function(require,module,exports){
 var freeGlobal = require('./_freeGlobal');
 
 /** Detect free variable `exports`. */
@@ -10296,7 +16453,7 @@ var nodeUtil = (function() {
 
 module.exports = nodeUtil;
 
-},{"./_freeGlobal":98}],135:[function(require,module,exports){
+},{"./_freeGlobal":115}],152:[function(require,module,exports){
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
 
@@ -10320,7 +16477,7 @@ function objectToString(value) {
 
 module.exports = objectToString;
 
-},{}],136:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 /**
  * Creates a unary function that invokes `func` with its argument transformed.
  *
@@ -10337,7 +16494,7 @@ function overArg(func, transform) {
 
 module.exports = overArg;
 
-},{}],137:[function(require,module,exports){
+},{}],154:[function(require,module,exports){
 var freeGlobal = require('./_freeGlobal');
 
 /** Detect free variable `self`. */
@@ -10348,7 +16505,7 @@ var root = freeGlobal || freeSelf || Function('return this')();
 
 module.exports = root;
 
-},{"./_freeGlobal":98}],138:[function(require,module,exports){
+},{"./_freeGlobal":115}],155:[function(require,module,exports){
 /** Used to stand-in for `undefined` hash values. */
 var HASH_UNDEFINED = '__lodash_hash_undefined__';
 
@@ -10369,7 +16526,7 @@ function setCacheAdd(value) {
 
 module.exports = setCacheAdd;
 
-},{}],139:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
 /**
  * Checks if `value` is in the array cache.
  *
@@ -10385,7 +16542,7 @@ function setCacheHas(value) {
 
 module.exports = setCacheHas;
 
-},{}],140:[function(require,module,exports){
+},{}],157:[function(require,module,exports){
 /**
  * Converts `set` to an array of its values.
  *
@@ -10405,7 +16562,7 @@ function setToArray(set) {
 
 module.exports = setToArray;
 
-},{}],141:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 var ListCache = require('./_ListCache');
 
 /**
@@ -10422,7 +16579,7 @@ function stackClear() {
 
 module.exports = stackClear;
 
-},{"./_ListCache":50}],142:[function(require,module,exports){
+},{"./_ListCache":66}],159:[function(require,module,exports){
 /**
  * Removes `key` and its value from the stack.
  *
@@ -10442,7 +16599,7 @@ function stackDelete(key) {
 
 module.exports = stackDelete;
 
-},{}],143:[function(require,module,exports){
+},{}],160:[function(require,module,exports){
 /**
  * Gets the stack value for `key`.
  *
@@ -10458,7 +16615,7 @@ function stackGet(key) {
 
 module.exports = stackGet;
 
-},{}],144:[function(require,module,exports){
+},{}],161:[function(require,module,exports){
 /**
  * Checks if a stack value for `key` exists.
  *
@@ -10474,7 +16631,7 @@ function stackHas(key) {
 
 module.exports = stackHas;
 
-},{}],145:[function(require,module,exports){
+},{}],162:[function(require,module,exports){
 var ListCache = require('./_ListCache'),
     Map = require('./_Map'),
     MapCache = require('./_MapCache');
@@ -10510,7 +16667,7 @@ function stackSet(key, value) {
 
 module.exports = stackSet;
 
-},{"./_ListCache":50,"./_Map":51,"./_MapCache":52}],146:[function(require,module,exports){
+},{"./_ListCache":66,"./_Map":67,"./_MapCache":68}],163:[function(require,module,exports){
 var memoizeCapped = require('./_memoizeCapped');
 
 /** Used to match property names within property paths. */
@@ -10539,7 +16696,7 @@ var stringToPath = memoizeCapped(function(string) {
 
 module.exports = stringToPath;
 
-},{"./_memoizeCapped":131}],147:[function(require,module,exports){
+},{"./_memoizeCapped":148}],164:[function(require,module,exports){
 var isSymbol = require('./isSymbol');
 
 /** Used as references for various `Number` constants. */
@@ -10562,7 +16719,7 @@ function toKey(value) {
 
 module.exports = toKey;
 
-},{"./isSymbol":161}],148:[function(require,module,exports){
+},{"./isSymbol":179}],165:[function(require,module,exports){
 /** Used for built-in method references. */
 var funcProto = Function.prototype;
 
@@ -10590,7 +16747,7 @@ function toSource(func) {
 
 module.exports = toSource;
 
-},{}],149:[function(require,module,exports){
+},{}],166:[function(require,module,exports){
 /**
  * Performs a
  * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
@@ -10629,7 +16786,57 @@ function eq(value, other) {
 
 module.exports = eq;
 
-},{}],150:[function(require,module,exports){
+},{}],167:[function(require,module,exports){
+var arrayFilter = require('./_arrayFilter'),
+    baseFilter = require('./_baseFilter'),
+    baseIteratee = require('./_baseIteratee'),
+    isArray = require('./isArray');
+
+/**
+ * Iterates over elements of `collection`, returning an array of all elements
+ * `predicate` returns truthy for. The predicate is invoked with three
+ * arguments: (value, index|key, collection).
+ *
+ * **Note:** Unlike `_.remove`, this method returns a new array.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Collection
+ * @param {Array|Object} collection The collection to iterate over.
+ * @param {Function} [predicate=_.identity] The function invoked per iteration.
+ * @returns {Array} Returns the new filtered array.
+ * @see _.reject
+ * @example
+ *
+ * var users = [
+ *   { 'user': 'barney', 'age': 36, 'active': true },
+ *   { 'user': 'fred',   'age': 40, 'active': false }
+ * ];
+ *
+ * _.filter(users, function(o) { return !o.active; });
+ * // => objects for ['fred']
+ *
+ * // The `_.matches` iteratee shorthand.
+ * _.filter(users, { 'age': 36, 'active': true });
+ * // => objects for ['barney']
+ *
+ * // The `_.matchesProperty` iteratee shorthand.
+ * _.filter(users, ['active', false]);
+ * // => objects for ['fred']
+ *
+ * // The `_.property` iteratee shorthand.
+ * _.filter(users, 'active');
+ * // => objects for ['barney']
+ */
+function filter(collection, predicate) {
+  var func = isArray(collection) ? arrayFilter : baseFilter;
+  return func(collection, baseIteratee(predicate, 3));
+}
+
+module.exports = filter;
+
+},{"./_arrayFilter":76,"./_baseFilter":83,"./_baseIteratee":96,"./isArray":172}],168:[function(require,module,exports){
 var baseGet = require('./_baseGet');
 
 /**
@@ -10664,7 +16871,7 @@ function get(object, path, defaultValue) {
 
 module.exports = get;
 
-},{"./_baseGet":69}],151:[function(require,module,exports){
+},{"./_baseGet":86}],169:[function(require,module,exports){
 var baseHasIn = require('./_baseHasIn'),
     hasPath = require('./_hasPath');
 
@@ -10700,7 +16907,7 @@ function hasIn(object, path) {
 
 module.exports = hasIn;
 
-},{"./_baseHasIn":72,"./_hasPath":107}],152:[function(require,module,exports){
+},{"./_baseHasIn":89,"./_hasPath":124}],170:[function(require,module,exports){
 /**
  * This method returns the first argument it receives.
  *
@@ -10723,7 +16930,7 @@ function identity(value) {
 
 module.exports = identity;
 
-},{}],153:[function(require,module,exports){
+},{}],171:[function(require,module,exports){
 var baseIsArguments = require('./_baseIsArguments'),
     isObjectLike = require('./isObjectLike');
 
@@ -10761,7 +16968,7 @@ var isArguments = baseIsArguments(function() { return arguments; }()) ? baseIsAr
 
 module.exports = isArguments;
 
-},{"./_baseIsArguments":73,"./isObjectLike":160}],154:[function(require,module,exports){
+},{"./_baseIsArguments":90,"./isObjectLike":178}],172:[function(require,module,exports){
 /**
  * Checks if `value` is classified as an `Array` object.
  *
@@ -10789,7 +16996,7 @@ var isArray = Array.isArray;
 
 module.exports = isArray;
 
-},{}],155:[function(require,module,exports){
+},{}],173:[function(require,module,exports){
 var isFunction = require('./isFunction'),
     isLength = require('./isLength');
 
@@ -10824,7 +17031,7 @@ function isArrayLike(value) {
 
 module.exports = isArrayLike;
 
-},{"./isFunction":157,"./isLength":158}],156:[function(require,module,exports){
+},{"./isFunction":175,"./isLength":176}],174:[function(require,module,exports){
 var root = require('./_root'),
     stubFalse = require('./stubFalse');
 
@@ -10864,7 +17071,7 @@ var isBuffer = nativeIsBuffer || stubFalse;
 
 module.exports = isBuffer;
 
-},{"./_root":137,"./stubFalse":168}],157:[function(require,module,exports){
+},{"./_root":154,"./stubFalse":186}],175:[function(require,module,exports){
 var baseGetTag = require('./_baseGetTag'),
     isObject = require('./isObject');
 
@@ -10903,7 +17110,7 @@ function isFunction(value) {
 
 module.exports = isFunction;
 
-},{"./_baseGetTag":71,"./isObject":159}],158:[function(require,module,exports){
+},{"./_baseGetTag":88,"./isObject":177}],176:[function(require,module,exports){
 /** Used as references for various `Number` constants. */
 var MAX_SAFE_INTEGER = 9007199254740991;
 
@@ -10940,7 +17147,7 @@ function isLength(value) {
 
 module.exports = isLength;
 
-},{}],159:[function(require,module,exports){
+},{}],177:[function(require,module,exports){
 /**
  * Checks if `value` is the
  * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
@@ -10973,7 +17180,7 @@ function isObject(value) {
 
 module.exports = isObject;
 
-},{}],160:[function(require,module,exports){
+},{}],178:[function(require,module,exports){
 /**
  * Checks if `value` is object-like. A value is object-like if it's not `null`
  * and has a `typeof` result of "object".
@@ -11004,7 +17211,7 @@ function isObjectLike(value) {
 
 module.exports = isObjectLike;
 
-},{}],161:[function(require,module,exports){
+},{}],179:[function(require,module,exports){
 var baseGetTag = require('./_baseGetTag'),
     isObjectLike = require('./isObjectLike');
 
@@ -11035,7 +17242,7 @@ function isSymbol(value) {
 
 module.exports = isSymbol;
 
-},{"./_baseGetTag":71,"./isObjectLike":160}],162:[function(require,module,exports){
+},{"./_baseGetTag":88,"./isObjectLike":178}],180:[function(require,module,exports){
 var baseIsTypedArray = require('./_baseIsTypedArray'),
     baseUnary = require('./_baseUnary'),
     nodeUtil = require('./_nodeUtil');
@@ -11064,7 +17271,7 @@ var isTypedArray = nodeIsTypedArray ? baseUnary(nodeIsTypedArray) : baseIsTypedA
 
 module.exports = isTypedArray;
 
-},{"./_baseIsTypedArray":78,"./_baseUnary":88,"./_nodeUtil":134}],163:[function(require,module,exports){
+},{"./_baseIsTypedArray":95,"./_baseUnary":105,"./_nodeUtil":151}],181:[function(require,module,exports){
 var arrayLikeKeys = require('./_arrayLikeKeys'),
     baseKeys = require('./_baseKeys'),
     isArrayLike = require('./isArrayLike');
@@ -11103,7 +17310,7 @@ function keys(object) {
 
 module.exports = keys;
 
-},{"./_arrayLikeKeys":61,"./_baseKeys":80,"./isArrayLike":155}],164:[function(require,module,exports){
+},{"./_arrayLikeKeys":77,"./_baseKeys":97,"./isArrayLike":173}],182:[function(require,module,exports){
 var arrayMap = require('./_arrayMap'),
     baseIteratee = require('./_baseIteratee'),
     baseMap = require('./_baseMap'),
@@ -11158,7 +17365,7 @@ function map(collection, iteratee) {
 
 module.exports = map;
 
-},{"./_arrayMap":62,"./_baseIteratee":79,"./_baseMap":81,"./isArray":154}],165:[function(require,module,exports){
+},{"./_arrayMap":78,"./_baseIteratee":96,"./_baseMap":98,"./isArray":172}],183:[function(require,module,exports){
 var MapCache = require('./_MapCache');
 
 /** Error message constants. */
@@ -11233,7 +17440,7 @@ memoize.Cache = MapCache;
 
 module.exports = memoize;
 
-},{"./_MapCache":52}],166:[function(require,module,exports){
+},{"./_MapCache":68}],184:[function(require,module,exports){
 var baseProperty = require('./_baseProperty'),
     basePropertyDeep = require('./_basePropertyDeep'),
     isKey = require('./_isKey'),
@@ -11267,7 +17474,7 @@ function property(path) {
 
 module.exports = property;
 
-},{"./_baseProperty":84,"./_basePropertyDeep":85,"./_isKey":114,"./_toKey":147}],167:[function(require,module,exports){
+},{"./_baseProperty":101,"./_basePropertyDeep":102,"./_isKey":131,"./_toKey":164}],185:[function(require,module,exports){
 /**
  * This method returns a new empty array.
  *
@@ -11292,7 +17499,7 @@ function stubArray() {
 
 module.exports = stubArray;
 
-},{}],168:[function(require,module,exports){
+},{}],186:[function(require,module,exports){
 /**
  * This method returns `false`.
  *
@@ -11312,7 +17519,7 @@ function stubFalse() {
 
 module.exports = stubFalse;
 
-},{}],169:[function(require,module,exports){
+},{}],187:[function(require,module,exports){
 var baseTimes = require('./_baseTimes'),
     castFunction = require('./_castFunction'),
     toInteger = require('./toInteger');
@@ -11365,7 +17572,7 @@ function times(n, iteratee) {
 
 module.exports = times;
 
-},{"./_baseTimes":86,"./_castFunction":90,"./toInteger":171}],170:[function(require,module,exports){
+},{"./_baseTimes":103,"./_castFunction":107,"./toInteger":189}],188:[function(require,module,exports){
 var toNumber = require('./toNumber');
 
 /** Used as references for various `Number` constants. */
@@ -11409,7 +17616,7 @@ function toFinite(value) {
 
 module.exports = toFinite;
 
-},{"./toNumber":172}],171:[function(require,module,exports){
+},{"./toNumber":190}],189:[function(require,module,exports){
 var toFinite = require('./toFinite');
 
 /**
@@ -11447,7 +17654,7 @@ function toInteger(value) {
 
 module.exports = toInteger;
 
-},{"./toFinite":170}],172:[function(require,module,exports){
+},{"./toFinite":188}],190:[function(require,module,exports){
 var isObject = require('./isObject'),
     isSymbol = require('./isSymbol');
 
@@ -11515,7 +17722,7 @@ function toNumber(value) {
 
 module.exports = toNumber;
 
-},{"./isObject":159,"./isSymbol":161}],173:[function(require,module,exports){
+},{"./isObject":177,"./isSymbol":179}],191:[function(require,module,exports){
 var baseToString = require('./_baseToString');
 
 /**
@@ -11545,7 +17752,128 @@ function toString(value) {
 
 module.exports = toString;
 
-},{"./_baseToString":87}],174:[function(require,module,exports){
+},{"./_baseToString":104}],192:[function(require,module,exports){
+(function (process){
+module.exports = function memize( fn, options ) {
+	var size = 0,
+		maxSize, head, tail;
+
+	if ( options && options.maxSize ) {
+		maxSize = options.maxSize;
+	}
+
+	function memoized( /* ...args */ ) {
+		var node = head,
+			len = arguments.length,
+			args, i;
+
+		searchCache: while ( node ) {
+			// Perform a shallow equality test to confirm that whether the node
+			// under test is a candidate for the arguments passed. Two arrays
+			// are shallowly equal if their length matches and each entry is
+			// strictly equal between the two sets. Avoid abstracting to a
+			// function which could incur an arguments leaking deoptimization.
+
+			// Check whether node arguments match arguments length
+			if ( node.args.length !== arguments.length ) {
+				node = node.next;
+				continue;
+			}
+
+			// Check whether node arguments match arguments values
+			for ( i = 0; i < len; i++ ) {
+				if ( node.args[ i ] !== arguments[ i ] ) {
+					node = node.next;
+					continue searchCache;
+				}
+			}
+
+			// At this point we can assume we've found a match
+
+			// Surface matched node to head if not already
+			if ( node !== head ) {
+				// As tail, shift to previous. Must only shift if not also
+				// head, since if both head and tail, there is no previous.
+				if ( node === tail ) {
+					tail = node.prev;
+				}
+
+				// Adjust siblings to point to each other. If node was tail,
+				// this also handles new tail's empty `next` assignment.
+				node.prev.next = node.next;
+				if ( node.next ) {
+					node.next.prev = node.prev;
+				}
+
+				node.next = head;
+				node.prev = null;
+				head.prev = node;
+				head = node;
+			}
+
+			// Return immediately
+			return node.val;
+		}
+
+		// No cached value found. Continue to insertion phase:
+
+		// Create a copy of arguments (avoid leaking deoptimization)
+		args = new Array( len );
+		for ( i = 0; i < len; i++ ) {
+			args[ i ] = arguments[ i ];
+		}
+
+		node = {
+			args: args,
+
+			// Generate the result from original function
+			val: fn.apply( null, args )
+		};
+
+		// Don't need to check whether node is already head, since it would
+		// have been returned above already if it was
+
+		// Shift existing head down list
+		if ( head ) {
+			head.prev = node;
+			node.next = head;
+		} else {
+			// If no head, follows that there's no tail (at initial or reset)
+			tail = node;
+		}
+
+		// Trim tail if we're reached max size and are pending cache insertion
+		if ( size === maxSize ) {
+			tail = tail.prev;
+			tail.next = null;
+		} else {
+			size++;
+		}
+
+		head = node;
+
+		return node.val;
+	}
+
+	memoized.clear = function() {
+		head = null;
+		tail = null;
+		size = 0;
+	};
+
+	if ( process.env.NODE_ENV === 'test' ) {
+		// Cache is not exposed in the public API, but used in tests to ensure
+		// expected list progression
+		memoized.getCache = function() {
+			return [ head, tail, size ];
+		};
+	}
+
+	return memoized;
+};
+
+}).call(this,require('_process'))
+},{"_process":194}],193:[function(require,module,exports){
 /*
 object-assign
 (c) Sindre Sorhus
@@ -11637,7 +17965,7 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 	return to;
 };
 
-},{}],175:[function(require,module,exports){
+},{}],194:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -11823,7 +18151,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],176:[function(require,module,exports){
+},{}],195:[function(require,module,exports){
 (function (process){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
@@ -11929,7 +18257,7 @@ checkPropTypes.resetWarningCache = function() {
 module.exports = checkPropTypes;
 
 }).call(this,require('_process'))
-},{"./lib/ReactPropTypesSecret":180,"_process":175}],177:[function(require,module,exports){
+},{"./lib/ReactPropTypesSecret":199,"_process":194}],196:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
@@ -11995,7 +18323,7 @@ module.exports = function() {
   return ReactPropTypes;
 };
 
-},{"./lib/ReactPropTypesSecret":180}],178:[function(require,module,exports){
+},{"./lib/ReactPropTypesSecret":199}],197:[function(require,module,exports){
 (function (process){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
@@ -12590,7 +18918,7 @@ module.exports = function(isValidElement, throwOnDirectAccess) {
 };
 
 }).call(this,require('_process'))
-},{"./checkPropTypes":176,"./lib/ReactPropTypesSecret":180,"_process":175,"object-assign":174,"react-is":186}],179:[function(require,module,exports){
+},{"./checkPropTypes":195,"./lib/ReactPropTypesSecret":199,"_process":194,"object-assign":193,"react-is":205}],198:[function(require,module,exports){
 (function (process){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
@@ -12613,7 +18941,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 }).call(this,require('_process'))
-},{"./factoryWithThrowingShims":177,"./factoryWithTypeCheckers":178,"_process":175,"react-is":186}],180:[function(require,module,exports){
+},{"./factoryWithThrowingShims":196,"./factoryWithTypeCheckers":197,"_process":194,"react-is":205}],199:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
@@ -12627,7 +18955,7 @@ var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
 
 module.exports = ReactPropTypesSecret;
 
-},{}],181:[function(require,module,exports){
+},{}],200:[function(require,module,exports){
 (function (process){
 /** @license React v16.12.0
  * react-dom.development.js
@@ -40426,7 +46754,7 @@ module.exports = reactDom;
 }
 
 }).call(this,require('_process'))
-},{"_process":175,"object-assign":174,"prop-types/checkPropTypes":176,"react":197,"scheduler":202,"scheduler/tracing":203}],182:[function(require,module,exports){
+},{"_process":194,"object-assign":193,"prop-types/checkPropTypes":195,"react":216,"scheduler":221,"scheduler/tracing":222}],201:[function(require,module,exports){
 /** @license React v16.12.0
  * react-dom.production.min.js
  *
@@ -40718,7 +47046,7 @@ xe,ye,Ca.injectEventPluginsByName,fa,Sc,function(a){ya(a,Rc)},cb,db,Pd,Ba,Sj,{cu
 (function(a){var b=a.findFiberByHostInstance;return ok(n({},a,{overrideHookState:null,overrideProps:null,setSuspenseHandler:null,scheduleUpdate:null,currentDispatcherRef:Ea.ReactCurrentDispatcher,findHostInstanceByFiber:function(a){a=ic(a);return null===a?null:a.stateNode},findFiberByHostInstance:function(a){return b?b(a):null},findHostInstancesForRefresh:null,scheduleRefresh:null,scheduleRoot:null,setRefreshHandler:null,getCurrentFiber:null}))})({findFiberByHostInstance:Fc,bundleType:0,version:"16.12.0",
 rendererPackageName:"react-dom"});var Dk={default:Ck},Ek=Dk&&Ck||Dk;module.exports=Ek.default||Ek;
 
-},{"object-assign":174,"react":197,"scheduler":202}],183:[function(require,module,exports){
+},{"object-assign":193,"react":216,"scheduler":221}],202:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -40760,7 +47088,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this,require('_process'))
-},{"./cjs/react-dom.development.js":181,"./cjs/react-dom.production.min.js":182,"_process":175}],184:[function(require,module,exports){
+},{"./cjs/react-dom.development.js":200,"./cjs/react-dom.production.min.js":201,"_process":194}],203:[function(require,module,exports){
 (function (process){
 /** @license React v16.12.0
  * react-is.development.js
@@ -41000,7 +47328,7 @@ exports.isSuspense = isSuspense;
 }
 
 }).call(this,require('_process'))
-},{"_process":175}],185:[function(require,module,exports){
+},{"_process":194}],204:[function(require,module,exports){
 /** @license React v16.12.0
  * react-is.production.min.js
  *
@@ -41017,7 +47345,7 @@ exports.typeOf=y;exports.AsyncMode=l;exports.ConcurrentMode=m;exports.ContextCon
 exports.isValidElementType=function(a){return"string"===typeof a||"function"===typeof a||a===e||a===m||a===g||a===f||a===p||a===q||"object"===typeof a&&null!==a&&(a.$$typeof===t||a.$$typeof===r||a.$$typeof===h||a.$$typeof===k||a.$$typeof===n||a.$$typeof===v||a.$$typeof===w||a.$$typeof===x)};exports.isAsyncMode=function(a){return z(a)||y(a)===l};exports.isConcurrentMode=z;exports.isContextConsumer=function(a){return y(a)===k};exports.isContextProvider=function(a){return y(a)===h};
 exports.isElement=function(a){return"object"===typeof a&&null!==a&&a.$$typeof===c};exports.isForwardRef=function(a){return y(a)===n};exports.isFragment=function(a){return y(a)===e};exports.isLazy=function(a){return y(a)===t};exports.isMemo=function(a){return y(a)===r};exports.isPortal=function(a){return y(a)===d};exports.isProfiler=function(a){return y(a)===g};exports.isStrictMode=function(a){return y(a)===f};exports.isSuspense=function(a){return y(a)===p};
 
-},{}],186:[function(require,module,exports){
+},{}],205:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -41028,7 +47356,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this,require('_process'))
-},{"./cjs/react-is.development.js":184,"./cjs/react-is.production.min.js":185,"_process":175}],187:[function(require,module,exports){
+},{"./cjs/react-is.development.js":203,"./cjs/react-is.production.min.js":204,"_process":194}],206:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -41192,7 +47520,7 @@ function polyfill(Component) {
 
 exports.polyfill = polyfill;
 
-},{}],188:[function(require,module,exports){
+},{}],207:[function(require,module,exports){
 (function (process){
 "use strict";
 
@@ -41559,7 +47887,7 @@ var _default = CSSTransition;
 exports.default = _default;
 module.exports = exports["default"];
 }).call(this,require('_process'))
-},{"./Transition":190,"./utils/PropTypes":194,"_process":175,"dom-helpers/class/addClass":45,"dom-helpers/class/removeClass":47,"prop-types":179,"react":197}],189:[function(require,module,exports){
+},{"./Transition":209,"./utils/PropTypes":213,"_process":194,"dom-helpers/class/addClass":61,"dom-helpers/class/removeClass":63,"prop-types":198,"react":216}],208:[function(require,module,exports){
 (function (process){
 "use strict";
 
@@ -41712,7 +48040,7 @@ var _default = ReplaceTransition;
 exports.default = _default;
 module.exports = exports["default"];
 }).call(this,require('_process'))
-},{"./TransitionGroup":191,"_process":175,"prop-types":179,"react":197,"react-dom":183}],190:[function(require,module,exports){
+},{"./TransitionGroup":210,"_process":194,"prop-types":198,"react":216,"react-dom":202}],209:[function(require,module,exports){
 (function (process){
 "use strict";
 
@@ -42324,7 +48652,7 @@ var _default = (0, _reactLifecyclesCompat.polyfill)(Transition);
 
 exports.default = _default;
 }).call(this,require('_process'))
-},{"./utils/PropTypes":194,"_process":175,"prop-types":179,"react":197,"react-dom":183,"react-lifecycles-compat":187}],191:[function(require,module,exports){
+},{"./utils/PropTypes":213,"_process":194,"prop-types":198,"react":216,"react-dom":202,"react-lifecycles-compat":206}],210:[function(require,module,exports){
 (function (process){
 "use strict";
 
@@ -42535,7 +48863,7 @@ var _default = (0, _reactLifecyclesCompat.polyfill)(TransitionGroup);
 exports.default = _default;
 module.exports = exports["default"];
 }).call(this,require('_process'))
-},{"./utils/ChildMapping":193,"_process":175,"prop-types":179,"react":197,"react-lifecycles-compat":187}],192:[function(require,module,exports){
+},{"./utils/ChildMapping":212,"_process":194,"prop-types":198,"react":216,"react-lifecycles-compat":206}],211:[function(require,module,exports){
 "use strict";
 
 var _CSSTransition = _interopRequireDefault(require("./CSSTransition"));
@@ -42554,7 +48882,7 @@ module.exports = {
   ReplaceTransition: _ReplaceTransition.default,
   CSSTransition: _CSSTransition.default
 };
-},{"./CSSTransition":188,"./ReplaceTransition":189,"./Transition":190,"./TransitionGroup":191}],193:[function(require,module,exports){
+},{"./CSSTransition":207,"./ReplaceTransition":208,"./Transition":209,"./TransitionGroup":210}],212:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -42705,7 +49033,7 @@ function getNextChildMapping(nextProps, prevChildMapping, onExited) {
   });
   return children;
 }
-},{"react":197}],194:[function(require,module,exports){
+},{"react":216}],213:[function(require,module,exports){
 (function (process){
 "use strict";
 
@@ -42736,7 +49064,7 @@ var classNamesShape = process.env.NODE_ENV !== 'production' ? _propTypes.default
 })]) : null;
 exports.classNamesShape = classNamesShape;
 }).call(this,require('_process'))
-},{"_process":175,"prop-types":179}],195:[function(require,module,exports){
+},{"_process":194,"prop-types":198}],214:[function(require,module,exports){
 (function (process){
 /** @license React v16.12.0
  * react.development.js
@@ -45060,7 +51388,7 @@ module.exports = react;
 }
 
 }).call(this,require('_process'))
-},{"_process":175,"object-assign":174,"prop-types/checkPropTypes":176}],196:[function(require,module,exports){
+},{"_process":194,"object-assign":193,"prop-types/checkPropTypes":195}],215:[function(require,module,exports){
 /** @license React v16.12.0
  * react.production.min.js
  *
@@ -45087,7 +51415,7 @@ b,c){return W().useImperativeHandle(a,b,c)},useDebugValue:function(){},useLayout
 if(null!=b){void 0!==b.ref&&(g=b.ref,l=J.current);void 0!==b.key&&(d=""+b.key);if(a.type&&a.type.defaultProps)var f=a.type.defaultProps;for(k in b)K.call(b,k)&&!L.hasOwnProperty(k)&&(e[k]=void 0===b[k]&&void 0!==f?f[k]:b[k])}var k=arguments.length-2;if(1===k)e.children=c;else if(1<k){f=Array(k);for(var m=0;m<k;m++)f[m]=arguments[m+2];e.children=f}return{$$typeof:p,type:a.type,key:d,ref:g,props:e,_owner:l}},createFactory:function(a){var b=M.bind(null,a);b.type=a;return b},isValidElement:N,version:"16.12.0",
 __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED:{ReactCurrentDispatcher:I,ReactCurrentBatchConfig:{suspense:null},ReactCurrentOwner:J,IsSomeRendererActing:{current:!1},assign:h}},Y={default:X},Z=Y&&X||Y;module.exports=Z.default||Z;
 
-},{"object-assign":174}],197:[function(require,module,exports){
+},{"object-assign":193}],216:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -45098,7 +51426,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this,require('_process'))
-},{"./cjs/react.development.js":195,"./cjs/react.production.min.js":196,"_process":175}],198:[function(require,module,exports){
+},{"./cjs/react.development.js":214,"./cjs/react.production.min.js":215,"_process":194}],217:[function(require,module,exports){
 (function (process){
 /** @license React v0.18.0
  * scheduler-tracing.development.js
@@ -45525,7 +51853,7 @@ exports.unstable_unsubscribe = unstable_unsubscribe;
 }
 
 }).call(this,require('_process'))
-},{"_process":175}],199:[function(require,module,exports){
+},{"_process":194}],218:[function(require,module,exports){
 /** @license React v0.18.0
  * scheduler-tracing.production.min.js
  *
@@ -45537,7 +51865,7 @@ exports.unstable_unsubscribe = unstable_unsubscribe;
 
 'use strict';Object.defineProperty(exports,"__esModule",{value:!0});var b=0;exports.__interactionsRef=null;exports.__subscriberRef=null;exports.unstable_clear=function(a){return a()};exports.unstable_getCurrent=function(){return null};exports.unstable_getThreadID=function(){return++b};exports.unstable_trace=function(a,d,c){return c()};exports.unstable_wrap=function(a){return a};exports.unstable_subscribe=function(){};exports.unstable_unsubscribe=function(){};
 
-},{}],200:[function(require,module,exports){
+},{}],219:[function(require,module,exports){
 (function (process){
 /** @license React v0.18.0
  * scheduler.development.js
@@ -46445,7 +52773,7 @@ exports.unstable_Profiling = unstable_Profiling;
 }
 
 }).call(this,require('_process'))
-},{"_process":175}],201:[function(require,module,exports){
+},{"_process":194}],220:[function(require,module,exports){
 /** @license React v0.18.0
  * scheduler.production.min.js
  *
@@ -46469,7 +52797,7 @@ exports.unstable_scheduleCallback=function(a,b,c){var d=exports.unstable_now();i
 exports.unstable_wrapCallback=function(a){var b=R;return function(){var c=R;R=b;try{return a.apply(this,arguments)}finally{R=c}}};exports.unstable_getCurrentPriorityLevel=function(){return R};exports.unstable_shouldYield=function(){var a=exports.unstable_now();V(a);var b=L(N);return b!==Q&&null!==Q&&null!==b&&null!==b.callback&&b.startTime<=a&&b.expirationTime<Q.expirationTime||k()};exports.unstable_requestPaint=Z;exports.unstable_continueExecution=function(){T||S||(T=!0,f(X))};
 exports.unstable_pauseExecution=function(){};exports.unstable_getFirstCallbackNode=function(){return L(N)};exports.unstable_Profiling=null;
 
-},{}],202:[function(require,module,exports){
+},{}],221:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -46480,7 +52808,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this,require('_process'))
-},{"./cjs/scheduler.development.js":200,"./cjs/scheduler.production.min.js":201,"_process":175}],203:[function(require,module,exports){
+},{"./cjs/scheduler.development.js":219,"./cjs/scheduler.production.min.js":220,"_process":194}],222:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -46491,4 +52819,4 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this,require('_process'))
-},{"./cjs/scheduler-tracing.development.js":198,"./cjs/scheduler-tracing.production.min.js":199,"_process":175}]},{},[39]);
+},{"./cjs/scheduler-tracing.development.js":217,"./cjs/scheduler-tracing.production.min.js":218,"_process":194}]},{},[55]);

@@ -20,11 +20,22 @@
     "babel-loader": "^8.0.0-beta.0",
     "babelify": "^10.0.0",
     "browserify": "^16.2.3",
-    "prop-types": "^15.7.2"
+    "prop-types": "^15.7.2",
+    "gulp": "^4.0.0",
+    "gulp-autoprefixer": "^6.0.0",
+    "gulp-cleancss": "^0.2.2",
+    "gulp-load-plugins": "^1.1.0",
+    "gulp-postcss": "^8.0.0",
+    "gulp-rename": "^2.0.0",
+    "gulp-sass": "^4.0.2",
+    "gulp-sourcemaps": "^2.6.1",
+    "merge-stream": "^1.0.1",
+    "cssnano": "^4.1.8",
+    "del": "^5.1.0"
   },
   "scripts": {
     "babel": "babel js/src/ --out-dir dist",
     "browser": "browserify dist/index.js -t babelify --outfile dist/index-browserify.js",
-    "gutenberg-compile": "babel js/src/ --out-dir dist; browserify dist/index.js -t babelify --outfile dist/index-browserify.js;"
+    "gutenberg-compile": "babel js/src/ --out-dir dist; browserify dist/index.js -t babelify --outfile dist/index-browserify.js; gulp build;"
   }
 }

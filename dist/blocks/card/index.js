@@ -8,6 +8,8 @@ var _card = _interopRequireDefault(require("./components/card"));
 
 var _icon = _interopRequireDefault(require("./components/icon"));
 
+var _infobox = _interopRequireDefault(require("../infobox/components/infobox"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
@@ -164,104 +166,110 @@ class InclindCard extends Component {
 
 const category = {
   slug: 'inclind-blocks',
-  title: __('Inclind Blocks')
+  title: __('Custom Blocks')
 }; // Grab the current categories and merge in the new category if not present.
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-card', {
-  title: __('Card', 'inclind-card'),
-  description: __('Description', 'inclind-blocks'),
-  category: 'inclind-blocks',
-  keywords: [__('card', 'inclind-card'), __('inclind', 'inclind-card')],
-  attributes: {
-    cardTitle: {
-      selector: '.card-title',
-      type: 'string'
-    },
-    cardSubtitle: {
-      selector: '.card-subtitle',
-      type: 'string'
-    },
-    cardContent: {
-      type: 'array',
-      selector: '.card-text',
-      source: 'children'
-    },
-    buttonText: {
-      type: 'string'
-    },
-    cardUrl: {
-      type: 'string',
-      source: 'attribute',
-      selector: '.card-link',
-      attribute: 'href'
-    },
-    cardImage: {
-      type: 'string'
-    },
-    cardImageData: {
-      type: 'object',
-      default: {}
-    },
-    cardStyle: {
-      type: 'string',
-      default: ''
-    },
-    cardImageTitle: {
-      type: 'string'
-    },
-    cardImageAlt: {
-      type: 'string'
-    }
-  },
-  // Render the block components.
-  edit: InclindCard,
-  // Save the attributes and markup.
-  save: function (props) {
-    const {
-      buttonText,
-      cardUrl,
-      cardContent,
-      cardSubtitle,
-      cardTitle,
-      cardImage,
-      cardImageAlt,
-      cardImageTitle,
-      cardImageData
-    } = props.attributes;
-    const arrow = '<svg viewBox="0 0 500 500"><path d="' + _icon.default['iconArrow'] + '"></path></svg>'; // Save the block markup for the front end.
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-    return React.createElement(_card.default, props, React.createElement("a", {
-      href: cardUrl,
-      className: "img img-card"
-    }, React.createElement("img", _extends({
-      src: cardImage,
-      className: "card-img-top"
-    }, cardImageData, {
-      alt: cardImageAlt,
-      title: cardImageTitle
-    }))), React.createElement("div", {
-      class: "card-body"
-    }, cardSubtitle && React.createElement(RichText.Content, {
-      tagName: "h6",
-      className: "card-subtitle",
-      value: '<a href="' + cardUrl + '" class="card-link">' + cardSubtitle + '</a>'
-    }), cardTitle && React.createElement(RichText.Content, {
-      tagName: "h3",
-      className: "card-title",
-      value: '<a href="' + cardUrl + '" class="card-link">' + cardTitle + '</a>'
-    }), cardContent && React.createElement(RichText.Content, {
-      tagName: "p",
-      className: "card-text",
-      value: cardContent
-    }), buttonText && React.createElement(RichText.Content, {
-      tagName: "a",
-      className: "btn btn-primary btn-tn icon",
-      value: buttonText + '<span class="svgicon-default">' + arrow + '</span>',
-      href: cardUrl
-    })));
+  if (blocks.hasOwnProperty(category.slug + '/inclind-card') && blocks[category.slug + '/inclind-card']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-card', {
+      title: __('Card', 'inclind-card'),
+      description: __('Description', 'inclind-blocks'),
+      category: 'inclind-blocks',
+      keywords: [__('card', 'inclind-card'), __('inclind', 'inclind-card')],
+      attributes: {
+        cardTitle: {
+          selector: '.card-title',
+          type: 'string'
+        },
+        cardSubtitle: {
+          selector: '.card-subtitle',
+          type: 'string'
+        },
+        cardContent: {
+          type: 'array',
+          selector: '.card-text',
+          source: 'children'
+        },
+        buttonText: {
+          type: 'string'
+        },
+        cardUrl: {
+          type: 'string',
+          source: 'attribute',
+          selector: '.card-link',
+          attribute: 'href'
+        },
+        cardImage: {
+          type: 'string'
+        },
+        cardImageData: {
+          type: 'object',
+          default: {}
+        },
+        cardStyle: {
+          type: 'string',
+          default: ''
+        },
+        cardImageTitle: {
+          type: 'string'
+        },
+        cardImageAlt: {
+          type: 'string'
+        }
+      },
+      // Render the block components.
+      edit: InclindCard,
+      // Save the attributes and markup.
+      save: function (props) {
+        const {
+          buttonText,
+          cardUrl,
+          cardContent,
+          cardSubtitle,
+          cardTitle,
+          cardImage,
+          cardImageAlt,
+          cardImageTitle,
+          cardImageData
+        } = props.attributes;
+        const arrow = '<svg viewBox="0 0 500 500"><path d="' + _icon.default['iconArrow'] + '"></path></svg>'; // Save the block markup for the front end.
+
+        return React.createElement(_card.default, props, React.createElement("a", {
+          href: cardUrl,
+          className: "img img-card"
+        }, React.createElement("img", _extends({
+          src: cardImage,
+          className: "card-img-top"
+        }, cardImageData, {
+          alt: cardImageAlt,
+          title: cardImageTitle
+        }))), React.createElement("div", {
+          class: "card-body"
+        }, cardSubtitle && React.createElement(RichText.Content, {
+          tagName: "h6",
+          className: "card-subtitle",
+          value: '<a href="' + cardUrl + '" class="card-link">' + cardSubtitle + '</a>'
+        }), cardTitle && React.createElement(RichText.Content, {
+          tagName: "h3",
+          className: "card-title",
+          value: '<a href="' + cardUrl + '" class="card-link">' + cardTitle + '</a>'
+        }), cardContent && React.createElement(RichText.Content, {
+          tagName: "p",
+          className: "card-text",
+          value: cardContent
+        }), buttonText && React.createElement(RichText.Content, {
+          tagName: "a",
+          className: "btn btn-primary btn-tn icon",
+          value: buttonText + '<span class="svgicon-default">' + arrow + '</span>',
+          href: cardUrl
+        })));
+      }
+    });
   }
-});
+}

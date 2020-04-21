@@ -3,6 +3,8 @@ import classnames from 'classnames';
 import Inspector from './components/inspector';
 import IconGridItem from './components/icon-grid-item';
 import Icon from './components/icon';
+import IconGridContainer
+  from "../icon-grid-container/components/icon-grid-container";
 
 // Internationalization
 const __ = Drupal.t;
@@ -60,69 +62,74 @@ class InclindIconGridItem extends Component {
 //  Start Drupal Specific.
 const category = {
     slug: 'inclind-blocks',
-    title: __('Inclind Blocks'),
+    title: __('Custom Blocks'),
 };
 // Grab the current categories and merge in the new category if not present.
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([ category, ...currentCategories ]);
 // End Drupal Specific.
 
-// Register the block.
-registerBlockType( category.slug+'/inclind-icon-grid-item', {
-    title: __( 'Icon Grid Item', 'inclind-icon-grid-item' ),
-    description: __( 'Description', 'inclind-blocks' ),
-    category: 'inclind-blocks',
-    keywords: [
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks =  drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
+  if (blocks.hasOwnProperty(category.slug + '/inclind-icon-grid-container') && blocks[category.slug + '/inclind-icon-grid-container']) {
+    // Register the block.
+    registerBlockType( category.slug+'/inclind-icon-grid-item', {
+      title: __( 'Icon Grid Item', 'inclind-icon-grid-item' ),
+      description: __( 'Description', 'inclind-blocks' ),
+      category: 'inclind-blocks',
+      keywords: [
         __( 'icon', 'inclind-icon-grid-item' ),
         __( 'grid', 'inclind-icon-grid-item' ),
         __( 'inclind', 'inclind-icon-grid-item' ),
-    ],
-    attributes: {
+      ],
+      attributes: {
         itemIcon: {
-            type: 'string',
-            default: '',
+          type: 'string',
+          default: '',
         },
         itemContent: {
-            selector: '.icon-grid-item-content',
-            type: 'array',
-            source: 'children',
+          selector: '.icon-grid-item-content',
+          type: 'array',
+          source: 'children',
         },
-    },
+      },
 
-    // Render the block components.
-    edit: InclindIconGridItem,
+      // Render the block components.
+      edit: InclindIconGridItem,
 
-    // Save the attributes and markup.
-    save: function( props ) {
+      // Save the attributes and markup.
+      save: function( props ) {
         const {
-            itemContent,
-            itemIcon,
+          itemContent,
+          itemIcon,
         } = props.attributes;
         const icon = ((itemIcon !== undefined && itemIcon !== '') && Icon[itemIcon] !== undefined) ? Icon[itemIcon] : '';
 
         // Save the block markup for the front end.
         return (
             <IconGridItem { ...props }>
-                {
-                    icon && (
-                        <span className={classnames(
-                            'svgicon-default',
-                            itemIcon
-                        )}>
+              {
+                icon && (
+                    <span className={classnames(
+                        'svgicon-default',
+                        itemIcon
+                    )}>
                             { icon }
                         </span>
-                    )
-                }
-                {
-                    itemContent && (
-                        <RichText.Content
-                            tagName="p"
-                            className="icon-grid-item-content"
-                            value={itemContent}
-                        />
-                    )
-                }
+                )
+              }
+              {
+                itemContent && (
+                    <RichText.Content
+                        tagName="p"
+                        className="icon-grid-item-content"
+                        value={itemContent}
+                    />
+                )
+              }
             </IconGridItem>
         );
-    },
-} );
+      },
+    } );
+  }
+}

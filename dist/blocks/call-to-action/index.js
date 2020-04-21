@@ -6,6 +6,10 @@ var _inspector = _interopRequireDefault(require("./components/inspector"));
 
 var _calltoaction = _interopRequireDefault(require("./components/calltoaction"));
 
+var _icon = _interopRequireDefault(require("../infobox/components/icon"));
+
+var _infobox = _interopRequireDefault(require("../infobox/components/infobox"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Import block dependencies and components
@@ -96,66 +100,72 @@ class InclindCallToAction extends Component {
 
 const category = {
   slug: 'inclind-blocks',
-  title: __('Inclind Blocks')
+  title: __('Custom Blocks')
 }; // Grab the current categories and merge in the new category if not present.
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-call-to-action', {
-  title: __('Call To Action', 'inclind-call-to-action'),
-  description: __('Description', 'inclind-blocks'),
-  category: 'inclind-blocks',
-  keywords: [__('action', 'inclind-call-to-action'), __('call to action', 'inclind-call-to-action'), __('inclind', 'inclind-call-to-action')],
-  attributes: {
-    itemTitle: {
-      selector: '.item-title',
-      type: 'string'
-    },
-    itemContent: {
-      selector: '.lead',
-      type: 'array',
-      source: 'children'
-    },
-    itemButtonText: {
-      type: 'string'
-    },
-    itemButtonLink: {
-      type: 'string',
-      source: 'attribute',
-      selector: '.item-button-link',
-      attribute: 'href'
-    }
-  },
-  // Render the block components.
-  edit: InclindCallToAction,
-  // Save the attributes and markup.
-  save: function (props) {
-    const {
-      itemTitle,
-      itemContent,
-      itemButtonText,
-      itemButtonLink
-    } = props.attributes; // Save the block markup for the front end.
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-    return React.createElement(_calltoaction.default, props, React.createElement("div", {
-      className: "row text-center"
-    }, itemTitle && React.createElement(RichText.Content, {
-      tagName: "h2",
-      className: "item-title text-center col-sm-12 emb-center",
-      value: itemTitle
-    }), React.createElement("div", {
-      className: "col-sm-12"
-    }, itemContent && React.createElement(RichText.Content, {
-      tagName: "p",
-      className: "lead",
-      value: itemContent
-    })), itemButtonText && React.createElement(RichText.Content, {
-      tagName: "a",
-      className: "btn btn-lg btn-secondary item-button-link",
-      value: itemButtonText,
-      href: itemButtonLink
-    })));
+  if (blocks.hasOwnProperty(category.slug + '/inclind-call-to-action') && blocks[category.slug + '/inclind-call-to-action']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-call-to-action', {
+      title: __('Call To Action', 'inclind-call-to-action'),
+      description: __('Description', 'inclind-blocks'),
+      category: 'inclind-blocks',
+      keywords: [__('action', 'inclind-call-to-action'), __('call to action', 'inclind-call-to-action'), __('inclind', 'inclind-call-to-action')],
+      attributes: {
+        itemTitle: {
+          selector: '.item-title',
+          type: 'string'
+        },
+        itemContent: {
+          selector: '.lead',
+          type: 'array',
+          source: 'children'
+        },
+        itemButtonText: {
+          type: 'string'
+        },
+        itemButtonLink: {
+          type: 'string',
+          source: 'attribute',
+          selector: '.item-button-link',
+          attribute: 'href'
+        }
+      },
+      // Render the block components.
+      edit: InclindCallToAction,
+      // Save the attributes and markup.
+      save: function (props) {
+        const {
+          itemTitle,
+          itemContent,
+          itemButtonText,
+          itemButtonLink
+        } = props.attributes; // Save the block markup for the front end.
+
+        return React.createElement(_calltoaction.default, props, React.createElement("div", {
+          className: "row text-center"
+        }, itemTitle && React.createElement(RichText.Content, {
+          tagName: "h2",
+          className: "item-title text-center col-sm-12 emb-center",
+          value: itemTitle
+        }), React.createElement("div", {
+          className: "col-sm-12"
+        }, itemContent && React.createElement(RichText.Content, {
+          tagName: "p",
+          className: "lead",
+          value: itemContent
+        })), itemButtonText && React.createElement(RichText.Content, {
+          tagName: "a",
+          className: "btn btn-lg btn-secondary item-button-link",
+          value: itemButtonText,
+          href: itemButtonLink
+        })));
+      }
+    });
   }
-});
+}

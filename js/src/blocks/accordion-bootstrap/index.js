@@ -425,7 +425,7 @@ class InclindAccordionBootstrap extends Component {
 
     // Unique HTML ID for accordion:
     var startCollapseVar = this.props.startCollapsed;
-    const acc_unique_id = `accord_${this.props.clientId.substr(2, 9)}`;
+    const acc_unique_id = `${uniqueID}`.length ? `accord${uniqueID}` : `accord_${this.props.clientId.substr(2, 9)}`;
     const onStartCollapsedChange = (collapse) => {
       startCollapseVar = collapse;
       setAttributes({startCollapsed: collapse});
@@ -742,155 +742,161 @@ const currentCategories = select('core/blocks').getCategories().filter(item => i
 dispatch('core/blocks').setCategories([category, ...currentCategories]);
 // End Drupal Specific.
 
-// Register the block.
-registerBlockType(category.slug + '/accordion-bootstrap', {
-      title: __('Accordion', 'accordion-bootstrap'),
-      description: __('Create an accordion layout.', 'accordion-bootstrap'),
-      category: 'inclind-blocks',
-      keywords: [
-        __('Accordion', 'accordion-bootstrap'),
-        __('Icon', 'accordion-bootstrap'),
-        __('inclind', 'accordion-bootstrap'),
-        __('custom', 'accordion-bootstrap'),
-      ],
-      attributes: {
-        uniqueID: {
-          type: 'string',
-          default: '',
-        },
-        paneCount: {
-          type: 'number',
-          default: 2,
-        },
-        showPresets: {
-          type: 'bool',
-          default: false,
-        },
-        openPane: {
-          type: 'number',
-          default: 0,
-        },
-        startCollapsed: {
-          type: 'bool',
-          default: false,
-        },
-        linkPaneCollapse: {
-          type: 'bool',
-          default: true,
-        },
-        minHeight: {
-          type: 'number',
-          default: '',
-        },
-        maxWidth: {
-          type: 'number',
-          default: '',
-        },
-        contentBgColor: {
-          type: 'string',
-          default: '',
-        },
-        contentBorderColor: {
-          type: 'string',
-          default: '#eeeeee',
-        },
-        contentBorder: {
-          type: 'array',
-          default: [0, 1, 1, 1],
-        },
-        contentBorderRadius: {
-          type: 'array',
-          default: [0, 0, 0, 0],
-        },
-        contentPadding: {
-          type: 'array',
-          default: [20, 20, 20, 20],
-        },
-        titleAlignment: {
-          type: 'string',
-          default: 'left',
-        },
-        blockAlignment: {
-          type: 'string',
-          default: 'none',
-        },
-        titleStyles: {
-          type: 'array',
-          default: [{
-            size: [18, '', ''],
-            sizeType: 'px',
-            lineHeight: [24, '', ''],
-            lineType: 'px',
-            letterSpacing: '',
-            family: '',
-            google: '',
-            style: '',
-            weight: '',
-            variant: '',
-            subset: '',
-            loadGoogle: true,
-            padding: [10, 14, 10, 14],
-            marginTop: 8,
-            color: '#555555',
-            background: '#f2f2f2',
-            border: ['#555555', '#555555', '#555555', '#555555'],
-            borderRadius: [0, 0, 0, 0],
-            borderWidth: [0, 0, 0, 0],
-            colorHover: '#444444',
-            backgroundHover: '#eeeeee',
-            borderHover: ['#eeeeee', '#eeeeee', '#eeeeee', '#eeeeee'],
-            colorActive: '#ffffff',
-            backgroundActive: '#444444',
-            borderActive: ['#444444', '#444444', '#444444', '#444444'],
-            textTransform: '',
-          }],
-        },
-        showIcon: {
-          type: 'bool',
-          default: true,
-        },
-        iconStyle: {
-          type: 'string',
-          default: 'basic',
-        },
-        iconSide: {
-          type: 'string',
-          default: 'right',
-        },
-      },
-      // Render the block components.
-      getEditWrapperProps({blockAlignment}) {
-        if ('left' === blockAlignment || 'right' === blockAlignment || 'center' === blockAlignment) {
-          return {'data-align': blockAlignment};
-        }
-      },
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks =  drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
+  if (blocks.hasOwnProperty(category.slug + '/accordion-bootstrap') && blocks[category.slug + '/accordion-bootstrap']) {
+    // Register the block.
+    registerBlockType(category.slug + '/accordion-bootstrap', {
+          title: __('Accordion (Bootstrap)', 'accordion-bootstrap'),
+          description: __('Create an accordion layout.', 'accordion-bootstrap'),
+          category: 'inclind-blocks',
+          keywords: [
+            __('Accordion', 'accordion-bootstrap'),
+            __('Icon', 'accordion-bootstrap'),
+            __('inclind', 'accordion-bootstrap'),
+            __('custom', 'accordion-bootstrap'),
+          ],
+          attributes: {
+            uniqueID: {
+              type: 'string',
+              default: '',
+            },
+            paneCount: {
+              type: 'number',
+              default: 2,
+            },
+            showPresets: {
+              type: 'bool',
+              default: false,
+            },
+            openPane: {
+              type: 'number',
+              default: 0,
+            },
+            startCollapsed: {
+              type: 'bool',
+              default: false,
+            },
+            linkPaneCollapse: {
+              type: 'bool',
+              default: true,
+            },
+            minHeight: {
+              type: 'number',
+              default: '',
+            },
+            maxWidth: {
+              type: 'number',
+              default: '',
+            },
+            contentBgColor: {
+              type: 'string',
+              default: '',
+            },
+            contentBorderColor: {
+              type: 'string',
+              default: '#eeeeee',
+            },
+            contentBorder: {
+              type: 'array',
+              default: [0, 1, 1, 1],
+            },
+            contentBorderRadius: {
+              type: 'array',
+              default: [0, 0, 0, 0],
+            },
+            contentPadding: {
+              type: 'array',
+              default: [20, 20, 20, 20],
+            },
+            titleAlignment: {
+              type: 'string',
+              default: 'left',
+            },
+            blockAlignment: {
+              type: 'string',
+              default: 'none',
+            },
+            titleStyles: {
+              type: 'array',
+              default: [{
+                size: [18, '', ''],
+                sizeType: 'px',
+                lineHeight: [24, '', ''],
+                lineType: 'px',
+                letterSpacing: '',
+                family: '',
+                google: '',
+                style: '',
+                weight: '',
+                variant: '',
+                subset: '',
+                loadGoogle: true,
+                padding: [10, 14, 10, 14],
+                marginTop: 8,
+                color: '#555555',
+                background: '#f2f2f2',
+                border: ['#555555', '#555555', '#555555', '#555555'],
+                borderRadius: [0, 0, 0, 0],
+                borderWidth: [0, 0, 0, 0],
+                colorHover: '#444444',
+                backgroundHover: '#eeeeee',
+                borderHover: ['#eeeeee', '#eeeeee', '#eeeeee', '#eeeeee'],
+                colorActive: '#ffffff',
+                backgroundActive: '#444444',
+                borderActive: ['#444444', '#444444', '#444444', '#444444'],
+                textTransform: '',
+              }],
+            },
+            showIcon: {
+              type: 'bool',
+              default: true,
+            },
+            iconStyle: {
+              type: 'string',
+              default: 'basic',
+            },
+            iconSide: {
+              type: 'string',
+              default: 'right',
+            },
+          },
+          // Render the block components.
+          getEditWrapperProps({blockAlignment}) {
+            if ('left' === blockAlignment || 'right' === blockAlignment || 'center' === blockAlignment) {
+              return {'data-align': blockAlignment};
+            }
+          },
 
-      edit: InclindAccordionBootstrap,
+          edit: InclindAccordionBootstrap,
 
-      save: props => {
-        const {attributes: {uniqueID, paneCount, blockAlignment, maxWidth, titleAlignment, startCollapsed, linkPaneCollapse, showIcon, iconStyle, iconSide, openPane}} = props;
-        const classes = classnames(`align${(blockAlignment ? blockAlignment : 'none')}`);
-        const innerClasses = classnames(`accordion-id${uniqueID} active-pane-${openPane}`);
+          save: props => {
+            const {attributes: {uniqueID, paneCount, blockAlignment, maxWidth, titleAlignment, startCollapsed, linkPaneCollapse, showIcon, iconStyle, iconSide, openPane}} = props;
+            const classes = classnames(`align${(blockAlignment ? blockAlignment : 'none')}`);
+            const innerClasses = classnames(`accordion-id${uniqueID} active-pane-${openPane}`);
 
-        const stripStringRender = (string) => {
-          return string.toLowerCase().replace(/[^0-9a-z-]/g, '');
-        }
-        // render() {
-        return (
-            <div className={classes}>
-              <div className={innerClasses} style={{
-                maxWidth: (maxWidth ? maxWidth + 'px' : 'none'),
-              }}>
-                <div className="accordion kt-accordion-inner-wrap"
-                     id={`accord${uniqueID}`}
-                     data-allow-multiple-open={(!linkPaneCollapse ? 'true' : 'false')}
-                     data-start-open={(!startCollapsed ? openPane : 'none')}>
-                  <InnerBlocks.Content/>
+            const stripStringRender = (string) => {
+              return string.toLowerCase().replace(/[^0-9a-z-]/g, '');
+            }
+            // render() {
+            return (
+                <div className={classes}>
+                  <div className={innerClasses} style={{
+                    maxWidth: (maxWidth ? maxWidth + 'px' : 'none'),
+                  }}>
+                    <div className="accordion kt-accordion-inner-wrap"
+                         id={`accord${uniqueID}`}
+                         data-allow-multiple-open={(!linkPaneCollapse ? 'true' : 'false')}
+                         data-start-open={(!startCollapsed ? openPane : 'none')}>
+                      <InnerBlocks.Content/>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-        );
-        // }
-      },
-    }
-);
+            );
+            // }
+          },
+        }
+    );
+  }
+}
+

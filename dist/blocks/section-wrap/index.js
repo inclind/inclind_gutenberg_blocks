@@ -8,6 +8,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
+// import GenIcon from "../../genicon";
+// import Ico from "../../svgicons";
 // Internationalization
 const __ = Drupal.t; // Extend component
 
@@ -210,136 +212,142 @@ const category = {
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-section-wrap', {
-  title: __('Section Wrapper', 'inclind-section-wrap'),
-  description: __('Wrap the content into a container and select full width display or contained to a grid. Adds ability to turn on/off gradient on the wrapper.', 'inclind-section-wrap'),
-  category: 'inclind-blocks',
-  keywords: [__('Section', 'inclind-section-wrap'), __('Wrapper', 'inclind-section-wrap'), __('inclind', 'inclind-section-wrap'), __('custom', 'inclind-section-wrap')],
-  attributes: {
-    backgroundType: {
-      type: 'string',
-      default: 'none'
-    },
-    backgroundColor: {
-      type: 'string',
-      default: '#2e358f'
-    },
-    backgroundImage: {
-      type: 'string',
-      default: 'https://placeimg.com/1200/600/nature/grayscale'
-    },
-    backgroundImageData: {
-      type: 'object',
-      default: {}
-    },
-    overlayOpacity: {
-      type: 'number',
-      default: 80
-    },
-    overlayColor: {
-      type: 'string',
-      default: '#2e358f'
-    },
-    padding: {
-      type: 'string',
-      default: ''
-    },
-    margin: {
-      type: 'string',
-      default: ''
-    },
-    align: {
-      type: 'string',
-      default: 'none'
-    },
-    contentWidth: {
-      type: 'number'
-    },
-    uniqueID: {
-      type: 'string',
-      default: ''
-    },
-    hAlign: {
-      type: 'string',
-      default: 'left'
-    }
-  },
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-  // Render the block components.
-  getEditWrapperProps({
-    blockAlignment
-  }) {
-    if ('left' === blockAlignment || 'right' === blockAlignment || 'center' === blockAlignment) {
-      return {
-        'data-align': blockAlignment
-      };
-    }
-  },
-
-  edit: InclindSectionWrap,
-  save: props => {
-    const {
+  if (blocks.hasOwnProperty(category.slug + '/inclind-section-wrap') && blocks[category.slug + '/inclind-section-wrap']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-section-wrap', {
+      title: __('Section Wrapper', 'inclind-section-wrap'),
+      description: __('Wrap the content into a container and select full width display or contained to a grid. Adds ability to turn on/off gradient on the wrapper.', 'inclind-section-wrap'),
+      category: 'inclind-blocks',
+      keywords: [__('Section', 'inclind-section-wrap'), __('Wrapper', 'inclind-section-wrap'), __('inclind', 'inclind-section-wrap'), __('custom', 'inclind-section-wrap')],
       attributes: {
-        backgroundType,
-        backgroundColor,
-        backgroundImage,
-        backgroundImageData,
-        overlayOpacity,
-        overlayColor,
-        align,
-        margin,
-        padding,
-        contentWidth,
-        uniqueID,
-        hAlign
+        backgroundType: {
+          type: 'string',
+          default: 'none'
+        },
+        backgroundColor: {
+          type: 'string',
+          default: '#2e358f'
+        },
+        backgroundImage: {
+          type: 'string',
+          default: 'https://placeimg.com/1200/600/nature/grayscale'
+        },
+        backgroundImageData: {
+          type: 'object',
+          default: {}
+        },
+        overlayOpacity: {
+          type: 'number',
+          default: 80
+        },
+        overlayColor: {
+          type: 'string',
+          default: '#2e358f'
+        },
+        padding: {
+          type: 'string',
+          default: ''
+        },
+        margin: {
+          type: 'string',
+          default: ''
+        },
+        align: {
+          type: 'string',
+          default: 'none'
+        },
+        contentWidth: {
+          type: 'number'
+        },
+        uniqueID: {
+          type: 'string',
+          default: ''
+        },
+        hAlign: {
+          type: 'string',
+          default: 'left'
+        }
+      },
+
+      // Render the block components.
+      getEditWrapperProps({
+        blockAlignment
+      }) {
+        if ('left' === blockAlignment || 'right' === blockAlignment || 'center' === blockAlignment) {
+          return {
+            'data-align': blockAlignment
+          };
+        }
+      },
+
+      edit: InclindSectionWrap,
+      save: props => {
+        const {
+          attributes: {
+            backgroundType,
+            backgroundColor,
+            backgroundImage,
+            backgroundImageData,
+            overlayOpacity,
+            overlayColor,
+            align,
+            margin,
+            padding,
+            contentWidth,
+            uniqueID,
+            hAlign
+          }
+        } = props;
+        const hasImageBg = backgroundType === 'image';
+        const containerStyle = {
+          backgroundColor: !hasImageBg && backgroundType !== 'none' ? backgroundColor : '',
+          backgroundImage: hasImageBg && `url('${backgroundImage}')`,
+          'background-size': 'cover'
+        };
+        const overlayStyle = !hasImageBg ? {} : {
+          display: 'block',
+          backgroundColor: overlayColor || '#2e358f',
+          opacity: parseInt(overlayOpacity, 10) / 100
+        };
+        const wrapperStyle = {
+          maxWidth: contentWidth && `${contentWidth}px`
+        };
+        const classes = [`text-${hAlign}`, `py-4`, (0, _classnames.default)(`align${align ? align : 'none'}`)];
+
+        if (backgroundType === 'gradient') {
+          classes.push('gradient-bg');
+          classes.push('has-overlay');
+        } else if (backgroundType === 'gray') {
+          classes.push('bg-lighter-gray');
+        } else if (backgroundType !== 'none') {
+          classes.push('has-overlay');
+          classes.push('text-white');
+        }
+
+        if (margin) {
+          classes.push(`my-${margin}`);
+        }
+
+        if (padding) {
+          classes.push(`py-${padding}`);
+        } // Render the section on Front-end:
+
+
+        return React.createElement("div", _extends({
+          className: classes.join(' '),
+          style: containerStyle
+        }, backgroundImageData), React.createElement("div", {
+          className: "g-section-overlay",
+          style: backgroundType !== 'gradient' && backgroundType !== 'none' ? overlayStyle : ''
+        }), React.createElement("div", {
+          className: `g-section-wrapper ${align == 'full' ? ' container' : ' container-fluid'}`,
+          style: wrapperStyle
+        }, React.createElement(InnerBlocks.Content, null)));
       }
-    } = props;
-    const hasImageBg = backgroundType === 'image';
-    const containerStyle = {
-      backgroundColor: !hasImageBg && backgroundType !== 'none' ? backgroundColor : '',
-      backgroundImage: hasImageBg && `url('${backgroundImage}')`,
-      'background-size': 'cover'
-    };
-    const overlayStyle = !hasImageBg ? {} : {
-      display: 'block',
-      backgroundColor: overlayColor || '#2e358f',
-      opacity: parseInt(overlayOpacity, 10) / 100
-    };
-    const wrapperStyle = {
-      maxWidth: contentWidth && `${contentWidth}px`
-    };
-    const classes = [`text-${hAlign}`, `py-4`, (0, _classnames.default)(`align${align ? align : 'none'}`)];
-
-    if (backgroundType === 'gradient') {
-      classes.push('gradient-bg');
-      classes.push('has-overlay');
-    } else if (backgroundType === 'gray') {
-      classes.push('bg-lighter-gray');
-    } else if (backgroundType !== 'none') {
-      classes.push('has-overlay');
-      classes.push('text-white');
-    }
-
-    if (margin) {
-      classes.push(`my-${margin}`);
-    }
-
-    if (padding) {
-      classes.push(`py-${padding}`);
-    } // Render the section on Front-end:
-
-
-    return React.createElement("div", _extends({
-      className: classes.join(' '),
-      style: containerStyle
-    }, backgroundImageData), React.createElement("div", {
-      className: "g-section-overlay",
-      style: backgroundType !== 'gradient' && backgroundType !== 'none' ? overlayStyle : ''
-    }), React.createElement("div", {
-      className: `g-section-wrapper ${align == 'full' ? ' container' : ' container-fluid'}`,
-      style: wrapperStyle
-    }, React.createElement(InnerBlocks.Content, null)));
+    });
   }
-});
+}

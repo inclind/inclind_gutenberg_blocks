@@ -20,7 +20,7 @@ class Infobox extends Component {
   render() {
     let className = 'infobox mb-0 row';
 
-    if (this.props.className !== 'wp-block-inclind-blocks-inclind-infobox') {
+    if (this.props.className !== 'wp-block-inclind-blocks-inclind-infobox-simple') {
       className = className + ' ' + this.props.className;
     }
 

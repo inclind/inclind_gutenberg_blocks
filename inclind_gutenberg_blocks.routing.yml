@@ -1,0 +1,15 @@
+inclind_gutenberg_blocks.admin_config:
+  path: '/admin/config/inclind-gutenberg'
+  defaults:
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+    _title: 'Inclind Gutenberg'
+    requirements:
+      _permission: 'access administration pages'
+
+inclind_gutenberg_blocks.settings:
+  path: '/admin/config/inclind-gutenberg/settings'
+  defaults:
+    _form: '\Drupal\inclind_gutenberg_blocks\Form\InclindGutenbergSettingsForm'
+    _title: 'Inclind Gutenberg Default Settings'
+  requirements:
+    _permission: 'administer site configuration'

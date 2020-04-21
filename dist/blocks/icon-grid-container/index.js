@@ -4,6 +4,10 @@ var _iconGridContainer = _interopRequireDefault(require("./components/icon-grid-
 
 var _classnames = _interopRequireDefault(require("classnames"));
 
+var _icon = _interopRequireDefault(require("../infobox/components/icon"));
+
+var _infobox = _interopRequireDefault(require("../infobox/components/infobox"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
@@ -99,54 +103,60 @@ class InclindIconGridContainer extends Component {
 
 const category = {
   slug: 'inclind-blocks',
-  title: __('Inclind Blocks')
+  title: __('Custom Blocks')
 }; // Grab the current categories and merge in the new category if not present.
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-icon-grid-container', {
-  title: __('Icon Grid Container', 'inclind-icon-grid-container'),
-  description: __('Description', 'inclind-blocks'),
-  category: 'inclind-blocks',
-  keywords: [__('icon', 'inclind-icon-grid-container'), __('inclind', 'inclind-icon-grid-container'), __('grid container', 'inclind-icon-grid-container')],
-  attributes: {
-    itemTitle: {
-      selector: '.item-title',
-      type: 'string'
-    },
-    itemImage: {
-      type: 'string'
-    },
-    itemImageData: {
-      type: 'object',
-      default: {}
-    }
-  },
-  // Render the block components.
-  edit: InclindIconGridContainer,
-  // Save the attributes and markup.
-  save: function (props) {
-    const {
-      itemTitle,
-      itemImage,
-      itemImageData
-    } = props.attributes; // Save the block markup for the front end.
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-    return React.createElement(_iconGridContainer.default, props, React.createElement("div", {
-      className: "container"
-    }, React.createElement("div", {
-      className: "row text-center"
-    }, itemTitle && React.createElement(RichText.Content, {
-      tagName: "h2",
-      className: "item-title emb-center",
-      value: itemTitle
-    }), React.createElement(InnerBlocks.Content, null)), React.createElement("div", {
-      className: "img img-bg"
-    }, React.createElement("img", _extends({
-      src: itemImage,
-      className: "card-img-top"
-    }, itemImageData)))));
+  if (blocks.hasOwnProperty(category.slug + '/inclind-icon-grid-container') && blocks[category.slug + '/inclind-icon-grid-container']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-icon-grid-container', {
+      title: __('Icon Grid Container', 'inclind-icon-grid-container'),
+      description: __('Description', 'inclind-blocks'),
+      category: 'inclind-blocks',
+      keywords: [__('icon', 'inclind-icon-grid-container'), __('inclind', 'inclind-icon-grid-container'), __('grid container', 'inclind-icon-grid-container')],
+      attributes: {
+        itemTitle: {
+          selector: '.item-title',
+          type: 'string'
+        },
+        itemImage: {
+          type: 'string'
+        },
+        itemImageData: {
+          type: 'object',
+          default: {}
+        }
+      },
+      // Render the block components.
+      edit: InclindIconGridContainer,
+      // Save the attributes and markup.
+      save: function (props) {
+        const {
+          itemTitle,
+          itemImage,
+          itemImageData
+        } = props.attributes; // Save the block markup for the front end.
+
+        return React.createElement(_iconGridContainer.default, props, React.createElement("div", {
+          className: "container"
+        }, React.createElement("div", {
+          className: "row text-center"
+        }, itemTitle && React.createElement(RichText.Content, {
+          tagName: "h2",
+          className: "item-title emb-center",
+          value: itemTitle
+        }), React.createElement(InnerBlocks.Content, null)), React.createElement("div", {
+          className: "img img-bg"
+        }, React.createElement("img", _extends({
+          src: itemImage,
+          className: "card-img-top"
+        }, itemImageData)))));
+      }
+    });
   }
-});
+}

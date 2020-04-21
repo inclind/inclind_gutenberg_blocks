@@ -1,5 +1,6 @@
 // Import block dependencies and components
 import Accordion from "./components/accordion";
+import classnames from "classnames";
 
 // Internationalization
 const __ = Drupal.t;
@@ -36,37 +37,42 @@ class InclindAccordion extends Component {
 //  Start Drupal Specific.
 const category = {
     slug: 'inclind-blocks',
-    title: __('Inclind Blocks'),
+    title: __('Custom Blocks'),
 };
 // Grab the current categories and merge in the new category if not present.
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([ category, ...currentCategories ]);
 // End Drupal Specific.
 
-// Register the block.
-registerBlockType( category.slug+'/inclind-accordion', {
-    title: __( 'Accordion', 'inclind-accordion' ),
-    description: __( 'Description', 'inclind-blocks' ),
-    category: 'inclind-blocks',
-    keywords: [
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks =  drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
+  if (blocks.hasOwnProperty(category.slug + '/inclind-accordion') && blocks[category.slug + '/inclind-accordion']) {
+    // Register the block.
+    registerBlockType( category.slug+'/inclind-accordion', {
+      title: __( 'Accordion', 'inclind-accordion' ),
+      description: __( 'Description', 'inclind-blocks' ),
+      category: 'inclind-blocks',
+      keywords: [
         __( 'accordion', 'inclind-accordion' ),
         __( 'inclind', 'inclind-accordion' ),
-    ],
-    attributes: {},
+      ],
+      attributes: {},
 
-    // Render the block components.
-    edit: InclindAccordion,
+      // Render the block components.
+      edit: InclindAccordion,
 
-    // Save the attributes and markup.
-    save: function( props ) {
+      // Save the attributes and markup.
+      save: function( props ) {
 
         const {} = props.attributes;
 
         // Save the block markup for the front end.
         return (
             <Accordion { ...props }>
-                <InnerBlocks.Content/>
+              <InnerBlocks.Content/>
             </Accordion>
         );
-    },
-} );
+      },
+    } );
+  }
+}

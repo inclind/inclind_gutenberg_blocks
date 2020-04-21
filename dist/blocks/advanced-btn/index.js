@@ -228,10 +228,10 @@ class InclindAdvancedBtn extends Component {
     }];
     const bgType = [{
       key: 'solid',
-      name: __('Blue')
+      name: __('Primary')
     }, {
       key: 'yellow',
-      name: __('Yellow')
+      name: __('Secondary')
     }, {
       key: 'gradient',
       name: __('Transparent')
@@ -856,173 +856,179 @@ const category = {
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-advanced-btn', {
-  title: __('Button', 'inclind-advanced-btn'),
-  description: __('Create an advanced button or a row of buttons. Style each one, including hover controls!', 'inclind-advanced-btn'),
-  category: 'inclind-blocks',
-  keywords: [__('Button', 'inclind-advanced-btn'), __('Icon', 'inclind-advanced-btn'), __('inclind', 'inclind-advanced-btn'), __('custom', 'inclind-accoadvanced-btnrdion')],
-  attributes: {
-    hAlign: {
-      type: 'string',
-      default: 'center'
-    },
-    thAlign: {
-      type: 'string',
-      default: ''
-    },
-    mhAlign: {
-      type: 'string',
-      default: ''
-    },
-    btnCount: {
-      type: 'number',
-      default: 1
-    },
-    uniqueID: {
-      type: 'string',
-      default: ''
-    },
-    btns: {
-      type: 'array',
-      default: [{
-        text: 'Start Button...',
-        link: '',
-        target: '_self',
-        size: '',
-        paddingBT: '',
-        paddingLR: '',
-        color: '#555555',
-        background: '',
-        border: '#555555',
-        backgroundOpacity: 1,
-        borderOpacity: 1,
-        borderRadius: '',
-        borderWidth: '',
-        // colorHover: '#ffffff',
-        // backgroundHover: '#444444',
-        // borderHover: '#444444',
-        // backgroundHoverOpacity: 1,
-        // borderHoverOpacity: 1,
-        icon: '',
-        iconSide: 'left',
-        iconHover: false,
-        cssClass: '',
-        noFollow: false,
-        gap: 5,
-        responsiveSize: ['', ''],
-        gradient: ['#999999', 1, 0, 100, 'linear', 180, 'center center'],
-        gradientHover: ['#777777', 1, 0, 100, 'linear', 180, 'center center'],
-        btnStyle: 'basic',
-        btnSize: 'standard',
-        backgroundType: 'solid',
-        backgroundHoverType: 'solid',
-        width: ['', '', ''],
-        responsivePaddingBT: ['', ''],
-        responsivePaddingLR: ['', ''],
-        boxShadow: [false, '#000000', 0.2, 1, 1, 2, 0, false],
-        boxShadowHover: [false, '#000000', 0.4, 2, 2, 3, 0, false]
-      }]
-    },
-    letterSpacing: {
-      type: 'number'
-    },
-    widthType: {
-      type: 'string',
-      default: 'auto'
-    },
-    forceFullwidth: {
-      type: 'bool',
-      default: false
-    }
-  },
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-  // Render the block components.
-  getEditWrapperProps({
-    blockAlignment
-  }) {
-    if ('left' === blockAlignment || 'right' === blockAlignment || 'center' === blockAlignment) {
-      return {
-        'data-align': blockAlignment
-      };
-    }
-  },
-
-  edit: InclindAdvancedBtn,
-  save: props => {
-    const {
+  if (blocks.hasOwnProperty(category.slug + '/inclind-advanced-btn') && blocks[category.slug + '/inclind-advanced-btn']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-advanced-btn', {
+      title: __('Button (Bootstrap)', 'inclind-advanced-btn'),
+      description: __('Create an advanced button or a row of buttons. Style each one, including hover controls!', 'inclind-advanced-btn'),
+      category: 'inclind-blocks',
+      keywords: [__('Button', 'inclind-advanced-btn'), __('Icon', 'inclind-advanced-btn'), __('inclind', 'inclind-advanced-btn'), __('custom', 'inclind-accoadvanced-btnrdion')],
       attributes: {
-        btnCount,
-        btns,
-        hAlign,
-        uniqueID,
-        letterSpacing,
-        forceFullwidth,
-        thAlign,
-        mhAlign
-      }
-    } = props;
+        hAlign: {
+          type: 'string',
+          default: 'center'
+        },
+        thAlign: {
+          type: 'string',
+          default: ''
+        },
+        mhAlign: {
+          type: 'string',
+          default: ''
+        },
+        btnCount: {
+          type: 'number',
+          default: 1
+        },
+        uniqueID: {
+          type: 'string',
+          default: ''
+        },
+        btns: {
+          type: 'array',
+          default: [{
+            text: 'Start Button...',
+            link: '',
+            target: '_self',
+            size: '',
+            paddingBT: '',
+            paddingLR: '',
+            color: '#555555',
+            background: '',
+            border: '#555555',
+            backgroundOpacity: 1,
+            borderOpacity: 1,
+            borderRadius: '',
+            borderWidth: '',
+            // colorHover: '#ffffff',
+            // backgroundHover: '#444444',
+            // borderHover: '#444444',
+            // backgroundHoverOpacity: 1,
+            // borderHoverOpacity: 1,
+            icon: '',
+            iconSide: 'left',
+            iconHover: false,
+            cssClass: '',
+            noFollow: false,
+            gap: 5,
+            responsiveSize: ['', ''],
+            gradient: ['#999999', 1, 0, 100, 'linear', 180, 'center center'],
+            gradientHover: ['#777777', 1, 0, 100, 'linear', 180, 'center center'],
+            btnStyle: 'basic',
+            btnSize: 'standard',
+            backgroundType: 'solid',
+            backgroundHoverType: 'solid',
+            width: ['', '', ''],
+            responsivePaddingBT: ['', ''],
+            responsivePaddingLR: ['', ''],
+            boxShadow: [false, '#000000', 0.2, 1, 1, 2, 0, false],
+            boxShadowHover: [false, '#000000', 0.4, 2, 2, 3, 0, false]
+          }]
+        },
+        letterSpacing: {
+          type: 'number'
+        },
+        widthType: {
+          type: 'string',
+          default: 'auto'
+        },
+        forceFullwidth: {
+          type: 'bool',
+          default: false
+        }
+      },
 
-    const renderSaveBtns = index => {
-      let relAttr;
+      // Render the block components.
+      getEditWrapperProps({
+        blockAlignment
+      }) {
+        if ('left' === blockAlignment || 'right' === blockAlignment || 'center' === blockAlignment) {
+          return {
+            'data-align': blockAlignment
+          };
+        }
+      },
 
-      if ('_blank' === btns[index].target && true === btns[index].noFollow) {
-        relAttr = 'noreferrer noopener nofollow';
-      } else if ('_blank' === btns[index].target) {
-        relAttr = 'noreferrer noopener';
-      } else if (true === btns[index].noFollow) {
-        relAttr = 'nofollow';
-      } else {
-        relAttr = undefined;
-      }
+      edit: InclindAdvancedBtn,
+      save: props => {
+        const {
+          attributes: {
+            btnCount,
+            btns,
+            hAlign,
+            uniqueID,
+            letterSpacing,
+            forceFullwidth,
+            thAlign,
+            mhAlign
+          }
+        } = props;
 
-      let btnSize;
+        const renderSaveBtns = index => {
+          let relAttr;
 
-      if (undefined !== btns[index].paddingLR || undefined !== btns[index].paddingBT) {
-        btnSize = 'custom';
-      } else {
-        btnSize = 'standard';
-      }
+          if ('_blank' === btns[index].target && true === btns[index].noFollow) {
+            relAttr = 'noreferrer noopener nofollow';
+          } else if ('_blank' === btns[index].target) {
+            relAttr = 'noreferrer noopener';
+          } else if (true === btns[index].noFollow) {
+            relAttr = 'nofollow';
+          } else {
+            relAttr = undefined;
+          }
 
-      return React.createElement("div", {
-        className: `kt-btn-wrap kt-btn-wrap-${index}`
-      }, React.createElement("a", {
-        className: `btn kt-btn-${index}-action kt-btn-size-${btns[index].btnSize ? btns[index].btnSize : btnSize} kt-btn-style-${btns[index].btnStyle ? btns[index].btnStyle : 'basic'}
+          let btnSize;
+
+          if (undefined !== btns[index].paddingLR || undefined !== btns[index].paddingBT) {
+            btnSize = 'custom';
+          } else {
+            btnSize = 'standard';
+          }
+
+          return React.createElement("div", {
+            className: `kt-btn-wrap kt-btn-wrap-${index}`
+          }, React.createElement("a", {
+            className: `btn kt-btn-${index}-action kt-btn-size-${btns[index].btnSize ? btns[index].btnSize : btnSize} kt-btn-style-${btns[index].btnStyle ? btns[index].btnStyle : 'basic'}
                 kt-btn-svg-show-${!btns[index].iconHover ? 'always' : 'hover'} kt-btn-has-text-${!btns[index].text ? 'false' : 'true'} ${forceFullwidth ? ' btn-block' : ''}
                 ${!btns[index].icon ? '' : 'btn-icon'}${'video' === btns[index].target ? ' ktblocksvideopop' : ''}${btns[index].cssClass ? ' ' + btns[index].cssClass : ''}
                 ${btns[index].backgroundHoverType === 'gradient' ? ' btn-arrow btn-cta btn-square' : btns[index].backgroundHoverType === 'yellow' ? ' btn-secondary' : 'btn-primary'} `,
-        href: !btns[index].link ? 'javascript:void(0);' : btns[index].link,
-        target: '_blank' === btns[index].target ? btns[index].target : undefined,
-        rel: relAttr,
-        style: {
-          borderRadius: undefined !== btns[index].borderRadius && '' !== btns[index].borderRadius ? btns[index].borderRadius + 'px' : undefined,
-          borderWidth: undefined !== btns[index].borderWidth && '' !== btns[index].borderWidth ? btns[index].borderWidth + 'px' : undefined,
-          letterSpacing: undefined !== letterSpacing && '' !== letterSpacing ? letterSpacing + 'px' : undefined
-        }
-      }, btns[index].icon && 'left' === btns[index].iconSide && React.createElement(_genicon.default, {
-        className: `color-fill--white svg svg--icon js-svg-exists kt-btn-svg-icon-${btns[index].icon} kt-btn-side-${btns[index].iconSide}`,
-        name: btns[index].icon,
-        size: !btns[index].size ? '14' : btns[index].size,
-        icon: _svgicons.default[btns[index].icon]
-      }), React.createElement(RichText.Content, {
-        tagName: 'span',
-        className: "kt-btn-inner-text",
-        value: btns[index].text
-      }), btns[index].icon && 'left' !== btns[index].iconSide && React.createElement(_genicon.default, {
-        className: `color-fill--white svg svg--icon js-svg-exists kt-btn-svg-icon-${btns[index].icon} kt-btn-side-${btns[index].iconSide}`,
-        name: btns[index].icon,
-        size: !btns[index].size ? '14' : btns[index].size,
-        icon: _svgicons.default[btns[index].icon]
-      }), btns[index].backgroundHoverType && 'gradient' === btns[index].backgroundHoverType && !btns[index].icon && React.createElement(_genicon.default, {
-        className: `svg svg--colorable js-svg-exists`,
-        name: `bb`,
-        htmltag: `span`
-      })));
-    };
+            href: !btns[index].link ? 'javascript:void(0);' : btns[index].link,
+            target: '_blank' === btns[index].target ? btns[index].target : undefined,
+            rel: relAttr,
+            style: {
+              borderRadius: undefined !== btns[index].borderRadius && '' !== btns[index].borderRadius ? btns[index].borderRadius + 'px' : undefined,
+              borderWidth: undefined !== btns[index].borderWidth && '' !== btns[index].borderWidth ? btns[index].borderWidth + 'px' : undefined,
+              letterSpacing: undefined !== letterSpacing && '' !== letterSpacing ? letterSpacing + 'px' : undefined
+            }
+          }, btns[index].icon && 'left' === btns[index].iconSide && React.createElement(_genicon.default, {
+            className: `color-fill--white svg svg--icon js-svg-exists kt-btn-svg-icon-${btns[index].icon} kt-btn-side-${btns[index].iconSide}`,
+            name: btns[index].icon,
+            size: !btns[index].size ? '14' : btns[index].size,
+            icon: _svgicons.default[btns[index].icon]
+          }), React.createElement(RichText.Content, {
+            tagName: 'span',
+            className: "kt-btn-inner-text",
+            value: btns[index].text
+          }), btns[index].icon && 'left' !== btns[index].iconSide && React.createElement(_genicon.default, {
+            className: `color-fill--white svg svg--icon js-svg-exists kt-btn-svg-icon-${btns[index].icon} kt-btn-side-${btns[index].iconSide}`,
+            name: btns[index].icon,
+            size: !btns[index].size ? '14' : btns[index].size,
+            icon: _svgicons.default[btns[index].icon]
+          }), btns[index].backgroundHoverType && 'gradient' === btns[index].backgroundHoverType && !btns[index].icon && React.createElement(_genicon.default, {
+            className: `svg svg--colorable js-svg-exists`,
+            name: `bb`,
+            htmltag: `span`
+          })));
+        };
 
-    return React.createElement("div", {
-      className: `kt-btn-align-${hAlign} kt-btn-tablet-align-${thAlign ? thAlign : 'inherit'} kt-btn-mobile-align-${mhAlign ? mhAlign : 'inherit'} kt-btns-wrap kt-btns${uniqueID}`
-    }, (0, _times.default)(btnCount, n => renderSaveBtns(n)));
+        return React.createElement("div", {
+          className: `kt-btn-align-${hAlign} kt-btn-tablet-align-${thAlign ? thAlign : 'inherit'} kt-btn-mobile-align-${mhAlign ? mhAlign : 'inherit'} kt-btns-wrap kt-btns${uniqueID}`
+        }, (0, _times.default)(btnCount, n => renderSaveBtns(n)));
+      }
+    });
   }
-});
+}

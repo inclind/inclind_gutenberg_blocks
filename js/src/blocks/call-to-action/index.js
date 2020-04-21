@@ -2,6 +2,8 @@
 import classnames from 'classnames';
 import Inspector from './components/inspector';
 import CallToAction from './components/calltoaction';
+import Icon from "../infobox/components/icon";
+import Infobox from "../infobox/components/infobox";
 
 // Internationalization
 const __ = Drupal.t;
@@ -98,90 +100,95 @@ class InclindCallToAction extends Component {
 //  Start Drupal Specific.
 const category = {
     slug: 'inclind-blocks',
-    title: __('Inclind Blocks'),
+    title: __('Custom Blocks'),
 };
 // Grab the current categories and merge in the new category if not present.
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([ category, ...currentCategories ]);
 // End Drupal Specific.
 
-// Register the block.
-registerBlockType( category.slug+'/inclind-call-to-action', {
-    title: __( 'Call To Action', 'inclind-call-to-action' ),
-    description: __( 'Description', 'inclind-blocks' ),
-    category: 'inclind-blocks',
-    keywords: [
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks =  drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
+  if (blocks.hasOwnProperty(category.slug + '/inclind-call-to-action') && blocks[category.slug + '/inclind-call-to-action']) {
+    // Register the block.
+    registerBlockType( category.slug+'/inclind-call-to-action', {
+      title: __( 'Call To Action', 'inclind-call-to-action' ),
+      description: __( 'Description', 'inclind-blocks' ),
+      category: 'inclind-blocks',
+      keywords: [
         __( 'action', 'inclind-call-to-action' ),
         __( 'call to action', 'inclind-call-to-action' ),
         __( 'inclind', 'inclind-call-to-action' ),
-    ],
-    attributes: {
+      ],
+      attributes: {
         itemTitle: {
-            selector: '.item-title',
-            type: 'string',
+          selector: '.item-title',
+          type: 'string',
         },
         itemContent: {
-            selector: '.lead',
-            type: 'array',
-            source: 'children',
+          selector: '.lead',
+          type: 'array',
+          source: 'children',
         },
         itemButtonText: {
-            type: 'string',
+          type: 'string',
         },
         itemButtonLink: {
-            type: 'string',
-            source: 'attribute',
-            selector: '.item-button-link',
-            attribute: 'href',
+          type: 'string',
+          source: 'attribute',
+          selector: '.item-button-link',
+          attribute: 'href',
         },
-    },
+      },
 
-    // Render the block components.
-    edit: InclindCallToAction,
+      // Render the block components.
+      edit: InclindCallToAction,
 
-    // Save the attributes and markup.
-    save: function( props ) {
+      // Save the attributes and markup.
+      save: function( props ) {
         const {
-            itemTitle,
-            itemContent,
-            itemButtonText,
-            itemButtonLink,} = props.attributes;
+          itemTitle,
+          itemContent,
+          itemButtonText,
+          itemButtonLink,} = props.attributes;
 
         // Save the block markup for the front end.
         return (
             <CallToAction { ...props }>
-                <div className="row text-center">
-                    {
-                        itemTitle && (
-                            <RichText.Content
-                                tagName="h2"
-                                className="item-title text-center col-sm-12 emb-center"
-                                value={ itemTitle }
-                            />
-                        )
-                    }
-                    <div className="col-sm-12">
-                        {
-                            itemContent && (
-                                <RichText.Content
-                                    tagName="p"
-                                    className="lead"
-                                    value={ itemContent }
-                                />
-                            )
-                        }
-                    </div>
-                    {
-                        itemButtonText && (
-                            <RichText.Content
-                                tagName="a"
-                                className="btn btn-lg btn-secondary item-button-link"
-                                value={itemButtonText}
-                                href={itemButtonLink}
-                            />
-                    ) }
+              <div className="row text-center">
+                {
+                  itemTitle && (
+                      <RichText.Content
+                          tagName="h2"
+                          className="item-title text-center col-sm-12 emb-center"
+                          value={ itemTitle }
+                      />
+                  )
+                }
+                <div className="col-sm-12">
+                  {
+                    itemContent && (
+                        <RichText.Content
+                            tagName="p"
+                            className="lead"
+                            value={ itemContent }
+                        />
+                    )
+                  }
                 </div>
+                {
+                  itemButtonText && (
+                      <RichText.Content
+                          tagName="a"
+                          className="btn btn-lg btn-secondary item-button-link"
+                          value={itemButtonText}
+                          href={itemButtonLink}
+                      />
+                  ) }
+              </div>
             </CallToAction>
         );
-    },
-} );
+      },
+    } );
+  }
+}

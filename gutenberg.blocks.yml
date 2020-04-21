@@ -1,0 +1,47 @@
+categories:
+  - name: "Inclind Blocks"
+    reference: "inclind/blocks"
+    description: ""
+    blocks:
+      - id: "inclind-blocks/icon-grid-container"
+        name: "Icon Grid Container"
+        default: false
+      - id: "inclind-blocks/inclind-infobox-simple"
+        name: "Infobox"
+        default: false
+      - id: "inclind-blocks/inclind-accordion"
+        name: "Accordion"
+        default: false
+      - id: "inclind-blocks/inclind-link-cards"
+        name: "Button Group (Boostrap)"
+        default: false
+      - id: "inclind-blocks/inclind-icon-link"
+        name: "Icon Link"
+        default: false
+      - id: "inclind-blocks/inclind-jumbotron"
+        name: "Jumbotron"
+        default: false
+      - id: "inclind-blocks/inclind-infographic"
+        name: "Infographic"
+        default: false
+      - id: "inclind-blocks/inclind-call-to-action"
+        name: "Call to action"
+        default: false
+      - id: "inclind-blocks/inclind-accordion-bootstrap"
+        name: "Accordion (Bootstrap)"
+        default: false
+      - id: "inclind-blocks/inclind-advanced-btn"
+        name: "Advanced Button"
+        default: false
+      - id: "inclind-blocks/inclind-card"
+        name: "Card (Bootstrap)"
+        default: false
+      - id: "inclind-blocks/inclind-infobox"
+        name: "Infobox (Bootstrap)"
+        default: false
+      - id: "inclind-blocks/inclind-section-wrap"
+        name: "Section Wrapper"
+        default: false
+      - id: "inclind-blocks/inclind-tabs"
+        name: "Tabs (Bootstrap)"
+        default: false

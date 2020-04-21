@@ -6,6 +6,10 @@ var _inspector = _interopRequireDefault(require("./components/inspector"));
 
 var _infographic = _interopRequireDefault(require("./components/infographic"));
 
+var _icon = _interopRequireDefault(require("../infobox/components/icon"));
+
+var _infobox = _interopRequireDefault(require("../infobox/components/infobox"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Import block dependencies and components
@@ -84,54 +88,60 @@ class InclindInfographic extends Component {
 
 const category = {
   slug: 'inclind-blocks',
-  title: __('Inclind Blocks')
+  title: __('Custom Blocks')
 }; // Grab the current categories and merge in the new category if not present.
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-infographic', {
-  title: __('Infographic', 'inclind-infographic'),
-  description: __('Description', 'inclind-blocks'),
-  category: 'inclind-blocks',
-  keywords: [__('info', 'inclind-infographic'), __('infogrpahic', 'inclind-infographic'), __('inclind', 'inclind-infographic')],
-  attributes: {
-    itemTitle: {
-      selector: '.infographic-title',
-      type: 'string'
-    },
-    itemContentTop: {
-      selector: '.infographic-content-top',
-      type: 'string'
-    },
-    itemContentBottom: {
-      selector: '.infographic-content-bottoom',
-      type: 'string'
-    }
-  },
-  // Render the block components.
-  edit: InclindInfographic,
-  // Save the attributes and markup.
-  save: function (props) {
-    const {
-      itemTitle,
-      itemContentTop,
-      itemContentBottom
-    } = props.attributes; // Save the block markup for the front end.
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-    return React.createElement(_infographic.default, props, React.createElement("p", null, itemTitle && React.createElement(RichText.Content, {
-      tagName: "span",
-      className: "h6 orange infographic-title",
-      value: itemTitle
-    }), React.createElement("br", null), itemContentTop && React.createElement(RichText.Content, {
-      tagName: "span",
-      className: "h1 infogrpahic-content-top",
-      value: itemContentTop
-    })), React.createElement("p", null, itemContentBottom && React.createElement(RichText.Content, {
-      tagName: "span",
-      className: "h4 infogrpahic-content-bottom",
-      value: itemContentBottom
-    })));
+  if (blocks.hasOwnProperty(category.slug + '/inclind-infographic') && blocks[category.slug + '/inclind-infographic']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-infographic', {
+      title: __('Infographic', 'inclind-infographic'),
+      description: __('Description', 'inclind-blocks'),
+      category: 'inclind-blocks',
+      keywords: [__('info', 'inclind-infographic'), __('infogrpahic', 'inclind-infographic'), __('inclind', 'inclind-infographic')],
+      attributes: {
+        itemTitle: {
+          selector: '.infographic-title',
+          type: 'string'
+        },
+        itemContentTop: {
+          selector: '.infographic-content-top',
+          type: 'string'
+        },
+        itemContentBottom: {
+          selector: '.infographic-content-bottoom',
+          type: 'string'
+        }
+      },
+      // Render the block components.
+      edit: InclindInfographic,
+      // Save the attributes and markup.
+      save: function (props) {
+        const {
+          itemTitle,
+          itemContentTop,
+          itemContentBottom
+        } = props.attributes; // Save the block markup for the front end.
+
+        return React.createElement(_infographic.default, props, React.createElement("p", null, itemTitle && React.createElement(RichText.Content, {
+          tagName: "span",
+          className: "h6 orange infographic-title",
+          value: itemTitle
+        }), React.createElement("br", null), itemContentTop && React.createElement(RichText.Content, {
+          tagName: "span",
+          className: "h1 infogrpahic-content-top",
+          value: itemContentTop
+        })), React.createElement("p", null, itemContentBottom && React.createElement(RichText.Content, {
+          tagName: "span",
+          className: "h4 infogrpahic-content-bottom",
+          value: itemContentBottom
+        })));
+      }
+    });
   }
-});
+}

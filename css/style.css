@@ -1,3 +1,24 @@
 /**
  * Loads on front end and back end
  */
+
+.has-overlay {
+  position: relative;
+}
+
+.g-section-wrapper {
+  position: relative;
+}
+
+.g-section-overlay {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.tabs-wrap.layout-vtabs .nav {
+  display: block !important;
+}

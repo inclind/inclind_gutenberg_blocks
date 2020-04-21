@@ -1,0 +1,6 @@
+inclind_gutenberg_blocks.settings:
+  title: 'Healthecho Settings'
+  description: 'Settings Page for Inclind Gutenberg custom module'
+  route_name: inclind_gutenberg_blocks.settings
+  parent: inclind_gutenberg_blocks.admin_config
+  weight: 100

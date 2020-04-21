@@ -1,6 +1,8 @@
 // Import block dependencies and components
 import IconGridContainer from "./components/icon-grid-container";
 import classnames from "classnames";
+import Icon from "../infobox/components/icon";
+import Infobox from "../infobox/components/infobox";
 
 // Internationalization
 const __ = Drupal.t;
@@ -87,70 +89,75 @@ class InclindIconGridContainer extends Component {
 //  Start Drupal Specific.
 const category = {
     slug: 'inclind-blocks',
-    title: __('Inclind Blocks'),
+    title: __('Custom Blocks'),
 };
 // Grab the current categories and merge in the new category if not present.
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([ category, ...currentCategories ]);
 // End Drupal Specific.
 
-// Register the block.
-registerBlockType( category.slug+'/inclind-icon-grid-container', {
-    title: __( 'Icon Grid Container', 'inclind-icon-grid-container' ),
-    description: __( 'Description', 'inclind-blocks' ),
-    category: 'inclind-blocks',
-    keywords: [
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks =  drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
+  if (blocks.hasOwnProperty(category.slug + '/inclind-icon-grid-container') && blocks[category.slug + '/inclind-icon-grid-container']) {
+    // Register the block.
+    registerBlockType( category.slug+'/inclind-icon-grid-container', {
+      title: __( 'Icon Grid Container', 'inclind-icon-grid-container' ),
+      description: __( 'Description', 'inclind-blocks' ),
+      category: 'inclind-blocks',
+      keywords: [
         __( 'icon', 'inclind-icon-grid-container' ),
         __( 'inclind', 'inclind-icon-grid-container' ),
         __( 'grid container', 'inclind-icon-grid-container' ),
-    ],
-    attributes: {
+      ],
+      attributes: {
         itemTitle: {
-            selector: '.item-title',
-            type: 'string',
+          selector: '.item-title',
+          type: 'string',
         },
         itemImage: {
-            type: 'string'
+          type: 'string'
         },
         itemImageData: {
-            type: 'object',
-            default: {},
+          type: 'object',
+          default: {},
         },
-    },
+      },
 
-    // Render the block components.
-    edit: InclindIconGridContainer,
+      // Render the block components.
+      edit: InclindIconGridContainer,
 
-    // Save the attributes and markup.
-    save: function( props ) {
+      // Save the attributes and markup.
+      save: function( props ) {
 
         const {
-            itemTitle,
-            itemImage,
-            itemImageData,
+          itemTitle,
+          itemImage,
+          itemImageData,
         } = props.attributes;
 
         // Save the block markup for the front end.
         return (
             <IconGridContainer { ...props }>
-                <div className="container">
-                    <div className="row text-center">
-                        {
-                            itemTitle && (
-                                <RichText.Content
-                                    tagName="h2"
-                                    className="item-title emb-center"
-                                    value={ itemTitle }
-                                />
-                            )
-                        }
-                        <InnerBlocks.Content/>
-                    </div>
-                    <div className="img img-bg">
-                        <img src={ itemImage } className={"card-img-top"} { ...itemImageData } />
-                    </div>
+              <div className="container">
+                <div className="row text-center">
+                  {
+                    itemTitle && (
+                        <RichText.Content
+                            tagName="h2"
+                            className="item-title emb-center"
+                            value={ itemTitle }
+                        />
+                    )
+                  }
+                  <InnerBlocks.Content/>
                 </div>
+                <div className="img img-bg">
+                  <img src={ itemImage } className={"card-img-top"} { ...itemImageData } />
+                </div>
+              </div>
             </IconGridContainer>
         );
-    },
-} );
+      },
+    } );
+  }
+}

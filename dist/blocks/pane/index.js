@@ -13,6 +13,7 @@ var _reactFonticonpicker = _interopRequireDefault(require("@fonticonpicker/react
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Import block dependencies and components
+// import classnames from "classnames";
 // Internationalization
 const __ = Drupal.t; // Extend component
 
@@ -171,118 +172,124 @@ const category = {
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-pane', {
-  title: __('Pane', 'inclind-pane'),
-  description: __('Accordion pane.', 'inclind-pane'),
-  parent: [category.slug + '/accordion-bootstrap'],
-  category: 'inclind-blocks',
-  attributes: {
-    id: {
-      type: 'number',
-      default: 1
-    },
-    title: {
-      type: 'array',
-      source: 'children',
-      selector: '.kt-blocks-accordion-title',
-      default: ''
-    },
-    titleTag: {
-      type: 'string',
-      default: 'h5'
-    },
-    hideLabel: {
-      type: 'bool',
-      default: false
-    },
-    startCollapsed: {
-      type: 'bool',
-      default: false
-    },
-    icon: {
-      type: 'string',
-      default: ''
-    },
-    iconSide: {
-      type: 'string',
-      default: 'right'
-    },
-    uniqueID: {
-      type: 'string',
-      default: ''
-    },
-    parentID: {
-      type: 'string',
-      default: ''
-    }
-  },
-  supports: {
-    inserter: false,
-    reusable: false,
-    html: false,
-    anchor: true
-  },
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-  getEditWrapperProps(attributes) {
-    return {
-      'data-pane': attributes.id
-    };
-  },
-
-  edit: InclindPane,
-  save: props => {
-    const {
+  if (blocks.hasOwnProperty(category.slug + '/accordion-bootstrap') && blocks[category.slug + '/accordion-bootstrap']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-pane', {
+      title: __('Pane', 'inclind-pane'),
+      description: __('Accordion pane.', 'inclind-pane'),
+      parent: [category.slug + '/accordion-bootstrap'],
+      category: 'inclind-blocks',
       attributes: {
-        id,
-        uniqueID,
-        parentID,
-        startCollapsed,
-        title,
-        icon,
-        iconSide,
-        hideLabel,
-        titleTag
-      }
-    } = props;
-    const HtmlTagOut = !titleTag ? 'h5' : titleTag; // Render the section on Front-end:
+        id: {
+          type: 'number',
+          default: 1
+        },
+        title: {
+          type: 'array',
+          source: 'children',
+          selector: '.kt-blocks-accordion-title',
+          default: ''
+        },
+        titleTag: {
+          type: 'string',
+          default: 'h5'
+        },
+        hideLabel: {
+          type: 'bool',
+          default: false
+        },
+        startCollapsed: {
+          type: 'bool',
+          default: false
+        },
+        icon: {
+          type: 'string',
+          default: ''
+        },
+        iconSide: {
+          type: 'string',
+          default: 'right'
+        },
+        uniqueID: {
+          type: 'string',
+          default: ''
+        },
+        parentID: {
+          type: 'string',
+          default: ''
+        }
+      },
+      supports: {
+        inserter: false,
+        reusable: false,
+        html: false,
+        anchor: true
+      },
 
-    return React.createElement("div", {
-      className: `card mb-0 pane-${id} pane${uniqueID}`
-    }, React.createElement("div", {
-      className: "card-header p-0",
-      id: `acc-header${uniqueID}`
-    }, React.createElement(HtmlTagOut, {
-      className: `mb-0 ${icon ? 'has-icon' : ''}`
-    }, icon && 'left' === iconSide && React.createElement(_genicon.default, {
-      className: `btn-svg-icon btn-svg-icon-${icon} btn-side-${iconSide}`,
-      name: icon,
-      icon: _svgicons.default[icon]
-    }), React.createElement("button", {
-      className: "p-4 pr-6 col-12 btn btn-link text-left",
-      type: "button",
-      "data-toggle": "collapse",
-      "data-target": `#acc-body${uniqueID}`,
-      "aria-expanded": "false" // aria-expanded={`${((!startCollapsed && id == 1) ? 'true' : 'false')}`}
-      ,
-      "aria-controls": `acc-body${uniqueID}`
-    }, React.createElement(RichText.Content, {
-      className: 'kt-blocks-accordion-title acc-title-inner',
-      tagName: 'span',
-      value: title
-    })), icon && 'right' === iconSide && React.createElement(_genicon.default, {
-      className: `btn-svg-icon btn-svg-icon-${icon} btn-side-${iconSide}`,
-      name: icon,
-      icon: _svgicons.default[icon]
-    }))), React.createElement("div", {
-      id: `acc-body${uniqueID}` // className={`collapse ${((!startCollapsed && id == 1) ? 'show' : '')}`}
-      ,
-      className: "collapse",
-      "aria-labelledby": `acc-header${uniqueID}`,
-      "data-parent": `#${parentID}`
-    }, React.createElement("div", {
-      className: "card-body"
-    }, React.createElement(InnerBlocks.Content, null))));
+      getEditWrapperProps(attributes) {
+        return {
+          'data-pane': attributes.id
+        };
+      },
+
+      edit: InclindPane,
+      save: props => {
+        const {
+          attributes: {
+            id,
+            uniqueID,
+            parentID,
+            startCollapsed,
+            title,
+            icon,
+            iconSide,
+            hideLabel,
+            titleTag
+          }
+        } = props;
+        const HtmlTagOut = !titleTag ? 'h5' : titleTag; // Render the section on Front-end:
+
+        return React.createElement("div", {
+          className: `card mb-0 pane-${id} pane${uniqueID}`
+        }, React.createElement("div", {
+          className: "card-header p-0",
+          id: `acc-header${uniqueID}`
+        }, React.createElement(HtmlTagOut, {
+          className: `mb-0 ${icon ? 'has-icon' : ''}`
+        }, icon && 'left' === iconSide && React.createElement(_genicon.default, {
+          className: `btn-svg-icon btn-svg-icon-${icon} btn-side-${iconSide}`,
+          name: icon,
+          icon: _svgicons.default[icon]
+        }), React.createElement("button", {
+          className: "p-4 pr-6 col-12 btn btn-link text-left",
+          type: "button",
+          "data-toggle": "collapse",
+          "data-target": `#acc-body${uniqueID}`,
+          "aria-expanded": "false" // aria-expanded={`${((!startCollapsed && id == 1) ? 'true' : 'false')}`}
+          ,
+          "aria-controls": `acc-body${uniqueID}`
+        }, React.createElement(RichText.Content, {
+          className: 'kt-blocks-accordion-title acc-title-inner',
+          tagName: 'span',
+          value: title
+        })), icon && 'right' === iconSide && React.createElement(_genicon.default, {
+          className: `btn-svg-icon btn-svg-icon-${icon} btn-side-${iconSide}`,
+          name: icon,
+          icon: _svgicons.default[icon]
+        }))), React.createElement("div", {
+          id: `acc-body${uniqueID}` // className={`collapse ${((!startCollapsed && id == 1) ? 'show' : '')}`}
+          ,
+          className: "collapse",
+          "aria-labelledby": `acc-header${uniqueID}`,
+          "data-parent": `#${parentID}`
+        }, React.createElement("div", {
+          className: "card-body"
+        }, React.createElement(InnerBlocks.Content, null))));
+      }
+    });
   }
-});
+}

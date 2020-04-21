@@ -1,0 +1,244 @@
+$primary: #2e358f; // #006bb5;
+$primary-txt: #ffc222;
+$primary-txt-hover: #ffc222;
+
+$secondary: #ef6223;
+$secondary-txt: #2e358f;
+$secondary-txt-hover: #242970;
+
+$success: #CFBECB;
+$warning: #EAE3D4;
+$alert: #ec5840;
+$black: #000000;
+$gray: #d8d8d8;
+$white: #ffffff;
+$off-white: #f8f9fa;
+
+$radius: 10px;
+$box-shadow: 0 2px 6px 0 rgba(0, 0, 0, .27);
+
+$font-main: Montserrat, sans-serif;
+$font-secondary: Montserrat, sans-serif;
+
+h1 {
+  color: $primary;
+  font-family: $font-main;
+  font-weight: 700;
+  font-style: normal;
+  width: auto;
+  margin: 0 0 .5em;
+}
+
+.h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5 {
+  @extend h1;
+}
+
+.orange {
+  color: $secondary;
+}
+
+.bg-light {
+  background-color: $off-white !important;
+}
+
+.card.card-bg {
+  border-top: 6px solid #7bc3bc;
+  box-shadow: $box-shadow;
+  border-radius: $radius;
+}
+
+.card .card-title {
+  color: $primary;
+  font-family: $font-main;
+}
+
+.card .card-subtitle {
+  color: $secondary;
+}
+
+.card.card-invert {
+  background-color: $primary;
+}
+
+.accordion {
+  border: 4px dashed $gray;
+}
+
+.accordion .card {
+  border-radius: $radius;
+  border: 1px solid $gray;
+}
+
+.btn:hover {
+  color: #212529;
+  text-decoration: none;
+}
+
+.btn.focus,
+.btn:focus {
+  outline: 0;
+  box-shadow: 0 0 0 .2rem rgba(46, 53, 143, .25);
+}
+
+.btn.disabled,
+.btn:disabled {
+  opacity: .65;
+  background-color: #d7d7d7;
+  border-color: #d7d7d7;
+  color: $primary;
+}
+
+a.btn.disabled,
+fieldset:disabled a.btn {
+  pointer-events: none;
+}
+
+.btn-cta {
+  background: transparent;
+  color: $primary;
+  &:hover {
+    background: transparent;
+    color: $secondary-txt-hover;
+  }
+}
+
+.btn-cta-reversed {
+  color: $white;
+  &:hover {
+    color: #efefef;
+  }
+}
+
+.btn-cta-reversed svg,
+.btn-cta svg {
+  fill: $secondary;
+}
+
+.btn[aria-pressed=true] {
+  background-color: #b2cc50;
+  border-color: #b2cc50;
+  color: $primary;
+}
+
+.btn-secondary {
+  color: $secondary-txt;
+  background-color: $secondary;
+  border-color: $secondary;
+
+  &:hover, &:focus {
+    color: $secondary-txt-hover;
+    background-color: $secondary;
+    border-color: $secondary;
+  }
+
+  &.focus, &:focus {
+    box-shadow: 0 0 0 .2rem rgba($secondary, .5);
+  }
+
+  &.disabled, &:disabled {
+    color: $secondary-txt;
+    background-color: $secondary;
+    border-color: $secondary;
+  }
+
+  &:not(:disabled):not(.disabled).active,
+  &:not(:disabled):not(.disabled):active {
+    color: $secondary-txt;
+    background-color: $secondary;
+    border-color: $secondary;
+  }
+
+  &:not(:disabled):not(.disabled).active:focus,
+  &:not(:disabled):not(.disabled):active:focus {
+    box-shadow: 0 0 0 .2rem rgba($secondary, .5);
+  }
+}
+
+.show > .btn-secondary.dropdown-toggle {
+  color: $secondary-txt;
+  background-color: $secondary;
+  border-color: $secondary;
+
+  &:focus {
+    box-shadow: 0 0 0 .2rem rgba($secondary, .5);
+  }
+}
+
+.btn-success {
+  color: $secondary-txt;
+  background-color: $secondary;
+  border-color: $secondary;
+
+  &:hover {
+    color: $secondary-txt-hover;
+    background-color: $secondary;
+    border-color: $secondary;
+  }
+}
+
+.btn-secondary,
+.btn-warning svg {
+  fill: $primary;
+}
+
+.btn-primary svg,
+.btn-alert svg,
+.btn-danger svg,
+.btn-dark-gray svg,
+.btn-dark svg,
+.btn-info svg,
+.btn-medium-gray svg,
+.btn-tertiary svg {
+  fill: $white;
+}
+
+.btn-primary {
+  color: $primary-txt;
+  background-color: $primary;
+  border-color: $primary;
+
+  &:hover, &:focus, &.focus {
+    color: $primary-txt;
+    background-color: $primary;
+    border-color: $primary;
+    box-shadow: 0 0 0 .2rem rgba(77, 83, 160, .5);
+
+    .block-editor-url-input input[type=text] {
+      color: gray !important;
+    }
+  }
+
+  &.disabled, &:disabled {
+    color: $white;
+    background-color: $primary;
+    border-color: $primary;
+  }
+
+  &:not(:disabled):not(.disabled).active, &:not(:disabled):not(.disabled):active {
+    color: $white;
+    background-color: $primary;
+    border-color: $primary;
+  }
+
+  &:not(:disabled):not(.disabled).active .block-editor-url-input input[type=text],
+  &:not(:disabled):not(.disabled):active .block-editor-url-input input[type=text] {
+    color: gray !important;
+  }
+
+  &:not(:disabled):not(.disabled).active:focus,
+  &:not(:disabled):not(.disabled):active:focus {
+    box-shadow: 0 0 0 .2rem rgba(77, 83, 160, .5);
+  }
+}
+
+.show > .btn-primary.dropdown-toggle {
+  color: gray !important;
+
+  &:focus {
+    box-shadow: 0 0 0 .2rem rgba(77, 83, 160, .5);
+  }
+}
+
+.gradient-bg {
+  background: linear-gradient(180deg, #fdfdfd 90%, #f2f2f2);
+}

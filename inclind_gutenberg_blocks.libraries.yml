@@ -1,16 +1,21 @@
-block-edit:
+blocks-edit:
   version: VERSION
   js:
     dist/index-browserify.js: { }
   css:
+    base:
+      css/defaults.min.css: { }
     theme:
-      css/style.css: { }
-      css/edit.css: { }
+      css/style.min.css: { }
+      css/edit.min.css: { }
   dependencies:
     - gutenberg/edit-node
     - core/drupal
-block-view:
+blocks-view:
   version: VERSION
   css:
+    base:
+      css/defaults.min.css: { }
     theme:
-      css/style.css: { }
+      css/style.min.css: { }
+  js: {  }

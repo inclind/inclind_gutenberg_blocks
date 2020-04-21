@@ -19,6 +19,8 @@ var _hexToRgba = _interopRequireDefault(require("../../hex-to-rgba"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Import block dependencies and components
+// import Icon from "../infobox/components/icon";
+// import Infobox from "../infobox/components/infobox";
 // Internationalization
 const __ = Drupal.t; // Extend component
 
@@ -538,160 +540,166 @@ const category = {
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-link-cards', {
-  title: __('Button Group', 'inclind-link-cards'),
-  description: __('Create a row or grid of buttons (links). Style each one.', 'inclind-link-cards'),
-  category: 'inclind-blocks',
-  keywords: [__('Button', 'inclind-link-cards'), __('Button grid', 'inclind-link-cards'), __('inclind', 'inclind-link-cards'), __('custom', 'inclind-link-cards')],
-  attributes: {
-    hAlign: {
-      type: 'string',
-      default: 'center'
-    },
-    thAlign: {
-      type: 'string',
-      default: ''
-    },
-    mhAlign: {
-      type: 'string',
-      default: ''
-    },
-    btnCount: {
-      type: 'number',
-      default: 1
-    },
-    uniqueID: {
-      type: 'string',
-      default: ''
-    },
-    btns: {
-      type: 'array',
-      default: [{
-        text: 'Start Button...',
-        link: '',
-        target: '_self',
-        size: '',
-        paddingBT: '',
-        paddingLR: '',
-        color: '#555555',
-        background: '',
-        border: '#555555',
-        backgroundOpacity: 1,
-        borderOpacity: 1,
-        colorHover: '#ffffff',
-        backgroundHover: '#444444',
-        borderHover: '#444444',
-        backgroundHoverOpacity: 1,
-        borderHoverOpacity: 1,
-        icon: '',
-        iconSide: 'left',
-        iconHover: false,
-        cssClass: '',
-        noFollow: false,
-        gradient: ['#999999', 1, 0, 100, 'linear', 180, 'center center'],
-        gradientHover: ['#777777', 1, 0, 100, 'linear', 180, 'center center'],
-        btnStyle: 'basic',
-        backgroundType: 'yellow',
-        backgroundHoverType: 'yellow',
-        width: ['', '', '']
-      }]
-    },
-    forceFullwidth: {
-      type: 'bool',
-      default: false
-    },
-    btnLayoutStyle: {
-      type: 'string',
-      default: 'inline'
-    }
-  },
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-  // Render the block components.
-  getEditWrapperProps({
-    blockAlignment
-  }) {
-    if ('left' === blockAlignment || 'right' === blockAlignment || 'center' === blockAlignment) {
-      return {
-        'data-align': blockAlignment
-      };
-    }
-  },
-
-  edit: InclindLinkCards,
-  save: props => {
-    const {
+  if (blocks.hasOwnProperty(category.slug + '/inclind-link-cards') && blocks[category.slug + '/inclind-link-cards']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-link-cards', {
+      title: __('Button Group', 'inclind-link-cards'),
+      description: __('Create a row or grid of buttons (links). Style each one.', 'inclind-link-cards'),
+      category: 'inclind-blocks',
+      keywords: [__('Button', 'inclind-link-cards'), __('Button grid', 'inclind-link-cards'), __('inclind', 'inclind-link-cards'), __('custom', 'inclind-link-cards')],
       attributes: {
-        btnCount,
-        btns,
-        hAlign,
-        uniqueID,
-        forceFullwidth,
-        thAlign,
-        mhAlign,
-        btnLayoutStyle
-      }
-    } = props;
+        hAlign: {
+          type: 'string',
+          default: 'center'
+        },
+        thAlign: {
+          type: 'string',
+          default: ''
+        },
+        mhAlign: {
+          type: 'string',
+          default: ''
+        },
+        btnCount: {
+          type: 'number',
+          default: 1
+        },
+        uniqueID: {
+          type: 'string',
+          default: ''
+        },
+        btns: {
+          type: 'array',
+          default: [{
+            text: 'Start Button...',
+            link: '',
+            target: '_self',
+            size: '',
+            paddingBT: '',
+            paddingLR: '',
+            color: '#555555',
+            background: '',
+            border: '#555555',
+            backgroundOpacity: 1,
+            borderOpacity: 1,
+            colorHover: '#ffffff',
+            backgroundHover: '#444444',
+            borderHover: '#444444',
+            backgroundHoverOpacity: 1,
+            borderHoverOpacity: 1,
+            icon: '',
+            iconSide: 'left',
+            iconHover: false,
+            cssClass: '',
+            noFollow: false,
+            gradient: ['#999999', 1, 0, 100, 'linear', 180, 'center center'],
+            gradientHover: ['#777777', 1, 0, 100, 'linear', 180, 'center center'],
+            btnStyle: 'basic',
+            backgroundType: 'yellow',
+            backgroundHoverType: 'yellow',
+            width: ['', '', '']
+          }]
+        },
+        forceFullwidth: {
+          type: 'bool',
+          default: false
+        },
+        btnLayoutStyle: {
+          type: 'string',
+          default: 'inline'
+        }
+      },
 
-    const renderSaveBtns = (index, layout) => {
-      let relAttr;
+      // Render the block components.
+      getEditWrapperProps({
+        blockAlignment
+      }) {
+        if ('left' === blockAlignment || 'right' === blockAlignment || 'center' === blockAlignment) {
+          return {
+            'data-align': blockAlignment
+          };
+        }
+      },
 
-      if ('_blank' === btns[index].target && true === btns[index].noFollow) {
-        relAttr = 'noreferrer noopener nofollow';
-      } else if ('_blank' === btns[index].target) {
-        relAttr = 'noreferrer noopener';
-      } else if (true === btns[index].noFollow) {
-        relAttr = 'nofollow';
-      } else {
-        relAttr = undefined;
-      }
+      edit: InclindLinkCards,
+      save: props => {
+        const {
+          attributes: {
+            btnCount,
+            btns,
+            hAlign,
+            uniqueID,
+            forceFullwidth,
+            thAlign,
+            mhAlign,
+            btnLayoutStyle
+          }
+        } = props;
 
-      return React.createElement("div", {
-        className: `${layout} kt-btn-wrap kt-btn-wrap-${index}`
-      }, React.createElement("a", {
-        className: `btn kt-btn-${index}-action
+        const renderSaveBtns = (index, layout) => {
+          let relAttr;
+
+          if ('_blank' === btns[index].target && true === btns[index].noFollow) {
+            relAttr = 'noreferrer noopener nofollow';
+          } else if ('_blank' === btns[index].target) {
+            relAttr = 'noreferrer noopener';
+          } else if (true === btns[index].noFollow) {
+            relAttr = 'nofollow';
+          } else {
+            relAttr = undefined;
+          }
+
+          return React.createElement("div", {
+            className: `${layout} kt-btn-wrap kt-btn-wrap-${index}`
+          }, React.createElement("a", {
+            className: `btn kt-btn-${index}-action
                 kt-btn-svg-show-${!btns[index].iconHover ? 'always' : 'hover'} kt-btn-has-text-${!btns[index].text ? 'false' : 'true'}
                 ${!btns[index].icon ? '' : 'btn-icon'}${btns[index].cssClass ? ' ' + btns[index].cssClass : ''}
                 ${btns[index].backgroundHoverType === 'gradient' ? ' btn-arrow btn-cta btn-square' : btns[index].backgroundHoverType === 'yellow' ? ' btn-secondary' : 'btn-primary'} `,
-        href: !btns[index].link ? 'javascript:void(0);' : btns[index].link,
-        target: '_blank' === btns[index].target ? btns[index].target : undefined,
-        rel: relAttr
-      }, btns[index].icon && 'left' === btns[index].iconSide && React.createElement(_genicon.default, {
-        className: `color-fill--white svg svg--icon js-svg-exists kt-btn-svg-icon-${btns[index].icon} kt-btn-side-${btns[index].iconSide}`,
-        name: btns[index].icon,
-        size: !btns[index].size ? '14' : btns[index].size,
-        icon: _svgicons.default[btns[index].icon]
-      }), React.createElement(RichText.Content, {
-        tagName: 'span',
-        className: "kt-btn-inner-text",
-        value: btns[index].text
-      }), btns[index].icon && 'left' !== btns[index].iconSide && React.createElement(_genicon.default, {
-        className: `color-fill--white svg svg--icon js-svg-exists kt-btn-svg-icon-${btns[index].icon} kt-btn-side-${btns[index].iconSide}`,
-        name: btns[index].icon,
-        size: !btns[index].size ? '14' : btns[index].size,
-        icon: _svgicons.default[btns[index].icon]
-      }), btns[index].backgroundHoverType && 'gradient' === btns[index].backgroundHoverType && !btns[index].icon && React.createElement(_genicon.default, {
-        className: `svg svg--colorable js-svg-exists`,
-        name: `bb`,
-        htmltag: `span`
-      })));
-    };
+            href: !btns[index].link ? 'javascript:void(0);' : btns[index].link,
+            target: '_blank' === btns[index].target ? btns[index].target : undefined,
+            rel: relAttr
+          }, btns[index].icon && 'left' === btns[index].iconSide && React.createElement(_genicon.default, {
+            className: `color-fill--white svg svg--icon js-svg-exists kt-btn-svg-icon-${btns[index].icon} kt-btn-side-${btns[index].iconSide}`,
+            name: btns[index].icon,
+            size: !btns[index].size ? '14' : btns[index].size,
+            icon: _svgicons.default[btns[index].icon]
+          }), React.createElement(RichText.Content, {
+            tagName: 'span',
+            className: "kt-btn-inner-text",
+            value: btns[index].text
+          }), btns[index].icon && 'left' !== btns[index].iconSide && React.createElement(_genicon.default, {
+            className: `color-fill--white svg svg--icon js-svg-exists kt-btn-svg-icon-${btns[index].icon} kt-btn-side-${btns[index].iconSide}`,
+            name: btns[index].icon,
+            size: !btns[index].size ? '14' : btns[index].size,
+            icon: _svgicons.default[btns[index].icon]
+          }), btns[index].backgroundHoverType && 'gradient' === btns[index].backgroundHoverType && !btns[index].icon && React.createElement(_genicon.default, {
+            className: `svg svg--colorable js-svg-exists`,
+            name: `bb`,
+            htmltag: `span`
+          })));
+        };
 
-    let gridClasses = 'justify-content-center link-card-grid row button-layout-inline'; // for "inline"
+        let gridClasses = 'justify-content-center link-card-grid row button-layout-inline'; // for "inline"
 
-    let btnClasses = 'col-xs-12 col-md-6 col-lg-4 mb-4';
+        let btnClasses = 'col-xs-12 col-md-6 col-lg-4 mb-4';
 
-    if (btnLayoutStyle == 'grid') {
-      gridClasses = 'justify-content-center link-card-grid row button-layout-grid';
-      btnClasses = 'col-xs-12 col-sm-6 pb-2 pr-1 pl-1';
-    } else if (btnLayoutStyle == 'banners') {
-      gridClasses = 'justify-content-center link-card-grid row button-layout-banner';
-      btnClasses = 'col m-0 p-0';
-    }
+        if (btnLayoutStyle == 'grid') {
+          gridClasses = 'justify-content-center link-card-grid row button-layout-grid';
+          btnClasses = 'col-xs-12 col-sm-6 pb-2 pr-1 pl-1';
+        } else if (btnLayoutStyle == 'banners') {
+          gridClasses = 'justify-content-center link-card-grid row button-layout-banner';
+          btnClasses = 'col m-0 p-0';
+        }
 
-    return React.createElement("div", {
-      className: `${gridClasses} kt-btn-align-${hAlign} kt-btn-tablet-align-${thAlign ? thAlign : 'inherit'} kt-btn-mobile-align-${mhAlign ? mhAlign : 'inherit'} kt-btns${uniqueID}`
-    }, (0, _times.default)(btnCount, n => renderSaveBtns(n, btnClasses)));
+        return React.createElement("div", {
+          className: `${gridClasses} kt-btn-align-${hAlign} kt-btn-tablet-align-${thAlign ? thAlign : 'inherit'} kt-btn-mobile-align-${mhAlign ? mhAlign : 'inherit'} kt-btns${uniqueID}`
+        }, (0, _times.default)(btnCount, n => renderSaveBtns(n, btnClasses)));
+      }
+    });
   }
-});
+}

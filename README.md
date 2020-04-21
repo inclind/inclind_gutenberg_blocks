@@ -34,6 +34,9 @@ The `gutenberg-compile` command is defined inside of `package.json` and runs
    block_view and block_edit displays.
   - If necessary additional libraries can be defined in the `gutenberg.yml`
    file for blocK_view and block_edit displays.
+  - Alter hook `hook_inclind_gutenberg_blocks_alter($js_files_edit, $css_files_edit, $css_files_view)`
+   can be utilized from other modules/themes to override (add to) default 
+   module's libraries files.
 - Blocks should be defined under /js/src/blocks/<block-name>/.
 - Blocks should have their individual `index.js` imported in /js/src/index.js
  for compilation.
@@ -48,8 +51,7 @@ The `gutenberg-compile` command is defined inside of `package.json` and runs
 
 ## TODO
 
-- There is no method for compiling scss presently defined.
 - Import statements for scss files inside of js are not handled and cause the
  compiler to fail.
-- The dist directory should be excluded and the Gutenberg blocks should be
+- The dist directory should be excluded in the future and the Gutenberg blocks should be
  linted and compiled during the build process.

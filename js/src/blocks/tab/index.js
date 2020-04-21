@@ -1,5 +1,8 @@
 // Import block dependencies and components
 import Tab from "./components/tab";
+// import attributes from "../tabs/attributes";
+// import edit from "../tabs/edit";
+// import save from "../tabs/save";
 
 // Internationalization
 const __ = Drupal.t;
@@ -80,65 +83,70 @@ const currentCategories = select('core/blocks').getCategories().filter(item => i
 dispatch('core/blocks').setCategories([category, ...currentCategories]);
 // End Drupal Specific.
 
-// Register the block.
-registerBlockType(category.slug + '/inclind-tab', {
-      title: __('Tab', 'inclind-tab'),
-      description: __('Single Tab element for Tabs creation.', 'inclind-tab'),
-      category: 'inclind-blocks',
-      parent: [category.slug + '/inclind-tabs'],
-      keywords: [
-        __('Tab', 'inclind-tab'),
-        __('inclind', 'inclind-tab'),
-        __('custom', 'inclind-tab'),
-      ],
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks =  drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
+  if (blocks.hasOwnProperty(category.slug + '/inclind-tabs') && blocks[category.slug + '/inclind-tabs']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-tab', {
+          title: __('Tab (Bootstrap)', 'inclind-tab'),
+          description: __('Single Tab element for Tabs creation.', 'inclind-tab'),
+          category: 'inclind-blocks',
+          parent: [category.slug + '/inclind-tabs'],
+          keywords: [
+            __('Tab', 'inclind-tab'),
+            __('inclind', 'inclind-tab'),
+            __('custom', 'inclind-tab'),
+          ],
 
-      attributes: {
-        id: {
-          type: 'number',
-          default: 1,
-        },
-        uniqueID: {
-          type: 'string',
-          default: '',
-        },
-        parentID: {
-          type: 'string',
-          default: '',
-        },
-      },
-      supports: {
-        inserter: false,
-        reusable: false,
-        html: false,
-      },
-      // Render the block components.
-      getEditWrapperProps(attributes) {
-        return {'data-tab': attributes.id};
-      },
+          attributes: {
+            id: {
+              type: 'number',
+              default: 1,
+            },
+            uniqueID: {
+              type: 'string',
+              default: '',
+            },
+            parentID: {
+              type: 'string',
+              default: '',
+            },
+          },
+          supports: {
+            inserter: false,
+            reusable: false,
+            html: false,
+          },
+          // Render the block components.
+          getEditWrapperProps(attributes) {
+            return {'data-tab': attributes.id};
+          },
 
-      edit: InclindTab,
+          edit: InclindTab,
 
-      save({attributes}) {
-        const {id, uniqueID, parentID} = attributes;
-        const backupAnchor = `${ parentID }-tab-${ ( id ) }`;
-        const ref = `${ parentID }-tabcontent-${ ( id ) }`;
-        const sel_tab = `${(id == 1 ? 'true' : 'false')}`;
-        const sel_tab_class = `${(id == 1 ? 'show active' : '')}`;
+          save({attributes}) {
+            const {id, uniqueID, parentID} = attributes;
+            const backupAnchor = `${ parentID }-tab-${ ( id ) }`;
+            const ref = `${ parentID }-tabcontent-${ ( id ) }`;
+            const sel_tab = `${(id == 1 ? 'true' : 'false')}`;
+            const sel_tab_class = `${(id == 1 ? 'show active' : '')}`;
 
-        // Render the Tab on Front-end:
-        return (
-            <div className={`tab-pane fade ${sel_tab_class}`} id={`${ref}`} role="tabpanel"
-                 aria-labelledby={`${backupAnchor}`}>
-              <InnerBlocks.Content/>
-            </div>
+            // Render the Tab on Front-end:
+            return (
+                <div className={`tab-pane fade ${sel_tab_class}`} id={`${ref}`} role="tabpanel"
+                     aria-labelledby={`${backupAnchor}`}>
+                  <InnerBlocks.Content/>
+                </div>
 
-            // <div
-            //     className={`kt-tab-inner-content kt-inner-tab-${id} kt-inner-tab${uniqueID}`}>
-            //   <div className={'kt-tab-inner-content-inner'}>
-            //     <InnerBlocks.Content/>
-            //   </div>
-            // </div>
-        );
-      },
-    }
-);
+                // <div
+                //     className={`kt-tab-inner-content kt-inner-tab-${id} kt-inner-tab${uniqueID}`}>
+                //   <div className={'kt-tab-inner-content-inner'}>
+                //     <InnerBlocks.Content/>
+                //   </div>
+                // </div>
+            );
+          },
+        }
+    );
+  }
+}

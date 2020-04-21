@@ -8,6 +8,8 @@ var _iconLink = _interopRequireDefault(require("./components/icon-link"));
 
 var _icon = _interopRequireDefault(require("./components/icon"));
 
+var _infobox = _interopRequireDefault(require("../infobox/components/infobox"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Import block dependencies and components
@@ -77,52 +79,58 @@ class InclindIconLink extends Component {
 
 const category = {
   slug: 'inclind-blocks',
-  title: __('Inclind Blocks')
+  title: __('Custom Blocks')
 }; // Grab the current categories and merge in the new category if not present.
 
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
 dispatch('core/blocks').setCategories([category, ...currentCategories]); // End Drupal Specific.
-// Register the block.
 
-registerBlockType(category.slug + '/inclind-icon-link', {
-  title: __('Icon Link', 'inclind-icon-link'),
-  description: __('Description', 'inclind-blocks'),
-  category: 'inclind-blocks',
-  keywords: [__('icon', 'inclind-icon-link'), __('link', 'inclind-icon-link'), __('inclind', 'inclind-icon-link')],
-  attributes: {
-    itemIcon: {
-      type: 'string',
-      default: ''
-    },
-    itemContent: {
-      type: 'string',
-      default: ''
-    },
-    itemLink: {
-      type: 'string',
-      source: 'attribute',
-      selector: '.icon-link',
-      attribute: 'href'
-    }
-  },
-  // Render the block components.
-  edit: InclindIconLink,
-  // Save the attributes and markup.
-  save: function (props) {
-    const {
-      itemContent,
-      itemIcon,
-      itemLink
-    } = props.attributes;
-    const icon = itemIcon !== undefined && itemIcon !== '' && _icon.default[itemIcon] !== undefined ? _icon.default[itemIcon] : ''; // Save the block markup for the front end.
+if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
 
-    return React.createElement(_iconLink.default, props, icon && React.createElement("span", {
-      className: (0, _classnames.default)('svgicon-default', 'align-middle', itemIcon)
-    }, icon), itemContent && itemLink && React.createElement(RichText.Content, {
-      tagName: "a",
-      href: itemLink,
-      className: "icon-link",
-      value: itemContent
-    }));
+  if (blocks.hasOwnProperty(category.slug + '/inclind-icon-link') && blocks[category.slug + '/inclind-icon-link']) {
+    // Register the block.
+    registerBlockType(category.slug + '/inclind-icon-link', {
+      title: __('Icon Link', 'inclind-icon-link'),
+      description: __('Description', 'inclind-blocks'),
+      category: 'inclind-blocks',
+      keywords: [__('icon', 'inclind-icon-link'), __('link', 'inclind-icon-link'), __('inclind', 'inclind-icon-link')],
+      attributes: {
+        itemIcon: {
+          type: 'string',
+          default: ''
+        },
+        itemContent: {
+          type: 'string',
+          default: ''
+        },
+        itemLink: {
+          type: 'string',
+          source: 'attribute',
+          selector: '.icon-link',
+          attribute: 'href'
+        }
+      },
+      // Render the block components.
+      edit: InclindIconLink,
+      // Save the attributes and markup.
+      save: function (props) {
+        const {
+          itemContent,
+          itemIcon,
+          itemLink
+        } = props.attributes;
+        const icon = itemIcon !== undefined && itemIcon !== '' && _icon.default[itemIcon] !== undefined ? _icon.default[itemIcon] : ''; // Save the block markup for the front end.
+
+        return React.createElement(_iconLink.default, props, icon && React.createElement("span", {
+          className: (0, _classnames.default)('svgicon-default', 'align-middle', itemIcon)
+        }, icon), itemContent && itemLink && React.createElement(RichText.Content, {
+          tagName: "a",
+          href: itemLink,
+          className: "icon-link",
+          value: itemContent
+        }));
+      }
+    });
   }
-});
+}
