@@ -3,8 +3,8 @@ inclind_gutenberg_blocks.admin_config:
   defaults:
     _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
     _title: 'Inclind Gutenberg'
-    requirements:
-      _permission: 'access administration pages'
+  requirements:
+    _permission: 'access administration pages'
 
 inclind_gutenberg_blocks.settings:
   path: '/admin/config/inclind-gutenberg/settings'

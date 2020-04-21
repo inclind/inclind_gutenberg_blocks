@@ -37,7 +37,9 @@ class InclindGutenbergSettingsForm extends ConfigFormBase {
 
     $form['info'] = [
       '#type' => 'markup',
-      '#markup' => '<p>You can copy <strong>inclind_gutenberg_blocks/scss/edit.scss</strong> file into your current
+      '#markup' => '<p>Inclind GB library files apply in the follownig order:
+        <ul><li>Colors CSS</li><li>Edit UI CSS</li><li>Front Styles CSS</li></ul></p>
+        <p>You can copy <strong>inclind_gutenberg_blocks/scss/edit.scss</strong> file into your current
         theme (and compile it) to override default colors/fonts and some other presets within Inclind Gutenberg widgets.<br>This setting
         applies if destination file is of <strong>CSS</strong> type file only. </p>',
     ];
@@ -45,9 +47,39 @@ class InclindGutenbergSettingsForm extends ConfigFormBase {
     $form['css_default_path'] = [
       '#type' => 'textfield',
       '#required' => FALSE,
-      '#title' => $this->t('Override Default CSS'),
+      '#title' => $this->t('Override Base CSS (replaces GB Colors CSS)'),
       '#default_value' => $config->get('css_default_path'),
+      '#placeholder' => 'For example:  css/some_file.css',
       '#description' => $this->t('Provide a path to .CSS file (relative to your site default theme folder).'),
+    ];
+
+    $form['info2'] = [
+      '#type' => 'markup',
+      '#markup' => '<p>If you want to add a CSS file that has to apply after all of the default GB attached CSS,
+        provide a path to it below. This file will be included after GB\'s Edit and Front-End style files (respectively).</p>',
+    ];
+
+    $form['css_theme_edit_path'] = [
+      '#type' => 'textfield',
+      '#required' => FALSE,
+      '#title' => $this->t('Override EDIT UI CSS'),
+      '#default_value' => $config->get('css_theme_edit_path'),
+      '#placeholder' => 'For example:  dist/app-drupal/assets/app.styles.css',
+      '#description' => $this->t('Provide a path to .CSS file (relative to your site default theme folder).'),
+    ];
+
+    $form['css_theme_style_path'] = [
+      '#type' => 'textfield',
+      '#required' => FALSE,
+      '#title' => $this->t('Override both EDIT UI and FRONT-END CSS'),
+      '#default_value' => $config->get('css_theme_style_path'),
+      '#placeholder' => 'For example:  dist/app-drupal/assets/app.styles.css',
+      '#description' => $this->t('Provide a path to .CSS file (relative to your site default theme folder).'),
+    ];
+
+    $form['info3'] = [
+      '#type' => 'markup',
+      '#markup' => '<h3>Don\'t forge to clear cache for the settings to get applied.</h3>',
     ];
 
     $form['actions'] = [
@@ -77,6 +109,8 @@ class InclindGutenbergSettingsForm extends ConfigFormBase {
     $values = $form_state->getValues();
     $this->config('inclind_gutenberg_blocks.settings')
       ->set('css_default_path', $values['css_default_path'])
+      ->set('css_theme_edit_path', $values['css_theme_edit_path'])
+      ->set('css_theme_style_path', $values['css_theme_style_path'])
       ->save();
 
     parent::submitForm($form, $form_state);

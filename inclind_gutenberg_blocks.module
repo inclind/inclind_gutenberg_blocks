@@ -54,17 +54,48 @@ function inclind_gutenberg_blocks_library_info_alter(&$libraries, $extension) {
     $css_files_edit = [];
     $css_files_view = [];
 
-    if (!empty($config) && !empty($config->get('css_default_path'))) {
+    if (!empty($config)) {
       $theme_name = \Drupal::config('system.theme')->get('default');
       $theme_path = drupal_get_path('theme', $theme_name);
 
-      $css_path = $config->get('css_default_path');
-      $file_path = /*DRUPAL_ROOT . */ '/' . $theme_path . '/' . ltrim($css_path, '/');
+      // For Pattern Lab based themes:
+      if (stripos($theme_path, '/apps/drupal') !== FALSE) {
+        $theme_path = str_replace('/apps/drupal', '', $theme_path);
+      }
 
-      if (stripos($css_path, '.css', -4) !== FALSE
-        && file_exists(DRUPAL_ROOT . $file_path)) {
-        $libraries['blocks-edit']['css']['base'] = [$file_path => []];
-        $libraries['blocks-view']['css']['base'] = [$file_path => []];
+      // Override base colors presets defined:
+      if (!empty($config->get('css_default_path'))) {
+        $css_path = $config->get('css_default_path');
+        $file_path = '/' . $theme_path . '/' . ltrim($css_path, '/');
+
+        if (stripos($css_path, '.css', -4) !== FALSE
+          && file_exists(DRUPAL_ROOT . $file_path)) {
+          $libraries['blocks-edit']['css']['base'] = [$file_path => []];
+          $libraries['blocks-view']['css']['base'] = [$file_path => []];
+        }
+      }
+
+      // Override EDIT CSS:
+      if (!empty($config->get('css_theme_edit_path'))) {
+        $css_path = $config->get('css_theme_edit_path');
+        $file_path = '/' . $theme_path . '/' . ltrim($css_path, '/');
+
+        if (stripos($css_path, '.css', -4) !== FALSE
+          && file_exists(DRUPAL_ROOT . $file_path)) {
+          $libraries['blocks-edit']['css']['theme'][$file_path] = [];
+        }
+      }
+
+      // Override both EDIT and FRONT UI CSS:
+      if (!empty($config->get('css_theme_style_path'))) {
+        $css_path = $config->get('css_theme_style_path');
+        $file_path = '/' . $theme_path . '/' . ltrim($css_path, '/');
+
+        if (stripos($css_path, '.css', -4) !== FALSE
+          && file_exists(DRUPAL_ROOT . $file_path)) {
+          $libraries['blocks-edit']['css']['theme'][$file_path] = [];
+          $libraries['blocks-view']['css']['theme'][$file_path] = [];
+        }
       }
     }
 
