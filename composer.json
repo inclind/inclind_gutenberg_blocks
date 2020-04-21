@@ -10,6 +10,6 @@
     ],
     "minimum-stability": "dev",
     "require": {
-         "drupal/gutenberg": "1.x-dev#db2952e3",
+         "drupal/gutenberg": "1.x-dev#0e82eaa5"
     }
 }
