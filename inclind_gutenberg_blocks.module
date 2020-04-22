@@ -71,7 +71,7 @@ function inclind_gutenberg_blocks_library_info_alter(&$libraries, $extension) {
         if (stripos($css_path, '.css', -4) !== FALSE
           && file_exists(DRUPAL_ROOT . $file_path)) {
           $libraries['blocks-edit']['css']['base'] = [$file_path => []];
-          $libraries['blocks-view']['css']['base'] = [$file_path => []];
+          // $libraries['blocks-view']['css']['base'] = [$file_path => []];.
         }
       }
 

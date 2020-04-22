@@ -14,8 +14,7 @@ blocks-edit:
 blocks-view:
   version: VERSION
   css:
-    base:
-      css/defaults.min.css: { }
+    base: { }
     theme:
       css/style.min.css: { }
   js: {  }
