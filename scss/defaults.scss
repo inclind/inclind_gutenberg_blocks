@@ -20,6 +20,18 @@ $box-shadow: 0 2px 6px 0 rgba(0, 0, 0, .27);
 $font-main: Montserrat, sans-serif;
 $font-secondary: Montserrat, sans-serif;
 
+.bg-color-primary {
+  background-color: $primary !important;
+}
+
+.bg-color-secondary {
+  background-color: $secondary !important;
+}
+
+.bg-color-transparent {
+  background-color: transparent !important;
+}
+
 h1 {
   color: $primary;
   font-family: $font-main;
@@ -39,6 +51,14 @@ h1 {
 
 .bg-light {
   background-color: $off-white !important;
+}
+
+.text-white {
+  color: #fff !important;
+}
+
+.bg-lighter-gray {
+  background-color: #fafafa !important;
 }
 
 .card.card-bg {
