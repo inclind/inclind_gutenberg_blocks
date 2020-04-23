@@ -20,7 +20,7 @@ const {
 
 const {
   InspectorControls
-} = wp.editor;
+} = wp.blockEditor;
 /**
  * Create an Inspector Controls wrapper Component.
  */
@@ -33,7 +33,11 @@ class Inspector extends Component {
   render() {
     // Setup the attributes
     const {
-      itemIcon
+      itemContent,
+      itemIcon,
+      itemLink,
+      target,
+      level
     } = this.props.attributes;
     const iconOptions = [{
       value: '',
@@ -75,6 +79,46 @@ class Inspector extends Component {
       value: itemIcon,
       onChange: value => this.props.setAttributes({
         itemIcon: value
+      })
+    })), React.createElement(PanelBody, {
+      title: __('Link settings')
+    }, React.createElement(SelectControl, {
+      label: __('Link Target'),
+      value: target,
+      options: [{
+        value: '_self',
+        label: __('Same Window')
+      }, {
+        value: '_blank',
+        label: __('New Window')
+      }],
+      onChange: value => this.props.setAttributes({
+        target: value
+      })
+    }), React.createElement(SelectControl, {
+      label: __('Heading Level'),
+      value: level,
+      options: [{
+        value: 0,
+        label: __('-- Pick one --')
+      }, {
+        value: 2,
+        label: __('H2')
+      }, {
+        value: 3,
+        label: __('H3')
+      }, {
+        value: 4,
+        label: __('H4')
+      }, {
+        value: 5,
+        label: __('H5')
+      }, {
+        value: 6,
+        label: __('H6')
+      }],
+      onChange: value => this.props.setAttributes({
+        level: Number.parseInt(value)
       })
     })));
   }

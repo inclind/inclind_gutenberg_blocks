@@ -3,92 +3,97 @@ import classnames from 'classnames';
 import Inspector from './components/inspector';
 import IconLink from './components/icon-link';
 import Icon from './components/icon';
-import Infobox from "../infobox/components/infobox";
 
 // Internationalization
 const __ = Drupal.t;
 
 // Extend component
-const { Component } = wp.element;
+const {Component, Fragment} = wp.element;
 
 // Register block
-const { registerBlockType } = wp.blocks;
+const {registerBlockType} = wp.blocks;
 
 // Register editor components
-const { RichText, BlockControls, URLInput } = wp.editor;
+const {
+  RichText,
+  BlockControls,
+  URLInput,
+} = wp.blockEditor;
 
 // Register components
 const {} = wp.components;
 
-const { dispatch, select } = wp.data;
+const {dispatch, select} = wp.data;
 
 class InclindIconLink extends Component {
-    render() {
+  render() {
 
-        // Setup the attributes.
-        const {
-            attributes: {
-                itemContent,
-                itemIcon,
-                itemLink,
-            }, isSelected, className, setAttributes } = this.props;
+    // Setup the attributes.
+    const {
+      attributes: {
+        itemContent,
+        itemLink,
+        level,
+        target
+      }, isSelected, className, setAttributes
+    } = this.props;
 
-        return [
-            // Show the alignment toolbar on focus.
-            <BlockControls key="controls">
+    return (
+        <Fragment>
+          <BlockControls key="controls">
 
-            </BlockControls>,
-            // Show the block controls on focus.
-            <Inspector
-                { ...this.props }
-            />,
-            // Show the block markup in the editor.
-            <IconLink { ...this.props }>
-                <RichText
-                    tagName="p"
-                    placeholder={__("Link Text...", 'inclind-blocks')}
-                    keepPlaceholderOnFocus
-                    value={ itemContent }
-                    className={classnames(
-                        'icon-link'
-                    )}
-                    onChange={ ( value ) => this.props.setAttributes( { itemContent: value } ) }
-                />
-            </IconLink>,
-            <form
-                key="form-link"
-                onSubmit={ event => event.preventDefault() }>
-                <URLInput
-                    value={ itemLink }
-                    onChange={ ( value ) => setAttributes( { itemLink: value } ) }
-                />
-            </form>
-        ];
-    }
+          </BlockControls>
+          <Inspector
+              {...this.props}
+          />
+          <IconLink {...this.props}>
+            <RichText
+                tagName="p"
+                placeholder={__("Link Text...", 'inclind-blocks')}
+                keepPlaceholderOnFocus
+                value={itemContent}
+                className={classnames(
+                    'icon-link'
+                )}
+                onChange={(value) => setAttributes({itemContent: value})}
+            />
+          </IconLink>
+          <URLInput
+              value={itemLink}
+              onChange={(url, post) => {
+                setAttributes({
+                  itemLink: url,
+                  text: (post && post.title) || 'Click here'
+                });
+              }}
+          />
+        </Fragment>
+    );
+  }
 }
 
 //  Start Drupal Specific.
 const category = {
-    slug: 'inclind-blocks',
-    title: __('Custom Blocks'),
+  slug: 'inclind-blocks',
+  title: __('Custom Blocks'),
 };
 // Grab the current categories and merge in the new category if not present.
 const currentCategories = select('core/blocks').getCategories().filter(item => item.slug !== category.slug);
-dispatch('core/blocks').setCategories([ category, ...currentCategories ]);
+dispatch('core/blocks').setCategories([category, ...currentCategories]);
 // End Drupal Specific.
 
 if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
-  const blocks =  drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
   if (blocks.hasOwnProperty(category.slug + '/inclind-icon-link') && blocks[category.slug + '/inclind-icon-link']) {
     // Register the block.
-    registerBlockType( category.slug+'/inclind-icon-link', {
-      title: __( 'Icon Link', 'inclind-icon-link' ),
-      description: __( 'Description', 'inclind-blocks' ),
+    registerBlockType(category.slug + '/inclind-icon-link', {
+      title: __('Icon with Header or Link', 'inclind-icon-link'),
+      description: __('Create a short heading (can be linked to a URL) preceded with an Icon.', 'inclind-blocks'),
       category: 'inclind-blocks',
       keywords: [
-        __( 'icon', 'inclind-icon-link' ),
-        __( 'link', 'inclind-icon-link' ),
-        __( 'inclind', 'inclind-icon-link' ),
+        __('icon', 'inclind-icon-link'),
+        __('link', 'inclind-icon-link'),
+        __('inclind', 'inclind-icon-link'),
       ],
       attributes: {
         itemIcon: {
@@ -101,9 +106,18 @@ if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !==
         },
         itemLink: {
           type: 'string',
+          default: '',
+        },
+        target: {
+          type: 'string',
           source: 'attribute',
+          attribute: 'target',
           selector: '.icon-link',
-          attribute: 'href',
+          default: '_self',
+        },
+        level: {
+          type: 'number',
+          default: 0,
         },
       },
 
@@ -111,34 +125,51 @@ if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !==
       edit: InclindIconLink,
 
       // Save the attributes and markup.
-      save: function( props ) {
+      save: function (props) {
         const {
           itemContent,
           itemIcon,
           itemLink,
+          target,
+          level,
         } = props.attributes;
         const icon = ((itemIcon !== undefined && itemIcon !== '') && Icon[itemIcon] !== undefined) ? Icon[itemIcon] : '';
+        const titleTagName = (level > 0) ? 'h' + level : 'div';
 
         // Save the block markup for the front end.
         return (
-            <IconLink { ...props }>
+            <IconLink {...props}>
               {
                 icon && (
                     <span className={classnames(
                         'svgicon-default',
                         'align-middle',
+                        ' icon-link-el',
                         itemIcon
                     )}>
-                            { icon }
-                        </span>
+                      {icon}
+                    </span>
                 )
               }
               {
-                itemContent && itemLink && (
+                itemContent.length && itemLink.length && (
+                    <a href={itemLink}
+                       target={('_blank' === target ? target : undefined)}
+                       class="icon-link icon-link-el"
+                       rel={('_blank' === target ? 'noopener noreferrer' : undefined)}>
+                      <RichText.Content
+                          className="icon-link-header"
+                          tagName={titleTagName}
+                          value={itemContent}
+                      />
+                    </a>
+                )
+              }
+              {
+                itemContent.length && !itemLink.length && (
                     <RichText.Content
-                        tagName="a"
-                        href={itemLink}
-                        className="icon-link"
+                        tagName={titleTagName}
+                        className="icon-link-text"
                         value={itemContent}
                     />
                 )
@@ -146,6 +177,6 @@ if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !==
             </IconLink>
         );
       },
-    } );
+    });
   }
 }

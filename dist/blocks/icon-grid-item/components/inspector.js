@@ -18,7 +18,7 @@ const {
 
 const {
   InspectorControls
-} = wp.editor;
+} = wp.blockEditor;
 /**
  * Create an Inspector Controls wrapper Component.
  */

@@ -20,7 +20,7 @@ const {
 
 const {
   InnerBlocks
-} = wp.editor; // Register components
+} = wp.blockEditor; // Register components
 
 const {} = wp.components;
 const {

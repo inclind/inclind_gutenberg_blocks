@@ -743,7 +743,7 @@ dispatch('core/blocks').setCategories([category, ...currentCategories]);
 // End Drupal Specific.
 
 if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !== undefined) {
-  const blocks =  drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
+  const blocks = drupalSettings.editor.formats.gutenberg.editorSettings.allowedBlocks;
   if (blocks.hasOwnProperty(category.slug + '/accordion-bootstrap') && blocks[category.slug + '/accordion-bootstrap']) {
     // Register the block.
     registerBlockType(category.slug + '/accordion-bootstrap', {

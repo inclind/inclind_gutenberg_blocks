@@ -27,7 +27,7 @@ const {
   RichText,
   InnerBlocks,
   MediaUpload
-} = wp.editor; // Register components
+} = wp.blockEditor; // Register components
 
 const {
   IconButton

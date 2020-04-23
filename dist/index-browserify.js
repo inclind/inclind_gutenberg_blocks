@@ -958,7 +958,7 @@ const {
 
 const {
   InspectorControls
-} = wp.editor; // Import block components.
+} = wp.blockEditor; // Import block components.
 
 const {
   PanelBody
@@ -1017,7 +1017,7 @@ const {
   RichText,
   BlockControls,
   InnerBlocks
-} = wp.editor; // Register components
+} = wp.blockEditor; // Register components
 
 const {} = wp.components;
 const {
@@ -1210,7 +1210,7 @@ const {
 
 const {
   InnerBlocks
-} = wp.editor; // Register components
+} = wp.blockEditor; // Register components
 
 const {} = wp.components;
 const {
@@ -2390,7 +2390,7 @@ const {
 
 const {
   InspectorControls
-} = wp.editor; // Import block components.
+} = wp.blockEditor; // Import block components.
 
 const {
   PanelBody
@@ -2451,7 +2451,7 @@ const {
   RichText,
   BlockControls,
   URLInput
-} = wp.editor; // Register components
+} = wp.blockEditor; // Register components
 
 const {} = wp.components;
 const {
@@ -2671,7 +2671,7 @@ const {
 
 const {
   InspectorControls
-} = wp.editor; // Import block components.
+} = wp.blockEditor; // Import block components.
 
 const {
   SelectControl,
@@ -2771,7 +2771,7 @@ const {
   BlockControls,
   MediaUpload,
   URLInput
-} = wp.editor; // Register components
+} = wp.blockEditor; // Register components
 
 const {
   IconButton
@@ -3101,7 +3101,7 @@ const {
   RichText,
   InnerBlocks,
   MediaUpload
-} = wp.editor; // Register components
+} = wp.blockEditor; // Register components
 
 const {
   IconButton
@@ -3395,7 +3395,7 @@ const {
 
 const {
   InspectorControls
-} = wp.editor;
+} = wp.blockEditor;
 /**
  * Create an Inspector Controls wrapper Component.
  */
@@ -3480,7 +3480,7 @@ const {
 const {
   RichText,
   BlockControls
-} = wp.editor; // Register components
+} = wp.blockEditor; // Register components
 
 const {} = wp.components;
 const {
@@ -3583,7 +3583,7 @@ const {
   Component
 } = wp.element;
 /**
- * Create a Icon Link wrapper Component.
+ * Create an Icon Link wrapper Component.
  */
 
 class IconLink extends Component {
@@ -3592,10 +3592,10 @@ class IconLink extends Component {
   }
 
   render() {
-    let className = '';
+    let className = 'wp-block-inclind-blocks-inclind-icon-link';
 
     if (this.props.className !== 'wp-block-inclind-blocks-inclind-icon-link') {
-      className = className + '' + this.props.className;
+      className = className + ' ' + this.props.className;
     }
 
     return React.createElement("div", {
@@ -3782,7 +3782,7 @@ const {
 
 const {
   InspectorControls
-} = wp.editor;
+} = wp.blockEditor;
 /**
  * Create an Inspector Controls wrapper Component.
  */
@@ -3795,7 +3795,11 @@ class Inspector extends Component {
   render() {
     // Setup the attributes
     const {
-      itemIcon
+      itemContent,
+      itemIcon,
+      itemLink,
+      target,
+      level
     } = this.props.attributes;
     const iconOptions = [{
       value: '',
@@ -3838,6 +3842,46 @@ class Inspector extends Component {
       onChange: value => this.props.setAttributes({
         itemIcon: value
       })
+    })), React.createElement(PanelBody, {
+      title: __('Link settings')
+    }, React.createElement(SelectControl, {
+      label: __('Link Target'),
+      value: target,
+      options: [{
+        value: '_self',
+        label: __('Same Window')
+      }, {
+        value: '_blank',
+        label: __('New Window')
+      }],
+      onChange: value => this.props.setAttributes({
+        target: value
+      })
+    }), React.createElement(SelectControl, {
+      label: __('Heading Level'),
+      value: level,
+      options: [{
+        value: 0,
+        label: __('-- Pick one --')
+      }, {
+        value: 2,
+        label: __('H2')
+      }, {
+        value: 3,
+        label: __('H3')
+      }, {
+        value: 4,
+        label: __('H4')
+      }, {
+        value: 5,
+        label: __('H5')
+      }, {
+        value: 6,
+        label: __('H6')
+      }],
+      onChange: value => this.props.setAttributes({
+        level: Number.parseInt(value)
+      })
     })));
   }
 
@@ -3856,8 +3900,6 @@ var _iconLink = _interopRequireDefault(require("./components/icon-link"));
 
 var _icon = _interopRequireDefault(require("./components/icon"));
 
-var _infobox = _interopRequireDefault(require("../infobox/components/infobox"));
-
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : {
     default: obj
@@ -3869,7 +3911,8 @@ function _interopRequireDefault(obj) {
 const __ = Drupal.t; // Extend component
 
 const {
-  Component
+  Component,
+  Fragment
 } = wp.element; // Register block
 
 const {
@@ -3880,7 +3923,7 @@ const {
   RichText,
   BlockControls,
   URLInput
-} = wp.editor; // Register components
+} = wp.blockEditor; // Register components
 
 const {} = wp.components;
 const {
@@ -3894,36 +3937,34 @@ class InclindIconLink extends Component {
     const {
       attributes: {
         itemContent,
-        itemIcon,
-        itemLink
+        itemLink,
+        level,
+        target
       },
       isSelected,
       className,
       setAttributes
     } = this.props;
-    return [// Show the alignment toolbar on focus.
-    React.createElement(BlockControls, {
+    return React.createElement(Fragment, null, React.createElement(BlockControls, {
       key: "controls"
-    }), // Show the block controls on focus.
-    React.createElement(_inspector.default, this.props), // Show the block markup in the editor.
-    React.createElement(_iconLink.default, this.props, React.createElement(RichText, {
+    }), React.createElement(_inspector.default, this.props), React.createElement(_iconLink.default, this.props, React.createElement(RichText, {
       tagName: "p",
       placeholder: __("Link Text...", 'inclind-blocks'),
       keepPlaceholderOnFocus: true,
       value: itemContent,
       className: (0, _classnames.default)('icon-link'),
-      onChange: value => this.props.setAttributes({
+      onChange: value => setAttributes({
         itemContent: value
       })
-    })), React.createElement("form", {
-      key: "form-link",
-      onSubmit: event => event.preventDefault()
-    }, React.createElement(URLInput, {
+    })), React.createElement(URLInput, {
       value: itemLink,
-      onChange: value => setAttributes({
-        itemLink: value
-      })
-    }))];
+      onChange: (url, post) => {
+        setAttributes({
+          itemLink: url,
+          text: post && post.title || 'Click here'
+        });
+      }
+    }));
   }
 
 } //  Start Drupal Specific.
@@ -3943,8 +3984,8 @@ if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !==
   if (blocks.hasOwnProperty(category.slug + '/inclind-icon-link') && blocks[category.slug + '/inclind-icon-link']) {
     // Register the block.
     registerBlockType(category.slug + '/inclind-icon-link', {
-      title: __('Icon Link', 'inclind-icon-link'),
-      description: __('Description', 'inclind-blocks'),
+      title: __('Icon with Header or Link', 'inclind-icon-link'),
+      description: __('Create a short heading (can be linked to a URL) preceded with an Icon.', 'inclind-blocks'),
       category: 'inclind-blocks',
       keywords: [__('icon', 'inclind-icon-link'), __('link', 'inclind-icon-link'), __('inclind', 'inclind-icon-link')],
       attributes: {
@@ -3958,9 +3999,18 @@ if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !==
         },
         itemLink: {
           type: 'string',
+          default: ''
+        },
+        target: {
+          type: 'string',
           source: 'attribute',
+          attribute: 'target',
           selector: '.icon-link',
-          attribute: 'href'
+          default: '_self'
+        },
+        level: {
+          type: 'number',
+          default: 0
         }
       },
       // Render the block components.
@@ -3970,16 +4020,27 @@ if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !==
         const {
           itemContent,
           itemIcon,
-          itemLink
+          itemLink,
+          target,
+          level
         } = props.attributes;
-        const icon = itemIcon !== undefined && itemIcon !== '' && _icon.default[itemIcon] !== undefined ? _icon.default[itemIcon] : ''; // Save the block markup for the front end.
+        const icon = itemIcon !== undefined && itemIcon !== '' && _icon.default[itemIcon] !== undefined ? _icon.default[itemIcon] : '';
+        const titleTagName = level > 0 ? 'h' + level : 'div'; // Save the block markup for the front end.
 
         return React.createElement(_iconLink.default, props, icon && React.createElement("span", {
-          className: (0, _classnames.default)('svgicon-default', 'align-middle', itemIcon)
-        }, icon), itemContent && itemLink && React.createElement(RichText.Content, {
-          tagName: "a",
+          className: (0, _classnames.default)('svgicon-default', 'align-middle', ' icon-link-el', itemIcon)
+        }, icon), itemContent.length && itemLink.length && React.createElement("a", {
           href: itemLink,
-          className: "icon-link",
+          target: '_blank' === target ? target : undefined,
+          class: "icon-link icon-link-el",
+          rel: '_blank' === target ? 'noopener noreferrer' : undefined
+        }, React.createElement(RichText.Content, {
+          className: "icon-link-header",
+          tagName: titleTagName,
+          value: itemContent
+        })), itemContent.length && !itemLink.length && React.createElement(RichText.Content, {
+          tagName: titleTagName,
+          className: "icon-link-text",
           value: itemContent
         }));
       }
@@ -3987,7 +4048,7 @@ if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !==
   }
 }
 
-},{"../infobox/components/infobox":31,"./components/icon":25,"./components/icon-link":24,"./components/inspector":26,"classnames":60}],28:[function(require,module,exports){
+},{"./components/icon":25,"./components/icon-link":24,"./components/inspector":26,"classnames":60}],28:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5479,7 +5540,7 @@ const {
 
 const {
   InspectorControls
-} = wp.editor;
+} = wp.blockEditor;
 /**
  * Create an Inspector Controls wrapper Component.
  */
@@ -5531,7 +5592,7 @@ const {
 const {
   RichText,
   BlockControls
-} = wp.editor; // Register components
+} = wp.blockEditor; // Register components
 
 const {} = wp.components;
 const {
@@ -5714,7 +5775,7 @@ const {
 const {
   RichText,
   BlockControls
-} = wp.editor; // Register components
+} = wp.blockEditor; // Register components
 
 const {} = wp.components;
 const {

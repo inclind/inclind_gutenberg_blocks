@@ -5,7 +5,7 @@ const __ = Drupal.t;
 const { Component } = wp.element;
 
 // Import Inspector components.
-const { InspectorControls } = wp.editor;
+const { InspectorControls } = wp.blockEditor;
 
 // Import block components.
 const { SelectControl, PanelBody } = wp.components;

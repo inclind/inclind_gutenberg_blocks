@@ -5,7 +5,7 @@ const { Component } = wp.element;
 const { PanelBody } = wp.components;
 
 // Import Inspector components.
-const { InspectorControls } = wp.editor;
+const { InspectorControls } = wp.blockEditor;
 
 /**
  * Create an Inspector Controls wrapper Component.

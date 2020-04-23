@@ -2,7 +2,7 @@
 const { Component } = wp.element;
 
 /**
- * Create a Icon Link wrapper Component.
+ * Create an Icon Link wrapper Component.
  */
 export default class IconLink extends Component {
 
@@ -11,9 +11,10 @@ export default class IconLink extends Component {
     }
 
     render() {
-        let className = '';
+        let className = 'wp-block-inclind-blocks-inclind-icon-link';
+
         if (this.props.className !== 'wp-block-inclind-blocks-inclind-icon-link') {
-            className = className + '' + this.props.className
+            className = className + ' ' + this.props.className;
         }
         return (
             <div className={className}>

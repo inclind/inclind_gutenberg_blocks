@@ -11,7 +11,7 @@ const {
 
 const {
   InspectorControls
-} = wp.editor; // Import block components.
+} = wp.blockEditor; // Import block components.
 
 const {
   PanelBody

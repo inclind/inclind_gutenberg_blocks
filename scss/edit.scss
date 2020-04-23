@@ -278,43 +278,43 @@ button p {
   width: 2rem;
   height: 2rem;
 }
-//
-//h1, .h1 {
-//  font-size: 2.75rem;
-//  line-height: 52px;
-//}
-//
-//h2, .h2 {
-//  font-size: 1.875rem;
-//  line-height: 42px;
-//}
-//
-//h3, .h3 {
-//  font-size: 1.625rem;
-//  line-height: 36px;
-//}
-//
-//h4, .h4 {
-//  font-size: 1.375rem;
-//  line-height: 32px;
-//}
-//
-//h5, .h5 {
-//  font-size: 1.125rem;
-//  line-height: 28px;
-//}
-//
-//h6, .h6 {
-//  font-size: 1rem;
-//  line-height: 26px;
-//  text-transform: uppercase;
-//}
-//
-//p {
-//  font-size: inherit;
-//  margin: 0 0 1em;
-//  line-height: inherit;
-//}
+
+h1, .h1 {
+  font-size: 2.75rem;
+  line-height: 52px;
+}
+
+h2, .h2 {
+  font-size: 1.875rem;
+  line-height: 42px;
+}
+
+h3, .h3 {
+  font-size: 1.625rem;
+  line-height: 36px;
+}
+
+h4, .h4 {
+  font-size: 1.375rem;
+  line-height: 32px;
+}
+
+h5, .h5 {
+  font-size: 1.125rem;
+  line-height: 28px;
+}
+
+h6, .h6 {
+  font-size: 1rem;
+  line-height: 26px;
+  text-transform: uppercase;
+}
+
+p {
+  font-size: inherit;
+  margin: 0 0 1em;
+  line-height: inherit;
+}
 
 .text-center {
   text-align: center !important;
@@ -323,6 +323,17 @@ button p {
 .wp-block-kadence-icon {
   min-width: 20px;
   min-height: 10px;
+}
+
+.wp-block-inclind-blocks-inclind-icon-link {
+  .icon-link-el{
+    display: inline-block;
+
+    .svgicon-defaul {
+      min-width: 20px;
+      vertical-align: top;
+    }
+  }
 }
 
 /*!

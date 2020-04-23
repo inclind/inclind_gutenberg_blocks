@@ -15,7 +15,7 @@ const { Component } = wp.element;
 const { registerBlockType } = wp.blocks;
 
 // Register editor components
-const { RichText, BlockControls, InnerBlocks } = wp.editor;
+const { RichText, BlockControls, InnerBlocks } = wp.blockEditor;
 
 // Register components
 const {} = wp.components;
