@@ -21,11 +21,55 @@ const {
 } = wp.blockEditor;
 
 // Register components
-const {} = wp.components;
+const {
+  IconButton,
+} = wp.components;
 
 const {dispatch, select} = wp.data;
 
+/**
+ * This allows for checking to see if the block needs to generate a new ID.
+ */
+const iconLinkUniqueIDs = [];
+
 class InclindIconLink extends Component {
+  constructor() {
+    super(...arguments);
+    this.state = {
+      btnFocused: 'false',
+      btnLink: false,
+      user: 'admin',
+      settings: {},
+    };
+  }
+
+  componentDidMount() {
+    if (!this.props.attributes.uniqueID) {
+
+      this.props.setAttributes({
+        uniqueID: '_' + this.props.clientId.substr(2, 9),
+      });
+      iconLinkUniqueIDs.push('_' + this.props.clientId.substr(2, 9));
+    }
+    else if (iconLinkUniqueIDs.includes(this.props.attributes.uniqueID)) {
+      this.props.setAttributes({
+        uniqueID: '_' + this.props.clientId.substr(2, 9),
+      });
+      iconLinkUniqueIDs.push('_' + this.props.clientId.substr(2, 9));
+    }
+    else {
+      iconLinkUniqueIDs.push(this.props.attributes.uniqueID);
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (!this.props.isSelected && prevProps.isSelected && this.state.btnFocused) {
+      this.setState({
+        btnFocused: 'false',
+      });
+    }
+  }
+
   render() {
 
     // Setup the attributes.
@@ -34,14 +78,22 @@ class InclindIconLink extends Component {
         itemContent,
         itemLink,
         level,
-        target
+        target,
+        uniqueID
       }, isSelected, className, setAttributes
     } = this.props;
+
+    const onFocusBtn = () => {
+      if ('txtlink' !== this.state.btnFocused) {
+        this.setState({
+          btnFocused: 'txtlink',
+        });
+      }
+    };
 
     return (
         <Fragment>
           <BlockControls key="controls">
-
           </BlockControls>
           <Inspector
               {...this.props}
@@ -49,24 +101,36 @@ class InclindIconLink extends Component {
           <IconLink {...this.props}>
             <RichText
                 tagName="p"
-                placeholder={__("Link Text...", 'inclind-blocks')}
+                placeholder={__("Enter Text...", 'inclind-icon-link')}
                 keepPlaceholderOnFocus
                 value={itemContent}
-                className={classnames(
-                    'icon-link'
-                )}
+                unstableOnFocus={() => {
+                  onFocusBtn()
+                }}
+                className={classnames('icon-link')}
                 onChange={(value) => setAttributes({itemContent: value})}
             />
           </IconLink>
-          <URLInput
-              value={itemLink}
-              onChange={(url, post) => {
-                setAttributes({
-                  itemLink: url,
-                  text: (post && post.title) || 'Click here'
-                });
-              }}
-          />
+          {isSelected && ((this.state.btnFocused && 'txtlink' === this.state.btnFocused) || (this.state.btnFocused && 'false' === this.state.btnFocused)) && (
+              <form key={'form-link'}
+                    onSubmit={(event) => event.preventDefault()}
+                    className="blocks-button__inline-link">
+                <URLInput
+                    value={itemLink}
+                    placeholder="Paste URL or leave it empty for no link."
+                    onChange={(url, post) => {
+                      setAttributes({
+                        itemLink: url,
+                      });
+                    }}
+                />
+                <IconButton
+                    icon={'editor-break'}
+                    label={__('Apply', 'inclind-icon-link')}
+                    type={'submit'}
+                />
+              </form>
+          )}
         </Fragment>
     );
   }
@@ -115,6 +179,10 @@ if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !==
           selector: '.icon-link',
           default: '_self',
         },
+        uniqueID: {
+          type: 'string',
+          default: '',
+        },
         level: {
           type: 'number',
           default: 0,
@@ -132,6 +200,7 @@ if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !==
           itemLink,
           target,
           level,
+          uniqueID,
         } = props.attributes;
         const icon = ((itemIcon !== undefined && itemIcon !== '') && Icon[itemIcon] !== undefined) ? Icon[itemIcon] : '';
         const titleTagName = (level > 0) ? 'h' + level : 'div';
@@ -152,7 +221,7 @@ if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !==
                 )
               }
               {
-                itemContent.length && itemLink.length && (
+                itemContent.length && itemLink.length > 0 && (
                     <a href={itemLink}
                        target={('_blank' === target ? target : undefined)}
                        class="icon-link icon-link-el"
@@ -166,7 +235,7 @@ if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !==
                 )
               }
               {
-                itemContent.length && !itemLink.length && (
+                itemContent.length && itemLink.length == 0 && (
                     <RichText.Content
                         tagName={titleTagName}
                         className="icon-link-text"

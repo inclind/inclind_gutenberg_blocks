@@ -18,6 +18,9 @@ class IconLink extends Component {
   }
 
   render() {
+    const {
+      uniqueID
+    } = this.props.attributes;
     let className = 'wp-block-inclind-blocks-inclind-icon-link';
 
     if (this.props.className !== 'wp-block-inclind-blocks-inclind-icon-link') {
@@ -25,6 +28,7 @@ class IconLink extends Component {
     }
 
     return React.createElement("div", {
+      id: `icon-link${uniqueID}`,
       className: className
     }, this.props.children);
   }

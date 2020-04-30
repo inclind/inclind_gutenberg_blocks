@@ -342,7 +342,7 @@ if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !==
           style: containerStyle
         }, backgroundImageData), React.createElement("div", {
           className: "g-section-overlay",
-          style: backgroundType !== 'gradient' && backgroundType !== 'none' ? overlayStyle : ''
+          style: backgroundType !== 'gradient' && backgroundType !== 'none' ? overlayStyle : {}
         }), React.createElement("div", {
           className: `g-section-wrapper ${align == 'full' ? ' container' : ' container-fluid'}`,
           style: wrapperStyle

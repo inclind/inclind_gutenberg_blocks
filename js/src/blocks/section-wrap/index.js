@@ -341,7 +341,7 @@ if (drupalSettings && drupalSettings.editor.formats.gutenberg.editorSettings !==
                 <div className={classes.join(' ')}
                      style={containerStyle} {...backgroundImageData}>
                   <div className="g-section-overlay"
-                       style={((backgroundType !== 'gradient' && backgroundType !== 'none') ? overlayStyle : '')}></div>
+                       style={((backgroundType !== 'gradient' && backgroundType !== 'none') ? overlayStyle : {} )}></div>
                   <div
                       className={`g-section-wrapper ${(align == 'full' ? ' container' : ' container-fluid')}`}
                       style={wrapperStyle}>
